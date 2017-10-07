@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MatchMain</class>
+ <widget class="QDialog" name="MatchMain">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1000</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1000</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>进行比赛</string>
+  </property>
+  <widget class="QLabel" name="lblCamera">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>175</y>
+     <width>800</width>
+     <height>600</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblMatchBGN">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1000</width>
+     <height>800</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnBeginEnd">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>550</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblScoreA">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>25</y>
+     <width>125</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A方得分</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblEvilA">
+   <property name="geometry">
+    <rect>
+     <x>175</x>
+     <y>25</y>
+     <width>125</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A方邪恶值</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblEvilB">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>25</y>
+     <width>125</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B方邪恶值</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblScoreB">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>25</y>
+     <width>125</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B方得分</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblSAVal">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>75</y>
+     <width>125</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblEAVal">
+   <property name="geometry">
+    <rect>
+     <x>175</x>
+     <y>75</y>
+     <width>125</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblEBVal">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>75</y>
+     <width>125</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblSBVal">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>75</y>
+     <width>125</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPauseResume">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>475</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnSOA">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>625</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>点球A</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPenaltyB">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>400</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B方犯规</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPlusB">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>325</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B方加分</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPenaltyA">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>250</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A方犯规</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPlusA">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>175</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A方加分</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblTime">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>25</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>比赛时间</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblTVal">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>75</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblHaltA">
+   <property name="geometry">
+    <rect>
+     <x>325</x>
+     <y>25</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A停止次数</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblHaltB">
+   <property name="geometry">
+    <rect>
+     <x>575</x>
+     <y>25</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B停止次数</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblHAVal">
+   <property name="geometry">
+    <rect>
+     <x>325</x>
+     <y>75</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblHBVal">
+   <property name="geometry">
+    <rect>
+     <x>575</x>
+     <y>75</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnSOB">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>700</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>点球B</string>
+   </property>
+  </widget>
+  <zorder>lblMatchBGN</zorder>
+  <zorder>lblCamera</zorder>
+  <zorder>btnBeginEnd</zorder>
+  <zorder>lblScoreA</zorder>
+  <zorder>lblEvilA</zorder>
+  <zorder>lblEvilB</zorder>
+  <zorder>lblScoreB</zorder>
+  <zorder>lblSAVal</zorder>
+  <zorder>lblEAVal</zorder>
+  <zorder>lblEBVal</zorder>
+  <zorder>lblSBVal</zorder>
+  <zorder>btnPauseResume</zorder>
+  <zorder>btnSOA</zorder>
+  <zorder>btnPenaltyB</zorder>
+  <zorder>btnPlusB</zorder>
+  <zorder>btnPenaltyA</zorder>
+  <zorder>btnPlusA</zorder>
+  <zorder>lblTime</zorder>
+  <zorder>lblTVal</zorder>
+  <zorder>lblHaltA</zorder>
+  <zorder>lblHaltB</zorder>
+  <zorder>lblHAVal</zorder>
+  <zorder>lblHBVal</zorder>
+  <zorder>btnSOB</zorder>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btnPlusA</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnPlusA()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>934</x>
+     <y>197</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>851</x>
+     <y>-15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnPlusB</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnPlusB()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>934</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>733</x>
+     <y>-9</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnPenaltyA</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnPenaltyA()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>899</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>805</x>
+     <y>-4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnPenaltyB</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnPenaltyB()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>885</x>
+     <y>418</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>-2</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnPauseResume</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnPR()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>935</x>
+     <y>488</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>457</x>
+     <y>-6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnBeginEnd</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnBE()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>927</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>517</x>
+     <y>-17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSOA</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnSOA()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>913</x>
+     <y>638</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>267</x>
+     <y>-7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSOB</sender>
+   <signal>clicked()</signal>
+   <receiver>MatchMain</receiver>
+   <slot>OnSOB()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>903</x>
+     <y>722</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>152</x>
+     <y>-14</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnPlusA()</slot>
+  <slot>OnPlusB()</slot>
+  <slot>OnPenaltyA()</slot>
+  <slot>OnPenaltyB()</slot>
+  <slot>OnPR()</slot>
+  <slot>OnBE()</slot>
+  <slot>OnSOA()</slot>
+  <slot>OnRST()</slot>
+  <slot>OnSOB()</slot>
+ </slots>
+</ui>

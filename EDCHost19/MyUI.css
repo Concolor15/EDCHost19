@@ -1,0 +1,88 @@
+/*Style Sheets for UI*/
+/*Global Settings for all widgets*/
+* {
+    font-family: 'Microsoft YaHei Light';
+    font-size: 18px;
+    text-align: center;
+    border-radius: 0;
+    background-color: white;
+}
+/*Labels and BackGround*/
+QLabel {
+    color: white;
+    background: transparent;
+    background-repeat: no-repeat;
+}
+QLabel#lblMainBGN {
+    background-image: url(Resources/MainBGN.png);
+}
+QLabel#lblMatchBGN {
+    background-image: url(Resources/MatchBGN.png);
+}
+QLabel#lblPSPBGN {
+    background-image: url(Resources/PSPBGN.png);
+}
+QLabel#lblDebugBGN {
+    background-image: url(Resources/DebugBGN.png);
+}
+QLabel#lblSAVal,
+QLabel#lblSBVal,
+QLabel#lblHAVal,
+QLabel#lblHBVal,
+QLabel#lblEAVal,
+QLabel#lblEBVal,
+QLabel#lblTVal{
+    font-size: 28px;
+}
+QLabel#lblPosLU,
+QLabel#lblPosRU,
+QLabel#lblPosLD,
+QLabel#lblPosRD {
+    color: black;
+}
+/*LineEdits*/
+QLineEdit {
+    background-color: white;
+    border-bottom: solid;
+    border-bottom-color: #BDBDBD;
+    border-bottom-width: 2px;
+    font: 18px;
+}
+QLineEdit:focus {
+    border-bottom-color: #4CAF50;
+}
+QPushButton {
+    font-size: 18px;
+    background-color: #4CAF50;
+    border-radius: 2%;
+    color: ghostwhite;
+    border: 1px solid transparent;
+    padding: 2px 8px;
+}
+
+QPushButton:hover {
+    color: lightgreen;
+}
+
+QPushButton:pressed {
+    color: white;
+}
+
+QPushButton:disabled {
+    background-color: #BDBDBD;
+}
+
+QPushButton#btnMatch {
+    font-size:22px;
+}
+QTextEdit {
+    font-size: 18px;
+    background: transparent;
+    border: solid;
+    border-width: 2px;
+    border-color: #BDBDBD;
+}
+
+QTextEdit:focus {
+   border-color: #4CAF50;
+}
