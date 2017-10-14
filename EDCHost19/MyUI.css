@@ -9,10 +9,16 @@
 }
 /*Labels and BackGround*/
 QLabel {
-    color: white;
+    color: black;
     background: transparent;
     background-repeat: no-repeat;
 }
+
+/*Label for MatchMain*/
+QDialog#MatchMain > QLabel {
+	color:white;
+}
+
 QLabel#lblMainBGN {
     background-image: url(Resources/MainBGN.png);
 }

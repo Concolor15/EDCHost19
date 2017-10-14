@@ -9,9 +9,6 @@ private:
 	MatchInfo theMatch;
 	MainLogic();
 	~MainLogic();
-	void ResetInfo();
-	void EvaluateEvil();
-	void ResetEvil(int nSide);
 public:
 	static MainLogic *GetInstance();
 	static void DestroyInstance();
@@ -23,5 +20,8 @@ public:
 	void ShootOut(int nSide);
 	void PlusOne(int nSide);
 	void Penalty(int nSide);
+	void ResetInfo();
+	void EvaluateEvil();
+	void ResetEvil(int nSide);
 	MatchInfo GetInfo();
 };

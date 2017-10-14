@@ -1,30 +1,33 @@
 #include "stdafx.h"
 #include "Serial.h"
 
+
 Serial * Serial::pInstance = nullptr;
 
-Serial::Serial()
+Serial::Serial() : byteToSend(32, 0)
 {
-	/*for (auto &info : QSerialPortInfo::availablePorts())
-	{
-		theSerial.setPort(info);
-		if (theSerial.open(QIODevice::ReadWrite))
-		{
-			
-			break;
-		}
-	}*/
+	//Serial Configurations
 	theSerial.setPortName("COM3");
+	theSerial.open(QIODevice::ReadWrite);
 	theSerial.setBaudRate(QSerialPort::Baud115200);
 	theSerial.setDataBits(QSerialPort::Data8);
 	theSerial.setParity(QSerialPort::NoParity);
 	theSerial.setFlowControl(QSerialPort::NoFlowControl);
 	theSerial.setStopBits(QSerialPort::OneStop);
+	//Freq Control Configuration
+	QObject::connect(&timerFreqCtrl, &QTimer::timeout, this, &Serial::Transmitter);
+	timerFreqCtrl.start(33);
 }
 
 Serial::~Serial()
 {
+	timerFreqCtrl.stop();
 	theSerial.close();
+}
+
+void Serial::Transmitter()
+{
+	theSerial.write(byteToSend);
 }
 
 Serial * Serial::GetInstance()
@@ -47,8 +50,6 @@ void Serial::DestroyInstance()
 
 void Serial::Transmit(const SerialInfo & theData)
 {
-	theSerial.open(QIODevice::ReadWrite);
-	QByteArray byteToSend(32, 0);
 	byteToSend[0] = 0xFC | (theData.binShootout << 1);
 	byteToSend[0] = byteToSend[0] | theData.binSideShoot;
 	byteToSend[1] = (theData.quaGameStatus << 6) | (theData.nTimeByRounds >> 8);
@@ -72,6 +73,4 @@ void Serial::Transmit(const SerialInfo & theData)
 	byteToSend[19] = theData.nScoreB;
 	byteToSend[30] = 0x0D;
 	byteToSend[31] = 0x0A;
-	theSerial.write(byteToSend);
-	theSerial.close();
 }

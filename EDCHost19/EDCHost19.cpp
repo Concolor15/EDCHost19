@@ -6,7 +6,7 @@ EDCHost19::EDCHost19(QWidget *parent)
 {
 	ui.setupUi(this);
 	MainLogic::GetInstance();
-	Serial::GetInstance();
+	
 	Camera::GetInstance()->Begin();
 	QObject::connect(Camera::GetInstance(), &Camera::InfoReady, this, &EDCHost19::FetchImg);
 }
@@ -15,7 +15,6 @@ EDCHost19::~EDCHost19()
 {
 	Camera::GetInstance()->End();
 	Camera::DestroyInstance();
-	Serial::DestroyInstance();
 	MainLogic::DestroyInstance();
 }
 
@@ -33,7 +32,6 @@ void EDCHost19::OnMatch()
 {
 	MatchMain *pMatch = new MatchMain(this);
 	pMatch->show();
-	this->hide();
 }
 
 void EDCHost19::OnPerspective()

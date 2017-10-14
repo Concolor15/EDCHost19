@@ -5,13 +5,15 @@
 MatchMain::MatchMain(QWidget *parent)
 	: QDialog(parent)
 {
+	Serial::GetInstance();
 	ui.setupUi(this);
 	QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
+	MainLogic::GetInstance()->ResetInfo();
 }
 
 MatchMain::~MatchMain()
 {
-	
+	Serial::DestroyInstance();
 }
 
 void MatchMain::paintEvent(QPaintEvent * event)
@@ -81,23 +83,15 @@ void MatchMain::paintEvent(QPaintEvent * event)
 
 void MatchMain::closeEvent(QCloseEvent * event)
 {
-	auto infoMatch = MainLogic::GetInstance()->GetInfo();
-	if (infoMatch.infoObjs.quaGameStatus == PHASE::RUNNING || infoMatch.infoObjs.quaGameStatus == PHASE::PAUSE)
+	if (QMessageBox::question(this, "提示", "请确认是否退出？", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
 	{
-		if (QMessageBox::information(this, "提示", "当前比赛尚未结束，请问是否退出？") == QMessageBox::No)
-		{
-			event->ignore();
-		}
-		else
-		{
-			parentWidget()->show();
-		}
+		deleteLater();
+		QDialog::closeEvent(event);
 	}
 	else
 	{
-		parentWidget()->show();
+		event->ignore();
 	}
-	QDialog::closeEvent(event);
 }
 
 void MatchMain::OnPR()
