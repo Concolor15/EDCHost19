@@ -14,15 +14,12 @@ private:
 	HighResCam *pHRView;
 	Camera();
 	~Camera();
-	cv::Mat matPerspective;
 private slots:
 	void CameraProc(CameraInfo info,QPixmap pixShow);
 public:
 	static Camera *GetInstance();
 	static void DestroyInstance();
-	void SetPerspecitve(const cv::Mat &persMat);
-	cv::Mat GetPerspective();
-	QSize GetCameraSize();
+	void SetPerspecitve(const QVector<cv::Point2f> &pts);
 	void Begin();
 	void End();
 signals:

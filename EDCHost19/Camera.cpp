@@ -22,6 +22,7 @@ Camera::Camera()
 	settings.setResolution(sizeSet);
 	pCamWork->setViewfinderSettings(settings);
 	QObject::connect(pHRView, &HighResCam::ImageArrived, this, &Camera::CameraProc);
+	QObject::connect(pHRView, &HighResCam::DebugPers, this, &Camera::DebugInfo);
 }
 
 Camera::~Camera()
@@ -48,19 +49,10 @@ void Camera::DestroyInstance()
 	}
 }
 
-void Camera::SetPerspecitve(const cv::Mat & persMat)
+void Camera::SetPerspecitve(const QVector<cv::Point2f>& pts)
 {
-	matPerspective = persMat;
-}
-
-cv::Mat Camera::GetPerspective()
-{
-	return matPerspective;
-}
-
-QSize Camera::GetCameraSize()
-{
-	return pCamWork->viewfinderSettings().resolution();
+	if (pts.size() != 4) return;
+	pHRView->SetPerspective(pts);
 }
 
 void Camera::Begin()

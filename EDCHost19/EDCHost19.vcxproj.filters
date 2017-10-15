@@ -105,6 +105,9 @@
     <ClCompile Include="MyLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CoordinateConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_MyLogger.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoordinateConverter.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

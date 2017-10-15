@@ -18,7 +18,7 @@ protected:
 private:
 	Ui::Perspective ui;
 	QPixmap pixPerspect;
-	QVector<cv::Point> ptsSelected;
+	QVector<cv::Point2f> ptsSelected;
 	QVector<QLineEdit *> lePositions;
 private slots:
 	void OnConfirm();

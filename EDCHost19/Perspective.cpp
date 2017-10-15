@@ -8,6 +8,7 @@ Perspective::Perspective(QPixmap pix, QWidget *parent)
 {
 	ui.setupUi(this);
 	lePositions = { ui.lePosLU,ui.lePosRU,ui.lePosLD,ui.lePosRD };
+	ui.lblPicture->setScaledContents(true);
 	ui.lblPicture->setPixmap(pixPerspect);
 }
 
@@ -18,35 +19,35 @@ Perspective::~Perspective()
 void Perspective::mousePressEvent(QMouseEvent * event)
 {
 	QPainter rndDrawer(this);
-	auto pos = cv::Point(event->x(), event->y());
+	auto pos = cv::Point2f(event->x() - 25, event->y() - 175);
 	auto centre = QPoint(pos.x, pos.y);
-	if (pos.x >= 25 && 
-		pos.x < 825 && 
-		pos.y >= 175 && 
-		pos.y < 775 &&
+	if (pos.x >= 0 && 
+		pos.x < 800 && 
+		pos.y >= 0 && 
+		pos.y < 600 &&
 		event->button() == Qt::LeftButton)
 	{
 		rndDrawer.drawEllipse(centre, 3, 3);
-		if (pos.y < 475)
+		if (pos.y < 300)
 		{
-			if (pos.x < 425)
+			if (pos.x < 400)
 			{
-				ptsSelected[0] = pos;
+				ptsSelected[0] = { 1280 * pos.x / 800,720 * pos.y / 600 };
 			}
 			else
 			{
-				ptsSelected[1] = pos;
+				ptsSelected[1] = { 1280 * pos.x / 800,720 * pos.y / 600 };
 			}
 		}
 		else
 		{
-			if (pos.x < 425)
+			if (pos.x < 400)
 			{
-				ptsSelected[2] = pos;
+				ptsSelected[2] = { 1280 * pos.x / 800,720 * pos.y / 600 };
 			}
 			else
 			{
-				ptsSelected[3] = pos;
+				ptsSelected[3] = { 1280 * pos.x / 800,720 * pos.y / 600 };
 			}
 		}
 	}
@@ -59,7 +60,7 @@ void Perspective::paintEvent(QPaintEvent * event)
 	bool bReady = true, bEmpty = true;
 	for (auto &pt : ptsSelected)
 	{
-		if (pt == cv::Point(-1,-1))
+		if (pt == cv::Point2f(-1,-1))
 		{
 			bReady = false;
 		}
@@ -72,9 +73,9 @@ void Perspective::paintEvent(QPaintEvent * event)
 	ui.btnRevoke->setDisabled(bEmpty);
 	for (int i = 0; i < 4; ++i)
 	{
-		if (ptsSelected[i] != cv::Point(-1, -1))
+		if (ptsSelected[i] != cv::Point2f(-1, -1))
 		{
-			lePositions[i]->setText(QString("(%1, %2)").arg(ptsSelected[i].x).arg(ptsSelected[i].y));
+			lePositions[i]->setText(QString("(%1, %2)").arg(int(ptsSelected[i].x)).arg(int(ptsSelected[i].y)));
 		}
 		else
 		{
@@ -86,26 +87,10 @@ void Perspective::paintEvent(QPaintEvent * event)
 
 void Perspective::OnConfirm()
 {
-	QSize sizeOrigin = Camera::GetInstance()->GetCameraSize();
-	float fXMax = static_cast<float>(sizeOrigin.width());
-	float fYMax = static_cast<float>(sizeOrigin.height());
-	for (auto &pt : ptsSelected)
-	{
-		pt.x = pt.x *  fXMax / 800;
-		pt.y = pt.y *  fYMax / 600;
-	}
-	cv::Point2f ptSrc[4]
-	{
-		cv::Point2f{0, 0},
-		cv::Point2f{ fXMax - 1, 0},
-		cv::Point2f{0, fYMax - 1},
-		cv::Point2f{ fXMax - 1, fYMax - 1}
-	};
-	cv::Point2f ptDst[4]{ ptsSelected[0],ptsSelected[1],ptsSelected[2],ptsSelected[3] };
-	Camera::GetInstance()->SetPerspecitve(cv::getPerspectiveTransform(ptSrc, ptDst));
+	Camera::GetInstance()->SetPerspecitve(ptsSelected);
 }
 
 void Perspective::OnRevoke()
 {
-	ptsSelected = QVector<cv::Point>(4, cv::Point(-1, -1));
+	ptsSelected = QVector<cv::Point2f>(4, cv::Point2f(-1, -1));
 }

@@ -9,17 +9,25 @@ typedef QPair<XType, YType> Position;
 typedef unsigned short RoundType;
 typedef unsigned char ValType;
 
+constexpr int nFPS = 25;
+constexpr int nCamWidth = 1280;
+constexpr int nCamHeight = 720;
+constexpr int nViewWidth = 800;
+constexpr int nViewHeight = 600;
+constexpr int nLogicWidth = 297;
+constexpr int nLogicHeight = 210;
+
 typedef struct tagPos	//For Camera Only
 {
 	Position posBall, posCarA, posCarB;
-	tagPos(const cv::Point &ptBall = { 0,0 }, const cv::Point &ptCarA = { 0,0 }, const cv::Point &ptCarB = { 0,0 })
+	tagPos(const cv::Point2f &ptBall = { 0.,0. }, const cv::Point2f &ptCarA = { 0.,0. }, const cv::Point2f &ptCarB = { 0.,0. })
 	{
-		posBall.first = static_cast<XType>(ptBall.x);
-		posBall.second = static_cast<YType>(ptBall.y);
-		posCarA.first = static_cast<XType>(ptCarA.x);
-		posCarA.second = static_cast<YType>(ptCarA.y);
-		posCarB.first = static_cast<XType>(ptCarB.x);
-		posCarB.second = static_cast<YType>(ptCarB.y);
+		posBall.first = static_cast<XType>((int)ptBall.x);
+		posBall.second = static_cast<YType>((int)ptBall.y);
+		posCarA.first = static_cast<XType>((int)ptCarA.x);
+		posCarA.second = static_cast<YType>((int)ptCarA.y);
+		posCarB.first = static_cast<XType>((int)ptCarB.x);
+		posCarB.second = static_cast<YType>((int)ptCarB.y);
 	}
 }CameraInfo;
 
@@ -64,8 +72,8 @@ typedef struct tagMatch		//For Logic
 	RoundType nBInARounds;
 	RoundType nHaltA;
 	RoundType nHaltB;
-	constexpr YType GetLength() { return 297; }
-	constexpr XType GetWidth() { return 210; }
-	constexpr YType GetHalfLength() { return 297 / 2; }
+	constexpr YType GetLength() { return nLogicWidth; }
+	constexpr XType GetWidth() { return nLogicHeight; }
+	constexpr YType GetHalfLength() { return nLogicWidth / 2; }
 	SerialInfo infoObjs;
 }MatchInfo;

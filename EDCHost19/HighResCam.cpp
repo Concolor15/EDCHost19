@@ -3,10 +3,27 @@
 
 using namespace cv;
 
+void HighResCam::TransToLogic(QVector<cv::Point2f>& info)
+{
+	for (auto &pt : info)
+	{
+		pt = ccToLogic.cam2logic(pt);
+	}
+}
+
 HighResCam::HighResCam(QObject *parent)
 	:QAbstractVideoSurface(parent)
 {
 	locateMachine.InitCv();
+	CoordinateConverter::Param theParam;
+	theParam.CameraSize = Size2i(nCamWidth, nCamHeight);
+	theParam.DisplaySize = Size2i(nViewWidth, nViewHeight);
+	theParam.LogicSize = Size2i(nLogicWidth, nLogicHeight); 
+	theParam.CornersInCamera[0] = Point2f(0, 0);
+	theParam.CornersInCamera[1] = Point2f(nCamWidth, 0); 
+	theParam.CornersInCamera[2] = Point2f(0, nCamHeight);
+	theParam.CornersInCamera[3] = Point2f(nCamWidth, nCamHeight);
+	ccToLogic.SetParam(theParam);
 } 
 
 HighResCam::~HighResCam()
@@ -49,20 +66,38 @@ bool HighResCam::present(const QVideoFrame & frame)
 		frametodraw.bytesPerLine(),
 		QImage::Format_RGB32);
 	auto info = locateMachine.GetLocation();
-	QPixmap pixSignal(QPixmap::fromImage(image.copy()));
-	emit ImageArrived(info, pixSignal);
+#ifdef PERS_DEBUG
+	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x), 3, 10, QChar('0')).arg(int(info[0].y), 3, 10, QChar('0'));
+#endif
+	TransToLogic(info);
+#ifdef PERS_DEBUG
+	qstrCam += QString("Logic-Ball:(%1,%2)\n").arg(int(info[0].x), 3, 10, QChar('0')).arg(int(info[0].y), 3, 10, QChar('0'));
+	emit DebugPers(qstrCam);
+#endif
+	QPixmap pixSignal(QPixmap::fromImage(image));
+	auto infCompressed = CameraInfo(info[0], info[1], info[2]);
+	emit ImageArrived(infCompressed, pixSignal);
 	frametodraw.unmap();
-
 	return true;
 }
 
-CameraInfo ImgProc::GetLocation()
+void HighResCam::SetPerspective(const QVector<cv::Point2f>& pts)
 {
-	Point ptA(0,0), ptB(0,0), ptBall(0,0);
+	CoordinateConverter::Param theParam = ccToLogic.GetParam();
+	theParam.CornersInCamera[0] = pts[0];
+	theParam.CornersInCamera[1] = pts[1];
+	theParam.CornersInCamera[2] = pts[2];
+	theParam.CornersInCamera[3] = pts[3];
+	ccToLogic.SetParam(theParam);
+}
+
+QVector<cv::Point2f> ImgProc::GetLocation()
+{
+	Point2f ptA(0,0), ptB(0,0), ptBall(0,0);
 	if (!ball_centers.empty()) ptBall = ball_centers[0];
 	if (!car1_centers.empty()) ptA = car1_centers[0];
 	if (!car2_centers.empty()) ptB = car2_centers[0];
-	return CameraInfo(ptBall, ptA, ptB);
+	return QVector<cv::Point2f>{ptBall, ptA, ptB};
 }
 
 void ImgProc::InitCv()

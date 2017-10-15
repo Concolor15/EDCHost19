@@ -13,12 +13,18 @@ MyLogger::~MyLogger()
 {
 }
 
+void MyLogger::closeEvent(QCloseEvent * event)
+{
+	deleteLater();
+	QDialog::closeEvent(event);
+}
+
 void MyLogger::OnCamDbg(QString qstrInfo)
 {
-	ui.teCamera->append(qstrInfo);
+	ui.teCamera->setText(qstrInfo);
 }
 
 void MyLogger::OnSerDbg(QString qstrInfo)
 {
-	ui.teSerial->append(qstrInfo);
+	ui.teSerial->setText(qstrInfo);
 }

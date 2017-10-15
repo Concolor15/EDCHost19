@@ -10,7 +10,8 @@ class MyLogger : public QDialog
 public:
 	MyLogger(QWidget *parent = Q_NULLPTR);
 	~MyLogger();
-
+protected:
+	void closeEvent(QCloseEvent *event) override;
 private:
 	Ui::MyLogger ui;
 private slots:

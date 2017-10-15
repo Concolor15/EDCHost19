@@ -21,7 +21,7 @@ struct ProcConfig
 class ImgProc
 {
 public:
-	CameraInfo GetLocation();
+	QVector<cv::Point2f> GetLocation();
 
 	//利用 opencv 生成滑动条，方便调试时改变参数
 	void InitCv();
@@ -59,16 +59,16 @@ class HighResCam : public QAbstractVideoSurface
 
 private:
 	ImgProc locateMachine;
+	cv::Mat matPerspective;
+	CoordinateConverter ccToLogic;
+	void TransToLogic(QVector<cv::Point2f> &info);
 public:
-
 	HighResCam(QObject *parent = nullptr);
-
 	~HighResCam();
-
 	QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const override;
-
 	bool present(const QVideoFrame &frame) override;
-
+	void SetPerspective(const QVector<cv::Point2f> &pts);
 signals:
 	void ImageArrived(CameraInfo, QPixmap);
+	void DebugPers(QString);
 };
