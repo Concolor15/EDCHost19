@@ -8,8 +8,8 @@ Perspective::Perspective(QPixmap pix, QWidget *parent)
 {
 	ui.setupUi(this);
 	lePositions = { ui.lePosLU,ui.lePosRU,ui.lePosLD,ui.lePosRD };
-	ui.lblPicture->setScaledContents(true);
 	ui.lblPicture->setPixmap(pixPerspect);
+	nSelected = 0;
 }
 
 Perspective::~Perspective()
@@ -18,37 +18,18 @@ Perspective::~Perspective()
 
 void Perspective::mousePressEvent(QMouseEvent * event)
 {
-	QPainter rndDrawer(this);
 	auto pos = cv::Point2f(event->x() - 25, event->y() - 175);
 	auto centre = QPoint(pos.x, pos.y);
-	if (pos.x >= 0 && 
-		pos.x < 800 && 
-		pos.y >= 0 && 
-		pos.y < 600 &&
+	if (pos.x >= 0 &&
+		pos.x < 1280 &&
+		pos.y >= 0 &&
+		pos.y < 720 &&
 		event->button() == Qt::LeftButton)
 	{
-		rndDrawer.drawEllipse(centre, 3, 3);
-		if (pos.y < 300)
+		if (nSelected < ptsSelected.size())
 		{
-			if (pos.x < 400)
-			{
-				ptsSelected[0] = { 1280 * pos.x / 800,720 * pos.y / 600 };
-			}
-			else
-			{
-				ptsSelected[1] = { 1280 * pos.x / 800,720 * pos.y / 600 };
-			}
-		}
-		else
-		{
-			if (pos.x < 400)
-			{
-				ptsSelected[2] = { 1280 * pos.x / 800,720 * pos.y / 600 };
-			}
-			else
-			{
-				ptsSelected[3] = { 1280 * pos.x / 800,720 * pos.y / 600 };
-			}
+			ptsSelected[nSelected] = { pos.x,pos.y };
+			++nSelected;
 		}
 	}
 	repaint();
@@ -93,4 +74,5 @@ void Perspective::OnConfirm()
 void Perspective::OnRevoke()
 {
 	ptsSelected = QVector<cv::Point2f>(4, cv::Point2f(-1, -1));
+	nSelected = 0;
 }

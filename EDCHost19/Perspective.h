@@ -20,6 +20,7 @@ private:
 	QPixmap pixPerspect;
 	QVector<cv::Point2f> ptsSelected;
 	QVector<QLineEdit *> lePositions;
+	int nSelected;
 private slots:
 	void OnConfirm();
 	void OnRevoke();
