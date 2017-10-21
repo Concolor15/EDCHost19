@@ -67,11 +67,15 @@ bool HighResCam::present(const QVideoFrame & frame)
 		QImage::Format_RGB32);
 	auto info = locateMachine.GetLocation();
 #ifdef PERS_DEBUG
-	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x), 3, 10, QChar('0')).arg(int(info[0].y), 3, 10, QChar('0'));
+	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));
+	qstrCam += QString("Camera-CarA:(%1,%2)\n").arg(int(info[1].x)).arg((int)info[1].y);
+	qstrCam += QString("Camera-CarB:(%1,%2)\n").arg(int(info[2].x)).arg((int)info[2].y);
 #endif
 	TransToLogic(info);
 #ifdef PERS_DEBUG
-	qstrCam += QString("Logic-Ball:(%1,%2)\n").arg(int(info[0].x), 3, 10, QChar('0')).arg(int(info[0].y), 3, 10, QChar('0'));
+	qstrCam += QString("Logic-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));
+	qstrCam += QString("Logic-CarA:(%1,%2)\n").arg(int(info[1].x)).arg(int(info[1].y));
+	qstrCam += QString("Logic-CarB:(%1,%2)\n").arg(int(info[2].x)).arg(int(info[2].y));
 	emit DebugPers(qstrCam);
 #endif
 	QPixmap pixSignal(QPixmap::fromImage(image));
@@ -108,9 +112,12 @@ void ImgProc::InitCv()
 	config.car1_hue_ub = 0;
 	config.car2_hue_lb = 0;
 	config.car2_hue_ub = 0;
-	config.s_lb = 0;
+	config.car1_s_lb = 0;
+	config.car2_s_lb = 0;
+	config.ball_s_lb = 0;
 	config.v_lb = 0;
-	config.area_lb = 100;
+	config.area_car_lb = 100;
+	config.area_ball_lb = 100;
 #ifdef CAMERA_DEBUG
 	namedWindow("show");
 	namedWindow("black");
@@ -121,9 +128,12 @@ void ImgProc::InitCv()
 	createTrackbar("car1_hue_ub", "control", &config.car1_hue_ub, 180);
 	createTrackbar("car2_hue_lb", "control", &config.car2_hue_lb, 180);
 	createTrackbar("car2_hue_ub", "control", &config.car2_hue_ub, 180);
-	createTrackbar("s_lb", "control", &config.s_lb, 255);
+	createTrackbar("ball_s_lb", "control", &config.ball_s_lb, 255);
+	createTrackbar("car1_s_lb", "control", &config.car1_s_lb, 255);
+	createTrackbar("car2_s_lb", "control", &config.car2_s_lb, 255);
 	createTrackbar("v_lb", "control", &config.v_lb, 255);
-	createTrackbar("area_lb", "control", &config.area_lb, 255);
+	createTrackbar("area_car_lb", "control", &config.area_car_lb, 1000);
+	createTrackbar("area_ball_lb", "control", &config.area_ball_lb, 200);
 #endif
 }
 
@@ -139,10 +149,17 @@ void ImgProc::Locate(Mat& mat)
 	// 生成 mask 和提取 h 通道
 #pragma region
 	cv::inRange(hsv,
-		Scalar(0, config.s_lb, config.v_lb),
+		Scalar(0, config.ball_s_lb, config.v_lb),
 		Scalar(180, 255, 255),
-		mask);
-
+		mask_ball);
+	cv::inRange(hsv,
+		Scalar(0, config.car1_s_lb, config.v_lb),
+		Scalar(180, 255, 255),
+		mask_car1);
+	cv::inRange(hsv,
+		Scalar(0, config.car2_s_lb, config.v_lb),
+		Scalar(180, 255, 255),
+		mask_car2);
 	int ch[] = { 0,0 };
 	hue.create(src.size(), CV_8UC1);
 	mixChannels(&hsv, 1, &hue, 1, ch, 1);
@@ -154,13 +171,13 @@ void ImgProc::Locate(Mat& mat)
 #pragma region
 	//Mat tmp;
 	inRange(hue, Scalar(config.ball_hue_lb), Scalar(config.ball_hue_ub), ball);
-	cv::bitwise_and(ball, mask, ball);
+	cv::bitwise_and(ball, mask_ball, ball);
 
 	inRange(hue, Scalar(config.car1_hue_lb), Scalar(config.car1_hue_ub), car1);
-	cv::bitwise_and(car1, mask, car1);
+	cv::bitwise_and(car1, mask_car1, car1);
 
 	inRange(hue, Scalar(config.car2_hue_lb), Scalar(config.car2_hue_ub), car2);
-	cv::bitwise_and(car2, mask, car2);
+	cv::bitwise_and(car2, mask_car2, car2);
 
 	//printf("%lld\n", timer.elapsed());
 #pragma endregion
@@ -168,9 +185,9 @@ void ImgProc::Locate(Mat& mat)
 	//cvtColor(src, dst, COLOR_BGR2GRAY, 3);
 	src.copyTo(dst);
 
-	ball_centers = GetCenter(ball, config);
-	car1_centers = GetCenter(car1, config);
-	car2_centers = GetCenter(car2, config);
+	ball_centers = GetCenter(ball, config, Types::BALL);
+	car1_centers = GetCenter(car1, config, Types::CARA);
+	car2_centers = GetCenter(car2, config, Types::CARB);
 	//printf("%lld\n\n", timer.elapsed());
 	for (auto & cts : ball_centers)
 	{
@@ -193,10 +210,10 @@ void ImgProc::Locate(Mat& mat)
 #endif
 }
 
-vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg)
+vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)
 {
-	float area_lb = cfg.area_lb;
-
+	float area_car_lb = cfg.area_car_lb;
+	float area_ball_lb = cfg.area_ball_lb;
 	vector<Point2f> rett;
 	vector<vector<Point>> contours;
 
@@ -205,15 +222,13 @@ vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg)
 	for (auto const& contour : contours)
 	{
 		Point2f center;
-		float radius;
-
 		auto const moment = moments(contour);
 		double area = moment.m00;
 		center.x = moment.m10 / moment.m00;
 		center.y = moment.m01 / moment.m00;
 
-		if (area < area_lb)
-			continue;
+		if ((nType == Types::CARA || nType == Types::CARB) && area < area_car_lb) continue;
+		if (nType == Types::BALL && area < area_ball_lb) continue;
 
 		rett.push_back(center);
 

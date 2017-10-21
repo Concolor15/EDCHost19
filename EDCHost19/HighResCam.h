@@ -13,9 +13,12 @@ struct ProcConfig
 	int car2_hue_lb;
 	int car2_hue_ub;
 
-	int s_lb;
+	int car1_s_lb;
+	int car2_s_lb;
+	int ball_s_lb;
 	int v_lb;
-	int area_lb;
+	int area_car_lb;
+	int area_ball_lb;
 };
 
 class ImgProc
@@ -34,15 +37,15 @@ public:
 private:
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
 	//src : 二值化图像
-	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg);
-
+	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg, int nType);
+	enum Types { CARA = 1, CARB = 2,BALL = 3 };
 	cv::Mat src, hsv;
 
 	// 8UC1, hsv 的 h 部分
 	cv::Mat hue;
 
 	// 单值化图像，s >= s_lb && h >= h_lb
-	cv::Mat mask;
+	cv::Mat mask_ball,mask_car1,mask_car2;
 
 	// 单值化图像
 	cv::Mat car1, car2, ball;
