@@ -140,14 +140,7 @@ void ImgProc::InitCv()
 void ImgProc::Locate(Mat& mat)
 {
 	src = mat;
-
-	//static QElapsedTimer timer;
-	//timer.start();
-
 	cvtColor(src, hsv, COLOR_BGR2HSV);
-
-	// 生成 mask 和提取 h 通道
-#pragma region
 	cv::inRange(hsv,
 		Scalar(0, config.ball_s_lb, config.v_lb),
 		Scalar(180, 255, 255),
@@ -163,32 +156,16 @@ void ImgProc::Locate(Mat& mat)
 	int ch[] = { 0,0 };
 	hue.create(src.size(), CV_8UC1);
 	mixChannels(&hsv, 1, &hue, 1, ch, 1);
-#pragma endregion
-
-	//printf("%lld\n", timer.elapsed());
-
-	// 生成球和小车对应色块的二值化图像
-#pragma region
-	//Mat tmp;
 	inRange(hue, Scalar(config.ball_hue_lb), Scalar(config.ball_hue_ub), ball);
 	cv::bitwise_and(ball, mask_ball, ball);
-
 	inRange(hue, Scalar(config.car1_hue_lb), Scalar(config.car1_hue_ub), car1);
 	cv::bitwise_and(car1, mask_car1, car1);
-
 	inRange(hue, Scalar(config.car2_hue_lb), Scalar(config.car2_hue_ub), car2);
 	cv::bitwise_and(car2, mask_car2, car2);
-
-	//printf("%lld\n", timer.elapsed());
-#pragma endregion
-
-	//cvtColor(src, dst, COLOR_BGR2GRAY, 3);
 	src.copyTo(dst);
-
 	ball_centers = GetCenter(ball, config, Types::BALL);
 	car1_centers = GetCenter(car1, config, Types::CARA);
 	car2_centers = GetCenter(car2, config, Types::CARB);
-	//printf("%lld\n\n", timer.elapsed());
 	for (auto & cts : ball_centers)
 	{
 		circle(dst, cts, 10, Scalar(255, 0, 0),-1);
@@ -202,12 +179,15 @@ void ImgProc::Locate(Mat& mat)
 		circle(dst, cts, 10, Scalar(0, 0, 255), -1);
 	}
 #ifdef CAMERA_DEBUG
-	// 调试输出
 	imshow("show", dst);
-
 	cv::merge(vector<Mat>{ car1, car2, ball }, merged);
 	imshow("black", merged);
 #endif
+}
+
+ImgProc::~ImgProc()
+{
+	
 }
 
 vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)
@@ -216,9 +196,7 @@ vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)
 	float area_ball_lb = cfg.area_ball_lb;
 	vector<Point2f> rett;
 	vector<vector<Point>> contours;
-
 	findContours(src, contours, cv::noArray(), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-
 	for (auto const& contour : contours)
 	{
 		Point2f center;
@@ -226,15 +204,9 @@ vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)
 		double area = moment.m00;
 		center.x = moment.m10 / moment.m00;
 		center.y = moment.m01 / moment.m00;
-
 		if ((nType == Types::CARA || nType == Types::CARB) && area < area_car_lb) continue;
 		if (nType == Types::BALL && area < area_ball_lb) continue;
-
-		rett.push_back(center);
-
-		//mark the center of contours
-		
+		rett.push_back(center);		
 	}
-
 	return rett;
 }

@@ -34,6 +34,7 @@ public:
 
 	// 定位所需参数
 	ProcConfig config;
+	~ImgProc();
 private:
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
 	//src : 二值化图像

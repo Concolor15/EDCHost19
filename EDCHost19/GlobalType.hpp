@@ -9,7 +9,7 @@ typedef QPair<XType, YType> Position;
 typedef unsigned short RoundType;
 typedef unsigned char ValType;
 
-constexpr int nFPS = 25;
+constexpr int nFPS = 33;
 constexpr int nCamWidth = 1280;
 constexpr int nCamHeight = 720;
 constexpr int nViewWidth = 800;
