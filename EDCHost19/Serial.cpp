@@ -7,7 +7,7 @@ Serial * Serial::pInstance = nullptr;
 Serial::Serial() : byteToSend(32, 0)
 {
 	//Serial Configurations
-	theSerial.setPortName("COM3");
+	theSerial.setPortName("COM5");
 	theSerial.open(QIODevice::ReadWrite);
 	theSerial.setBaudRate(QSerialPort::Baud115200);
 	theSerial.setDataBits(QSerialPort::Data8);
@@ -16,7 +16,7 @@ Serial::Serial() : byteToSend(32, 0)
 	theSerial.setStopBits(QSerialPort::OneStop);
 	//Freq Control Configuration
 	QObject::connect(&timerFreqCtrl, &QTimer::timeout, this, &Serial::Transmitter);
-	timerFreqCtrl.start(33);
+	timerFreqCtrl.start(100);
 }
 
 Serial::~Serial()

@@ -16,6 +16,8 @@ Camera::Camera()
 	//Prepare a camera and a view
 	auto theDevice = QCamera::availableDevices().at(QCamera::availableDevices().size() - 1);
 	pCamWork = new QCamera(theDevice);
+	pCamWork->imageProcessing()->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
+	pCamWork->imageProcessing()->setManualWhiteBalance(4000);
 	pHRView = new HighResCam;
 	pCamWork->setViewfinder(pHRView);
 	QCameraViewfinderSettings settings;
