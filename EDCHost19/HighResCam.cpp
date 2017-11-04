@@ -38,7 +38,11 @@ QList<QVideoFrame::PixelFormat> HighResCam::supportedPixelFormats(QAbstractVideo
 
 bool HighResCam::present(const QVideoFrame & frame)
 {
-	if (frame.pixelFormat() != QVideoFrame::Format_RGB32) {
+    QVideoFrame::PixelFormat pixelFormat = frame.pixelFormat();
+    switch (pixelFormat) {
+        case QVideoFrame::Format_RGB32:
+        case QVideoFrame::Format_BGR24: break;
+    default:
 		setError(IncorrectFormatError);
 		return false;
 	}
@@ -53,18 +57,39 @@ bool HighResCam::present(const QVideoFrame & frame)
 		setError(ResourceError);
 		return false;
 	}
-	cv::Mat matToLocate = cv::Mat(frametodraw.height(),
+
+    cv::Mat matToLocate;
+
+    if (pixelFormat == QVideoFrame::Format_RGB32)
+    {
+        matToLocate = cv::Mat(frametodraw.height(),
 		frametodraw.width(),
 		CV_8UC4,
 		frametodraw.bits(),
 		frametodraw.bytesPerLine());
+    }
+    else if (pixelFormat == QVideoFrame::Format_BGR24)
+    {
+        matToLocate = cv::Mat(frametodraw.height(),
+                              frametodraw.width(),
+                              CV_8UC3,
+                              frametodraw.bits(),
+                              frametodraw.bytesPerLine());
+    }
+
 	locateMachine.Locate(matToLocate);
+
+
 	QImage image = QImage(
 		frametodraw.bits(),
 		frametodraw.width(),
 		frametodraw.height(),
 		frametodraw.bytesPerLine(),
-		QImage::Format_RGB32);
+        QImage::Format_RGB888);
+
+
+
+
 	auto info = locateMachine.GetLocation();
 #ifdef PERS_DEBUG
 	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));

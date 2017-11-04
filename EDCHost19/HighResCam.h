@@ -1,6 +1,11 @@
 #pragma once
 
-#include "stdafx.h"
+#include <QPixmap>
+#include <QtMultimedia/QCamera>
+#include <QAbstractVideoSurface>
+#include <opencv2/core.hpp>
+#include "GlobalType.hpp"
+#include "CoordinateConverter.h"
 
 struct ProcConfig
 {
@@ -26,32 +31,32 @@ class ImgProc
 public:
 	QVector<cv::Point2f> GetLocation();
 
-	//ÀûÓÃ opencv Éú³É»¬¶¯Ìõ£¬·½±ãµ÷ÊÔÊ±¸Ä±ä²ÎÊı
+	//åˆ©ç”¨ opencv ç”Ÿæˆæ»‘åŠ¨æ¡ï¼Œæ–¹ä¾¿è°ƒè¯•æ—¶æ”¹å˜å‚æ•°
 	void InitCv();
 
-	//±£Ö¤²»»áĞŞ¸Ä mat
+	//ä¿è¯ä¸ä¼šä¿®æ”¹ mat
 	void Locate(cv::Mat& mat);
 
-	// ¶¨Î»ËùĞè²ÎÊı
+	// å®šä½æ‰€éœ€å‚æ•°
 	ProcConfig config;
 	~ImgProc();
 private:
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
-	//src : ¶şÖµ»¯Í¼Ïñ
+	//src : äºŒå€¼åŒ–å›¾åƒ
 	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg, int nType);
 	enum Types { CARA = 1, CARB = 2,BALL = 3 };
 	cv::Mat src, hsv;
 
-	// 8UC1, hsv µÄ h ²¿·Ö
+	// 8UC1, hsv çš„ h éƒ¨åˆ†
 	cv::Mat hue;
 
-	// µ¥Öµ»¯Í¼Ïñ£¬s >= s_lb && h >= h_lb
+	// å•å€¼åŒ–å›¾åƒï¼Œs >= s_lb && h >= h_lb
 	cv::Mat mask_ball,mask_car1,mask_car2;
 
-	// µ¥Öµ»¯Í¼Ïñ
+	// å•å€¼åŒ–å›¾åƒ
 	cv::Mat car1, car2, ball;
 
-	// ²ÊÉ«Í¼Ïñ£¬½« car1 car2 ball ºÏÔÚÒ»Æğ£¬·½±ãµ÷ÊÔ£¨·Ö±ğÎªBGRÍ¨µÀ£©
+	// å½©è‰²å›¾åƒï¼Œå°† car1 car2 ball åˆåœ¨ä¸€èµ·ï¼Œæ–¹ä¾¿è°ƒè¯•ï¼ˆåˆ†åˆ«ä¸ºBGRé€šé“ï¼‰
 	cv::Mat merged;
 
 	cv::Mat dst;

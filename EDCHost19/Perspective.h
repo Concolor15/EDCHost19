@@ -3,7 +3,7 @@
 #include <QDialog>
 #include "ui_Perspective.h"
 
-#include"stdafx.h"
+#include <opencv2/core.hpp>
 
 class Perspective : public QDialog
 {

@@ -1,6 +1,6 @@
 #pragma once
-#include <opencv2\core.hpp>
-#include <Eigen>
+#include <opencv2/core.hpp>
+#include <eigen3/Eigen/Eigen>
 class CoordinateConverter
 {
 public:

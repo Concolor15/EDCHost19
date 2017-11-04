@@ -3,7 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_EDCHost19.h"
 
-#include "stdafx.h"
+#include "GlobalType.hpp"
 #include "Perspective.h"
 #include "MatchMain.h"
 #include "MyLogger.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QtCore\qpair.h>
-#include <opencv2\core\types.hpp>
+#include <QtCore/qpair.h>
+#include <opencv2/core/types.hpp>
 
 typedef unsigned short YType;
 typedef unsigned char XType;
@@ -51,7 +51,7 @@ enum SHOOTOUT	//For binShootout
 	NO = 0b0
 };
 
-typedef struct tagSerial	//For Serial Only
+struct tagSerial	//For Serial Only
 {
 	RoundType nTimeByRounds;
 	RoundType nHaltRoundA;
@@ -64,9 +64,10 @@ typedef struct tagSerial	//For Serial Only
 	ValType binShootout;
 	ValType binSideShoot;
 	CameraInfo posObjs;
-}SerialInfo;
+};
+typedef tagSerial SerialInfo;
 
-typedef struct tagMatch		//For Logic
+struct tagMatch		//For Logic
 {
 	RoundType nAInBRounds;
 	RoundType nBInARounds;
@@ -76,4 +77,5 @@ typedef struct tagMatch		//For Logic
 	constexpr XType GetWidth() { return nLogicHeight; }
 	constexpr YType GetHalfLength() { return nLogicWidth / 2; }
 	SerialInfo infoObjs;
-}MatchInfo;
+};
+typedef tagMatch MatchInfo;

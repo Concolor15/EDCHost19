@@ -3,6 +3,8 @@
 #include <QDialog>
 #include "ui_MatchMain.h"
 
+#include <GlobalType.hpp>
+
 class MatchMain : public QDialog
 {
 	Q_OBJECT

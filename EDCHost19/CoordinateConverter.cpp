@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "CoordinateConverter.h"
 
-#include <opencv2\imgproc.hpp>
-#include <Eigen>
+#include <opencv2/imgproc.hpp>
+#include <eigen3/Eigen/Eigen>
 
 using namespace cv;
 using namespace Eigen;
@@ -42,7 +42,7 @@ static void getPerspectiveTransform(Point2f(&src)[4], Point2f(&dst)[4], Matrix3d
 		B[i + 4] = dst[i].y;
 	}
 
-	Matrix<double, 8, 1> X = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(B);
+    Matrix<double, 8, 1> X = A.jacobiSvd(ComputeFullU | ComputeFullV).solve(B);
 
 	res(0, 0) = X[0];
 	res(0, 1) = X[1];

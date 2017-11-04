@@ -1,7 +1,7 @@
 #pragma once
-#include "HighResCam.h"
 
-#include "stdafx.h"
+#include <QPixmap>
+#include "HighResCam.h"
 
 using std::vector;
 
@@ -11,7 +11,7 @@ class Camera final :public QObject
 private:
 	static Camera* pInstance;
 	QCamera *pCamWork;
-	HighResCam *pHRView;
+    HighResCam *pHRView;
 	Camera();
 	~Camera();
 private slots:
