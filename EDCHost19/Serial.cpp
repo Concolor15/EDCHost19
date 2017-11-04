@@ -32,6 +32,9 @@ Serial::~Serial()
 void Serial::Transmitter()
 {
 	theSerial.write(byteToSend);
+
+    QString debugInfo = QTime::currentTime().toString() + QString(byteToSend.toHex());
+    emit DebugInfo(debugInfo);
 }
 
 Serial * Serial::GetInstance()
@@ -52,29 +55,34 @@ void Serial::DestroyInstance()
 	}
 }
 
-void Serial::Transmit(const SerialInfo & theData)
+void Serial::Transmit(const MatchInfo & data)
 {
-	byteToSend[0] = 0xFC | (theData.binShootout << 1);
-	byteToSend[0] = byteToSend[0] | theData.binSideShoot;
-	byteToSend[1] = (theData.quaGameStatus << 6) | (theData.nTimeByRounds >> 8);
-	byteToSend[2] = theData.nTimeByRounds & 0xFF;
-	byteToSend[3] = theData.posObjs.posCarA.first;
-	byteToSend[4] = (theData.posObjs.posCarA.second >> 8);
-	byteToSend[5] = (theData.posObjs.posCarA.second & 0xFF);
-	byteToSend[6] = theData.posObjs.posCarB.first;
-	byteToSend[7] = (theData.posObjs.posCarB.second >> 8);
-	byteToSend[8] = (theData.posObjs.posCarB.second & 0xFF);
-	byteToSend[9] = theData.posObjs.posBall.first;
-	byteToSend[10] = (theData.posObjs.posBall.second >> 8);
-	byteToSend[11] = (theData.posObjs.posBall.second & 0xFF);
-	byteToSend[12] = (theData.nHaltRoundA >> 8);
-	byteToSend[13] = (theData.nHaltRoundA & 0xFF);
-	byteToSend[14] = (theData.nHaltRoundB >> 8);
-	byteToSend[15] = (theData.nHaltRoundB & 0xFF);
-	byteToSend[16] = theData.nEvilA;
-	byteToSend[17] = theData.nEvilB;
-	byteToSend[18] = theData.nScoreA;
-	byteToSend[19] = theData.nScoreB;
+    auto const& pos = data.posObjs;
+    byteToSend[0] = 0xFC | (data.binShootout << 1);
+    byteToSend[0] = byteToSend[0] | data.binSideShoot;
+    byteToSend[1] = (data.quaGameStatus << 6) | (data.nTimeByRounds >> 8);
+    byteToSend[2] = data.nTimeByRounds & 0xFF;
+
+    byteToSend[3] = pos.posCar1.x();
+    byteToSend[4] = pos.posCar1.y() >> 8;
+    byteToSend[5] = pos.posCar1.y() & 0xFF;
+
+    byteToSend[6] = pos.posCar2.x();
+    byteToSend[7] = pos.posCar2.y() >> 8;
+    byteToSend[8] = pos.posCar2.y() & 0xFF;
+
+    byteToSend[9] = pos.posBall.x();
+    byteToSend[10] = pos.posBall.y() >> 8;
+    byteToSend[11] = pos.posBall.y() & 0xFF;
+
+    byteToSend[12] = data.nHaltRoundA >> 8;
+    byteToSend[13] = data.nHaltRoundA & 0xFF;
+    byteToSend[14] = data.nHaltRoundB >> 8;
+    byteToSend[15] = data.nHaltRoundB & 0xFF;
+    byteToSend[16] = data.nEvilA;
+    byteToSend[17] = data.nEvilB;
+    byteToSend[18] = data.nScoreA;
+    byteToSend[19] = data.nScoreB;
 	byteToSend[30] = 0x0D;
 	byteToSend[31] = 0x0A;
 }

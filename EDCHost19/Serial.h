@@ -19,7 +19,7 @@ private:
 public:
 	static Serial * GetInstance();
 	static void DestroyInstance();
-	void Transmit(const SerialInfo &theData);
+    void Transmit(const MatchInfo &data);
 signals:
 	void DebugInfo(QString);
 };

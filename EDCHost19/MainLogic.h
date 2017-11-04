@@ -5,7 +5,7 @@
 class MainLogic final
 {
 private:
-	MatchInfo theMatch;
+    MatchInfo info;
 public:
     MainLogic();
     ~MainLogic();

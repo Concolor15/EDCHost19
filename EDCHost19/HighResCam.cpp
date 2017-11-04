@@ -194,12 +194,15 @@ void ImgProc::Locate(Mat& mat)
                 Scalar(config.ball_hue_lb, config.ball_s_lb, config.ball_v_lb),
                 Scalar(config.ball_hue_ub, 255, 255),
                 ball);
-    if (!config.red_reverse) {
+    if (!config.red_reverse)
+    {
     cv::inRange(hsv,
                 Scalar(config.car1_hue_lb, config.car1_s_lb, config.car1_v_lb),
                 Scalar(config.car1_hue_ub, 255, 255),
                 car1);
-    } else {
+    }
+    else
+    {
         cv::Mat tmp;
         cv::inRange(hsv,
                     Scalar(config.car1_hue_lb, 0, 0),
@@ -255,7 +258,7 @@ void ImgProc::Locate(Mat& mat)
 	}
 #ifdef CAMERA_DEBUG
 	imshow("show", dst);
-	cv::merge(vector<Mat>{ car1, car2, ball }, merged);
+    cv::merge(vector<Mat>{ ball, car1, car2}, merged);
 	imshow("black", merged);
 #endif
 }

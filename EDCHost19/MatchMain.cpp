@@ -22,17 +22,17 @@ MatchMain::~MatchMain()
 void MatchMain::paintEvent(QPaintEvent * event)
 {
     auto infoMatch = logic->GetInfo();
-	auto infoPhase = infoMatch.infoObjs.quaGameStatus;
-	bool bAInHalt = infoMatch.infoObjs.nHaltRoundA != 0;
-	bool bBInHalt = infoMatch.infoObjs.nHaltRoundB != 0;
+    auto infoPhase = infoMatch.quaGameStatus;
+    bool bAInHalt = infoMatch.nHaltRoundA != 0;
+    bool bBInHalt = infoMatch.nHaltRoundB != 0;
 	int countDown;
-	if (infoMatch.infoObjs.binShootout == NO)
+    if (infoMatch.binShootout == NO)
 	{
-        countDown = GAME_TIME - infoMatch.infoObjs.nTimeByRounds / nFPS;
+        countDown = GAME_TIME - infoMatch.nTimeByRounds / nFPS;
 	}
 	else
 	{
-		countDown = 20 - infoMatch.infoObjs.nTimeByRounds / nFPS;
+        countDown = 20 - infoMatch.nTimeByRounds / nFPS;
 	}
 	ui.btnBeginEnd->setDisabled(false);
 	ui.btnPauseResume->setDisabled(infoPhase != PHASE::RUNNING && infoPhase != PHASE::PAUSE);
@@ -59,23 +59,23 @@ void MatchMain::paintEvent(QPaintEvent * event)
 	case PHASE::RUNNING:
 		ui.btnBeginEnd->setText("结束");
 		ui.btnPauseResume->setText("暂停");
-		ui.lblEAVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilA, 3, 10, QChar('0')));
-		ui.lblEBVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilB, 3, 10, QChar('0')));
+        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvilA, 3, 10, QChar('0')));
+        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvilB, 3, 10, QChar('0')));
 		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
 		ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHaltB, 1, 10, QChar('0')));
-		ui.lblSAVal->setText(QString("%1").arg(infoMatch.infoObjs.nScoreA, 2, 10, QChar('0')));
-		ui.lblSBVal->setText(QString("%1").arg(infoMatch.infoObjs.nScoreB, 2, 10, QChar('0')));
+        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScoreA, 2, 10, QChar('0')));
+        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScoreB, 2, 10, QChar('0')));
 		ui.lblTVal->setText(QString("%1").arg(countDown, 3, 10, QChar('0')));
 		break;
 	case PHASE::PAUSE:
 		ui.btnBeginEnd->setText("结束");
 		ui.btnPauseResume->setText("继续");
-		ui.lblEAVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilA, 3, 10, QChar('0')));
-		ui.lblEBVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilB, 3, 10, QChar('0')));
+        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvilA, 3, 10, QChar('0')));
+        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvilB, 3, 10, QChar('0')));
 		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
 		ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHaltB, 1, 10, QChar('0')));
-		ui.lblSAVal->setText(QString("%1").arg(infoMatch.infoObjs.nScoreA, 2, 10, QChar('0')));
-		ui.lblSBVal->setText(QString("%1").arg(infoMatch.infoObjs.nScoreB, 2, 10, QChar('0')));
+        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScoreA, 2, 10, QChar('0')));
+        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScoreB, 2, 10, QChar('0')));
 		ui.lblTVal->setText(QString("%1").arg(countDown, 3, 10, QChar('0')));
 		break;
 	default:
@@ -99,7 +99,7 @@ void MatchMain::closeEvent(QCloseEvent * event)
 
 void MatchMain::OnPR()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING)
 	{
         logic->MatchPause();
@@ -112,7 +112,7 @@ void MatchMain::OnPR()
 
 void MatchMain::OnBE()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
         logic->MatchEnd();
@@ -125,7 +125,7 @@ void MatchMain::OnBE()
 
 void MatchMain::OnSOA()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::NOTBEGIN || info == PHASE::OVER)
 	{
         logic->ShootOut(SIDE_A);
@@ -134,7 +134,7 @@ void MatchMain::OnSOA()
 
 void MatchMain::OnSOB()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::NOTBEGIN || info == PHASE::OVER)
 	{
         logic->ShootOut(SIDE_B);
@@ -143,7 +143,7 @@ void MatchMain::OnSOB()
 
 void MatchMain::OnPlusA()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
         logic->PlusOne(SIDE_A);
@@ -152,7 +152,7 @@ void MatchMain::OnPlusA()
 
 void MatchMain::OnPlusB()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
         logic->PlusOne(SIDE_B);
@@ -161,7 +161,7 @@ void MatchMain::OnPlusB()
 
 void MatchMain::OnPenaltyA()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
         logic->Penalty(SIDE_A);
@@ -170,7 +170,7 @@ void MatchMain::OnPenaltyA()
 
 void MatchMain::OnPenaltyB()
 {
-    auto info = logic->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
         logic->Penalty(SIDE_B);
@@ -181,5 +181,5 @@ void MatchMain::Running(CameraInfo infoReady,QPixmap pixShow)
 {
     logic->Run(infoReady);
 	ui.lblCamera->setPixmap(pixShow);
-    Serial::GetInstance()->Transmit(logic->GetInfo().infoObjs);
+    Serial::GetInstance()->Transmit(logic->GetInfo());
 }

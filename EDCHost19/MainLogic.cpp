@@ -18,46 +18,46 @@ MainLogic::~MainLogic()
 void MainLogic::ResetInfo()
 {
 	//Set all data to init
-	theMatch.nAInBRounds = 0;
-	theMatch.nBInARounds = 0;
-	theMatch.infoObjs.binShootout = SHOOTOUT::NO;
-	theMatch.infoObjs.binSideShoot = SIDE::SIDE_B;
-	theMatch.infoObjs.nEvilA = 0;
-	theMatch.infoObjs.nEvilB = 0;
-	theMatch.infoObjs.nHaltRoundA = 0;
-	theMatch.infoObjs.nHaltRoundB = 0;
-	theMatch.infoObjs.nScoreA = 0;
-	theMatch.infoObjs.nScoreB = 0;
-	theMatch.infoObjs.nTimeByRounds = 0;
-	theMatch.infoObjs.posObjs = CameraInfo();
-	theMatch.infoObjs.quaGameStatus = PHASE::NOTBEGIN;
-	theMatch.nHaltA = 0;
-	theMatch.nHaltB = 0;
+    info.nAInBRounds = 0;
+    info.nBInARounds = 0;
+    info.binShootout = SHOOTOUT::NO;
+    info.binSideShoot = SIDE::SIDE_B;
+    info.nEvilA = 0;
+    info.nEvilB = 0;
+    info.nHaltRoundA = 0;
+    info.nHaltRoundB = 0;
+    info.nScoreA = 0;
+    info.nScoreB = 0;
+    info.nTimeByRounds = 0;
+    info.posObjs = CameraInfo();
+    info.quaGameStatus = PHASE::NOTBEGIN;
+    info.nHaltA = 0;
+    info.nHaltB = 0;
 }
 
 void MainLogic::EvaluateEvil()
 {
 	//Running to calculate
-	if (theMatch.infoObjs.quaGameStatus != PHASE::RUNNING) return;
-	if (theMatch.infoObjs.binShootout == SHOOTOUT::YES) return;
-	const auto &posA = theMatch.infoObjs.posObjs.posCarA;
-	const auto &posB = theMatch.infoObjs.posObjs.posCarB;
-	if (posA.second > theMatch.GetHalfLength() && theMatch.infoObjs.nHaltRoundA != 0)
+    if (info.quaGameStatus != PHASE::RUNNING) return;
+    if (info.binShootout == SHOOTOUT::YES) return;
+    const auto &posA = info.posObjs.posCar1;
+    const auto &posB = info.posObjs.posCar2;
+    if (posA.y() > info.GetHalfLength() && info.nHaltRoundA != 0)
 	{
-		++theMatch.nAInBRounds;
-		if (theMatch.nAInBRounds % nFPS == 0 && theMatch.infoObjs.nHaltRoundA != 0)
+        ++info.nAInBRounds;
+        if (info.nAInBRounds % nFPS == 0 && info.nHaltRoundA != 0)
 		{
-			auto d = theMatch.GetLength() - posA.second;
-			theMatch.infoObjs.nEvilA += 5 - d / 30;
+            auto d = info.GetLength() - posA.y();
+            info.nEvilA += 5 - d / 30;
 		}
 	}
-	if (posB.second <= theMatch.GetHalfLength() && theMatch.infoObjs.nHaltRoundB != 0)
+    if (posB.y() <= info.GetHalfLength() && info.nHaltRoundB != 0)
 	{
-		++theMatch.nBInARounds;
-		if (theMatch.nBInARounds % nFPS == 0)
+        ++info.nBInARounds;
+        if (info.nBInARounds % nFPS == 0)
 		{
-			auto d = posB.second - 0;
-			theMatch.infoObjs.nEvilB += 5 - d / 30;
+            auto d = posB.y() - 0;
+            info.nEvilB += 5 - d / 30;
 		}
 	}
 }
@@ -66,118 +66,118 @@ void MainLogic::ResetEvil(int nSide)
 {
 	if (nSide == SIDE::SIDE_A)
 	{
-		theMatch.nAInBRounds = 0;
-		theMatch.infoObjs.nEvilA = 0;
+        info.nAInBRounds = 0;
+        info.nEvilA = 0;
 	}
 	if (nSide == SIDE::SIDE_B)
 	{
-		theMatch.nBInARounds = 0;
-		theMatch.infoObjs.nEvilB = 0;
+        info.nBInARounds = 0;
+        info.nEvilB = 0;
 	}
 }
 
 void MainLogic::MatchBegin()
 {
 	ResetInfo();
-	theMatch.infoObjs.quaGameStatus = PHASE::RUNNING;
+    info.quaGameStatus = PHASE::RUNNING;
 }
 
 void MainLogic::MatchEnd()
 {
-	theMatch.infoObjs.quaGameStatus = PHASE::OVER;
+    info.quaGameStatus = PHASE::OVER;
 	ResetInfo();
 }
 
 void MainLogic::MatchPause()
 {
-	theMatch.infoObjs.quaGameStatus = PHASE::PAUSE;
+    info.quaGameStatus = PHASE::PAUSE;
 }
 
 void MainLogic::MatchResume()
 {
-	theMatch.infoObjs.quaGameStatus = PHASE::RUNNING;
+    info.quaGameStatus = PHASE::RUNNING;
 }
 
 void MainLogic::Run(const CameraInfo & pts)
 {
 	//Update position info
-	theMatch.infoObjs.posObjs = pts;
+    info.posObjs = pts;
 	//Update Evil
 	EvaluateEvil();
 	//Deal with penalty of halting
-	if (theMatch.infoObjs.binShootout == SHOOTOUT::NO && theMatch.infoObjs.quaGameStatus == PHASE::RUNNING)
+    if (info.binShootout == SHOOTOUT::NO && info.quaGameStatus == PHASE::RUNNING)
 	{
-		++theMatch.infoObjs.nTimeByRounds;
-		if (theMatch.infoObjs.nHaltRoundA == 0)
+        ++info.nTimeByRounds;
+        if (info.nHaltRoundA == 0)
 		{
-			if (theMatch.infoObjs.nEvilA >= 100)
+            if (info.nEvilA >= 100)
 			{
-				auto nStopSecA = MAX((5 + 2 * theMatch.nHaltA), 15);
-				theMatch.infoObjs.nHaltRoundA = nStopSecA * nFPS;
-				++theMatch.nHaltA;
+                auto nStopSecA = MAX((5 + 2 * info.nHaltA), 15);
+                info.nHaltRoundA = nStopSecA * nFPS;
+                ++info.nHaltA;
 			}
 		}
 		else
 		{
-			if (theMatch.infoObjs.nHaltRoundA == 1)
+            if (info.nHaltRoundA == 1)
 			{
 				ResetEvil(SIDE_A);
 			}
-			--theMatch.infoObjs.nHaltRoundA;
+            --info.nHaltRoundA;
 		}
-		if (theMatch.infoObjs.nHaltRoundB == 0)
+        if (info.nHaltRoundB == 0)
 		{
-			if (theMatch.infoObjs.nEvilB >= 100)
+            if (info.nEvilB >= 100)
 			{
-				auto nStopSecB = MAX((5 + 2 * theMatch.nHaltB), 15);
-				theMatch.infoObjs.nHaltRoundB = nStopSecB * nFPS;
-				++theMatch.nHaltB;
+                auto nStopSecB = MAX((5 + 2 * info.nHaltB), 15);
+                info.nHaltRoundB = nStopSecB * nFPS;
+                ++info.nHaltB;
 			}
 		}
 		else
 		{
-			if (theMatch.infoObjs.nHaltRoundB == 1)
+            if (info.nHaltRoundB == 1)
 			{
 				ResetEvil(SIDE_B);
 			}
-			--theMatch.infoObjs.nHaltRoundB;
+            --info.nHaltRoundB;
 		}
 	}
 	//Time up
-    if (theMatch.infoObjs.nTimeByRounds / nFPS == GAME_TIME &&
-		theMatch.infoObjs.binShootout == SHOOTOUT::NO &&
-		theMatch.infoObjs.quaGameStatus == PHASE::RUNNING)
+    if (info.nTimeByRounds / nFPS == GAME_TIME &&
+        info.binShootout == SHOOTOUT::NO &&
+        info.quaGameStatus == PHASE::RUNNING)
 	{
-		theMatch.infoObjs.quaGameStatus = PHASE::OVER;
+        info.quaGameStatus = PHASE::OVER;
 	}
-	if (theMatch.infoObjs.quaGameStatus == PHASE::RUNNING && theMatch.infoObjs.binShootout == SHOOTOUT::YES)
+    if (info.quaGameStatus == PHASE::RUNNING && info.binShootout == SHOOTOUT::YES)
 	{
-		++theMatch.infoObjs.nTimeByRounds;
-		if (theMatch.infoObjs.nTimeByRounds / nFPS == 20)
+        ++info.nTimeByRounds;
+        if (info.nTimeByRounds / nFPS == 20)
 		{
-			theMatch.infoObjs.quaGameStatus = PHASE::OVER;
-			theMatch.infoObjs.binShootout = SHOOTOUT::NO;
+            info.quaGameStatus = PHASE::OVER;
+            info.binShootout = SHOOTOUT::NO;
 		}
 	}
 }
 
 void MainLogic::ShootOut(int nSide)
 {
-	theMatch.infoObjs.binShootout = SHOOTOUT::YES;
-	theMatch.infoObjs.binSideShoot = nSide;
-	theMatch.infoObjs.quaGameStatus = PHASE::RUNNING;
-	theMatch.infoObjs.nTimeByRounds = 0;
+    info.binShootout = SHOOTOUT::YES;
+    info.binSideShoot = nSide;
+    info.quaGameStatus = PHASE::RUNNING;
+    info.nTimeByRounds = 0;
 }
 
 void MainLogic::PlusOne(int nSide)
 {
 	if (nSide == SIDE::SIDE_A)
 	{
-		++theMatch.infoObjs.nScoreA;
+        ++info.nScoreA;
 	}
 	if (nSide == SIDE::SIDE_B)
 	{
-		++theMatch.infoObjs.nScoreB;
+        ++info.nScoreB;
 	}
 }
 
@@ -185,16 +185,16 @@ void MainLogic::Penalty(int nSide)
 {
 	if (nSide == SIDE::SIDE_A)
 	{
-		theMatch.infoObjs.nEvilA += thePenalty;
+        info.nEvilA += thePenalty;
 	}
 	if (nSide == SIDE::SIDE_B)
 	{
-		theMatch.infoObjs.nEvilB += thePenalty;
+        info.nEvilB += thePenalty;
 	}
 }
 
 MatchInfo MainLogic::GetInfo()
 {
-	return theMatch;
+    return info;
 }
 
