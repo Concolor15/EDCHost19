@@ -4,11 +4,13 @@
 #include <QtMultimedia/QCamera>
 #include <QAbstractVideoSurface>
 #include <opencv2/core.hpp>
-#include "GlobalType.hpp"
+#include "GlobalType.h"
 #include "CoordinateConverter.h"
 
 struct ProcConfig
 {
+    int red_reverse;
+
 	int ball_hue_lb;
 	int ball_hue_ub;
 

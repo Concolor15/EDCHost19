@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "Serial.h"
 #include "config.h"
+#include "Serial.h"
 
 Serial * Serial::pInstance = nullptr;
 

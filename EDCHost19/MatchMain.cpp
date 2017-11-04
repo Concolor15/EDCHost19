@@ -1,25 +1,27 @@
 #include "stdafx.h"
+#include "config.h"
 #include "MatchMain.h"
 #include "EDCHost19.h"
-#include "config.h"
+#include "Serial.h"
 
 MatchMain::MatchMain(QWidget *parent)
-	: QDialog(parent)
+    : QDialog(parent), logic(new MainLogic)
 {
 	Serial::GetInstance();
 	ui.setupUi(this);
 	QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
-	MainLogic::GetInstance()->ResetInfo();
+    logic->ResetInfo();
 }
 
 MatchMain::~MatchMain()
 {
+    delete logic;
 	Serial::DestroyInstance();
 }
 
 void MatchMain::paintEvent(QPaintEvent * event)
 {
-	auto infoMatch = MainLogic::GetInstance()->GetInfo();
+    auto infoMatch = logic->GetInfo();
 	auto infoPhase = infoMatch.infoObjs.quaGameStatus;
 	bool bAInHalt = infoMatch.infoObjs.nHaltRoundA != 0;
 	bool bBInHalt = infoMatch.infoObjs.nHaltRoundB != 0;
@@ -97,87 +99,87 @@ void MatchMain::closeEvent(QCloseEvent * event)
 
 void MatchMain::OnPR()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING)
 	{
-		MainLogic::GetInstance()->MatchPause();
+        logic->MatchPause();
 	}
 	if (info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->MatchResume();
+        logic->MatchResume();
 	}
 }
 
 void MatchMain::OnBE()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->MatchEnd();
+        logic->MatchEnd();
 	}
 	if (info == PHASE::NOTBEGIN || info == PHASE::OVER)
 	{
-		MainLogic::GetInstance()->MatchBegin();
+        logic->MatchBegin();
 	}
 }
 
 void MatchMain::OnSOA()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::NOTBEGIN || info == PHASE::OVER)
 	{
-		MainLogic::GetInstance()->ShootOut(SIDE_A);
+        logic->ShootOut(SIDE_A);
 	}
 }
 
 void MatchMain::OnSOB()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::NOTBEGIN || info == PHASE::OVER)
 	{
-		MainLogic::GetInstance()->ShootOut(SIDE_B);
+        logic->ShootOut(SIDE_B);
 	}
 }
 
 void MatchMain::OnPlusA()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->PlusOne(SIDE_A);
+        logic->PlusOne(SIDE_A);
 	}
 }
 
 void MatchMain::OnPlusB()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->PlusOne(SIDE_B);
+        logic->PlusOne(SIDE_B);
 	}
 }
 
 void MatchMain::OnPenaltyA()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->Penalty(SIDE_A);
+        logic->Penalty(SIDE_A);
 	}
 }
 
 void MatchMain::OnPenaltyB()
 {
-	auto info = MainLogic::GetInstance()->GetInfo().infoObjs.quaGameStatus;
+    auto info = logic->GetInfo().infoObjs.quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-		MainLogic::GetInstance()->Penalty(SIDE_B);
+        logic->Penalty(SIDE_B);
 	}
 }
 
 void MatchMain::Running(CameraInfo infoReady,QPixmap pixShow)
 {
-	MainLogic::GetInstance()->Run(infoReady);
+    logic->Run(infoReady);
 	ui.lblCamera->setPixmap(pixShow);
-	Serial::GetInstance()->Transmit(MainLogic::GetInstance()->GetInfo().infoObjs);
+    Serial::GetInstance()->Transmit(logic->GetInfo().infoObjs);
 }

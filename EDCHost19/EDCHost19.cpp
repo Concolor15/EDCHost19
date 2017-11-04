@@ -1,11 +1,13 @@
 #include "stdafx.h"
+#include "config.h"
+
 #include "EDCHost19.h"
+#include "Camera.h"
 
 EDCHost19::EDCHost19(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	MainLogic::GetInstance();
 	
 	Camera::GetInstance()->Begin();
 	QObject::connect(Camera::GetInstance(), &Camera::InfoReady, this, &EDCHost19::FetchImg);
@@ -15,7 +17,6 @@ EDCHost19::~EDCHost19()
 {
 	Camera::GetInstance()->End();
 	Camera::DestroyInstance();
-	MainLogic::DestroyInstance();
 }
 
 void EDCHost19::paintEvent(QPaintEvent * event)

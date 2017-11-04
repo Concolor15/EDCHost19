@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "config.h"
+
 #include "EDCHost19.h"
 #include <QtWidgets/QApplication>
 

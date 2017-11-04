@@ -3,7 +3,8 @@
 #include <QDialog>
 #include "ui_MatchMain.h"
 
-#include <GlobalType.hpp>
+#include "GlobalType.h"
+#include "MainLogic.h"
 
 class MatchMain : public QDialog
 {
@@ -17,6 +18,7 @@ protected:
 	void closeEvent(QCloseEvent * event) override;
 private:
 	Ui::MatchMain ui;
+    MainLogic* logic;
 private slots:
 	void Running(CameraInfo infoReady, QPixmap pixShow);
 	void OnPR();

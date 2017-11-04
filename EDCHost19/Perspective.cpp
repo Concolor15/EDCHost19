@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "config.h"
 #include "Perspective.h"
+#include "Camera.h"
 
 Perspective::Perspective(QPixmap pix, QWidget *parent)
 	: QDialog(parent),

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include <QtCore/qpair.h>
 #include <opencv2/core/types.hpp>
 
@@ -9,17 +10,12 @@ typedef QPair<XType, YType> Position;
 typedef unsigned short RoundType;
 typedef unsigned char ValType;
 
-constexpr int nFPS = 10;
 
-constexpr int nViewWidth = 800;
-constexpr int nViewHeight = 600;
-constexpr int nLogicWidth = 297;
-constexpr int nLogicHeight = 210;
 
-typedef struct tagPos	//For Camera Only
+struct CameraInfo	//For Camera Only
 {
 	Position posBall, posCarA, posCarB;
-	tagPos(const cv::Point2f &ptBall = { 0.,0. }, const cv::Point2f &ptCarA = { 0.,0. }, const cv::Point2f &ptCarB = { 0.,0. })
+    CameraInfo(const cv::Point2f &ptBall = { 0.,0. }, const cv::Point2f &ptCarA = { 0.,0. }, const cv::Point2f &ptCarB = { 0.,0. })
 	{
 		posBall.first = static_cast<XType>((int)ptBall.x);
 		posBall.second = static_cast<YType>((int)ptBall.y);
@@ -28,7 +24,7 @@ typedef struct tagPos	//For Camera Only
 		posCarB.first = static_cast<XType>((int)ptCarB.x);
 		posCarB.second = static_cast<YType>((int)ptCarB.y);
 	}
-}CameraInfo;
+};
 
 enum PHASE		//For quaGameStatus
 {

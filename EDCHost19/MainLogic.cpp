@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "MainLogic.h"
 #include "config.h"
+#include "GlobalType.h"
+#include "MainLogic.h"
 
 constexpr int thePenalty = 50;
 
-MainLogic * MainLogic::pInstance = nullptr;
 MainLogic::MainLogic()
 {
 	ResetInfo();
@@ -73,24 +73,6 @@ void MainLogic::ResetEvil(int nSide)
 	{
 		theMatch.nBInARounds = 0;
 		theMatch.infoObjs.nEvilB = 0;
-	}
-}
-
-MainLogic * MainLogic::GetInstance()
-{
-	if (pInstance == nullptr)
-	{
-		pInstance = new MainLogic;
-	}
-	return pInstance;
-}
-
-void MainLogic::DestroyInstance()
-{
-	if (pInstance != nullptr)
-	{
-		delete pInstance;
-		pInstance = nullptr;
 	}
 }
 

@@ -3,7 +3,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
-#include "GlobalType.hpp"
+#include "GlobalType.h"
 
 class Serial final :public QObject
 {

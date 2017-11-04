@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "Camera.h"
 #include "config.h"
 
+#include "Camera.h"
 #include <QPixmap>
 
 Camera *Camera::pInstance = nullptr;

@@ -1,15 +1,14 @@
 #pragma once
 
+#include "GlobalType.h"
+
 class MainLogic final
 {
 private:
-	static MainLogic * pInstance;
 	MatchInfo theMatch;
-	MainLogic();
-	~MainLogic();
 public:
-	static MainLogic *GetInstance();
-	static void DestroyInstance();
+    MainLogic();
+    ~MainLogic();
 	void MatchBegin();
 	void MatchEnd();
 	void MatchPause();

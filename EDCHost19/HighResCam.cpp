@@ -1,7 +1,10 @@
 #include "stdafx.h"
-#include "HighResCam.h"
 #include "config.h"
 
+#include "HighResCam.h"
+#include <vector>
+
+using namespace std;
 using namespace cv;
 
 void HighResCam::TransToLogic(QVector<cv::Point2f>& info)
@@ -144,6 +147,8 @@ QVector<cv::Point2f> ImgProc::GetLocation()
 
 void ImgProc::InitCv()
 {
+    config.red_reverse = 0;
+
 	config.ball_hue_lb = 0;
 	config.ball_hue_ub = 0;
 	config.car1_hue_lb = 0;
@@ -162,6 +167,7 @@ void ImgProc::InitCv()
 	namedWindow("show");
 	namedWindow("black");
 	namedWindow("control", CV_WINDOW_NORMAL);
+    createTrackbar("car1_red_reverse", "control", &config.red_reverse, 1);
 	createTrackbar("ball_hue_lb", "control", &config.ball_hue_lb, 180);
 	createTrackbar("ball_hue_ub", "control", &config.ball_hue_ub, 180);
 	createTrackbar("car1_hue_lb", "control", &config.car1_hue_lb, 180);
@@ -188,10 +194,23 @@ void ImgProc::Locate(Mat& mat)
                 Scalar(config.ball_hue_lb, config.ball_s_lb, config.ball_v_lb),
                 Scalar(config.ball_hue_ub, 255, 255),
                 ball);
+    if (!config.red_reverse) {
     cv::inRange(hsv,
                 Scalar(config.car1_hue_lb, config.car1_s_lb, config.car1_v_lb),
                 Scalar(config.car1_hue_ub, 255, 255),
                 car1);
+    } else {
+        cv::Mat tmp;
+        cv::inRange(hsv,
+                    Scalar(config.car1_hue_lb, 0, 0),
+                    Scalar(config.car1_hue_ub, 255,255),
+                    tmp);
+        cv::inRange(hsv,
+                    Scalar(0, config.car1_s_lb, config.car1_v_lb),
+                    Scalar(255, 255,255),
+                    car1);
+        car1 &= ~tmp;
+    }
     cv::inRange(hsv,
                 Scalar(config.car2_hue_lb, config.car2_s_lb, config.car2_v_lb),
                 Scalar(config.car2_hue_ub, 255, 255),
