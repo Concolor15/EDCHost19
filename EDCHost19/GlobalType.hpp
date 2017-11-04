@@ -10,8 +10,7 @@ typedef unsigned short RoundType;
 typedef unsigned char ValType;
 
 constexpr int nFPS = 10;
-constexpr int nCamWidth = 1280;
-constexpr int nCamHeight = 720;
+
 constexpr int nViewWidth = 800;
 constexpr int nViewHeight = 600;
 constexpr int nLogicWidth = 297;
@@ -51,7 +50,7 @@ enum SHOOTOUT	//For binShootout
 	NO = 0b0
 };
 
-struct tagSerial	//For Serial Only
+struct SerialInfo	//For Serial Only
 {
 	RoundType nTimeByRounds;
 	RoundType nHaltRoundA;
@@ -65,9 +64,8 @@ struct tagSerial	//For Serial Only
 	ValType binSideShoot;
 	CameraInfo posObjs;
 };
-typedef tagSerial SerialInfo;
 
-struct tagMatch		//For Logic
+struct MatchInfo	//For Logic
 {
 	RoundType nAInBRounds;
 	RoundType nBInARounds;
@@ -78,4 +76,3 @@ struct tagMatch		//For Logic
 	constexpr YType GetHalfLength() { return nLogicWidth / 2; }
 	SerialInfo infoObjs;
 };
-typedef tagMatch MatchInfo;

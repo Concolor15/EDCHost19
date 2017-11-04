@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MatchMain.h"
 #include "EDCHost19.h"
+#include "config.h"
 
 MatchMain::MatchMain(QWidget *parent)
 	: QDialog(parent)
@@ -25,7 +26,7 @@ void MatchMain::paintEvent(QPaintEvent * event)
 	int countDown;
 	if (infoMatch.infoObjs.binShootout == NO)
 	{
-		countDown = 360 - infoMatch.infoObjs.nTimeByRounds / nFPS;
+        countDown = GAME_TIME - infoMatch.infoObjs.nTimeByRounds / nFPS;
 	}
 	else
 	{
@@ -43,8 +44,8 @@ void MatchMain::paintEvent(QPaintEvent * event)
 	{
 	case PHASE::NOTBEGIN:
 	case PHASE::OVER:
-		ui.btnBeginEnd->setText("¿ªÊ¼");
-		ui.btnPauseResume->setText("ÔİÍ£/¼ÌĞø");
+		ui.btnBeginEnd->setText("å¼€å§‹");
+		ui.btnPauseResume->setText("æš‚åœ/ç»§ç»­");
 		ui.lblEAVal->setText("000");
 		ui.lblEBVal->setText("000");
 		ui.lblHAVal->setText("0");
@@ -54,8 +55,8 @@ void MatchMain::paintEvent(QPaintEvent * event)
 		ui.lblTVal->setText(QString("%1").arg(countDown,3,10,QChar('0')));
 		break;
 	case PHASE::RUNNING:
-		ui.btnBeginEnd->setText("½áÊø");
-		ui.btnPauseResume->setText("ÔİÍ£");
+		ui.btnBeginEnd->setText("ç»“æŸ");
+		ui.btnPauseResume->setText("æš‚åœ");
 		ui.lblEAVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilA, 3, 10, QChar('0')));
 		ui.lblEBVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilB, 3, 10, QChar('0')));
 		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
@@ -65,8 +66,8 @@ void MatchMain::paintEvent(QPaintEvent * event)
 		ui.lblTVal->setText(QString("%1").arg(countDown, 3, 10, QChar('0')));
 		break;
 	case PHASE::PAUSE:
-		ui.btnBeginEnd->setText("½áÊø");
-		ui.btnPauseResume->setText("¼ÌĞø");
+		ui.btnBeginEnd->setText("ç»“æŸ");
+		ui.btnPauseResume->setText("ç»§ç»­");
 		ui.lblEAVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilA, 3, 10, QChar('0')));
 		ui.lblEBVal->setText(QString("%1").arg(infoMatch.infoObjs.nEvilB, 3, 10, QChar('0')));
 		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
@@ -83,7 +84,7 @@ void MatchMain::paintEvent(QPaintEvent * event)
 
 void MatchMain::closeEvent(QCloseEvent * event)
 {
-	if (QMessageBox::question(this, "ÌáÊ¾", "ÇëÈ·ÈÏÊÇ·ñÍË³ö£¿", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+	if (QMessageBox::question(this, "æç¤º", "è¯·ç¡®è®¤æ˜¯å¦é€€å‡ºï¼Ÿ", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
 	{
 		deleteLater();
 		QDialog::closeEvent(event);

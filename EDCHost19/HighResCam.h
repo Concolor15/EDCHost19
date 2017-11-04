@@ -21,7 +21,11 @@ struct ProcConfig
 	int car1_s_lb;
 	int car2_s_lb;
 	int ball_s_lb;
-	int v_lb;
+
+    int car1_v_lb;
+    int car2_v_lb;
+    int ball_v_lb;
+
 	int area_car_lb;
 	int area_ball_lb;
 };

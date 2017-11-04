@@ -1,24 +1,22 @@
 #include "stdafx.h"
 #include "Serial.h"
-
+#include "config.h"
 
 Serial * Serial::pInstance = nullptr;
 
 Serial::Serial() : byteToSend(32, 0)
 {
 	//Serial Configurations
-    auto ports = QSerialPortInfo::availablePorts();
-    for (auto x : ports)
-        qInfo() << x.portName();
-    theSerial.setPort(ports[0]);
+    theSerial.setPortName(SERIAL_PORT_NAME);
 	theSerial.setBaudRate(QSerialPort::Baud115200);
 	theSerial.setDataBits(QSerialPort::Data8);
 	theSerial.setParity(QSerialPort::NoParity);
 	theSerial.setFlowControl(QSerialPort::NoFlowControl);
 	theSerial.setStopBits(QSerialPort::OneStop);
 
-    qInfo() << theSerial.open(QIODevice::ReadWrite);
-    qInfo() << theSerial.error();
+    if (!theSerial.open(QIODevice::ReadWrite)) {
+        qInfo() << theSerial.error();
+    }
 
 	//Freq Control Configuration
 	QObject::connect(&timerFreqCtrl, &QTimer::timeout, this, &Serial::Transmitter);

@@ -18,7 +18,7 @@ Perspective::~Perspective()
 
 void Perspective::mousePressEvent(QMouseEvent * event)
 {
-	auto pos = cv::Point2f(event->x() - 25, event->y() - 175);
+    auto pos = cv::Point2f(event->x() - 25, event->y() - 175 - 90);
 	auto centre = QPoint(pos.x, pos.y);
 	if (pos.x >= 0 &&
 		pos.x < 1280 &&

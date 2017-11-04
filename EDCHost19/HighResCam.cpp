@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "HighResCam.h"
+#include "config.h"
 
 using namespace cv;
 
@@ -16,7 +17,9 @@ HighResCam::HighResCam(QObject *parent)
 {
 	locateMachine.InitCv();
 	CoordinateConverter::Param theParam;
-	theParam.CameraSize = Size2i(nCamWidth, nCamHeight);
+    int nCamWidth = CAMERA_DOWNSAMPLE_SIZE.width();
+    int nCamHeight = CAMERA_DOWNSAMPLE_SIZE.height();
+    theParam.CameraSize = Size2i(nCamWidth, nCamHeight);
 	theParam.DisplaySize = Size2i(nViewWidth, nViewHeight);
 	theParam.LogicSize = Size2i(nLogicWidth, nLogicHeight); 
 	theParam.CornersInCamera[0] = Point2f(0, 0);
@@ -77,15 +80,25 @@ bool HighResCam::present(const QVideoFrame & frame)
                               frametodraw.bytesPerLine());
     }
 
-	locateMachine.Locate(matToLocate);
+    cv::Mat downsample;
+    cv::resize(matToLocate, downsample, cv::Size2f(960, 540));
+
+    locateMachine.Locate(downsample);
+
+    QImage image = QImage(
+                downsample.data,
+                downsample.cols,
+                downsample.rows,
+                downsample.step1(),
+                QImage::Format_RGB888);
 
 
-	QImage image = QImage(
-		frametodraw.bits(),
-		frametodraw.width(),
-		frametodraw.height(),
-		frametodraw.bytesPerLine(),
-        QImage::Format_RGB888);
+//	QImage image = QImage(
+//		frametodraw.bits(),
+//		frametodraw.width(),
+//		frametodraw.height(),
+//		frametodraw.bytesPerLine(),
+//        QImage::Format_RGB888);
 
 
 
@@ -140,7 +153,9 @@ void ImgProc::InitCv()
 	config.car1_s_lb = 0;
 	config.car2_s_lb = 0;
 	config.ball_s_lb = 0;
-	config.v_lb = 0;
+    config.ball_v_lb = 0;
+    config.car1_v_lb = 0;
+    config.car2_v_lb = 0;
 	config.area_car_lb = 100;
 	config.area_ball_lb = 100;
 #ifdef CAMERA_DEBUG
@@ -156,7 +171,9 @@ void ImgProc::InitCv()
 	createTrackbar("ball_s_lb", "control", &config.ball_s_lb, 255);
 	createTrackbar("car1_s_lb", "control", &config.car1_s_lb, 255);
 	createTrackbar("car2_s_lb", "control", &config.car2_s_lb, 255);
-	createTrackbar("v_lb", "control", &config.v_lb, 255);
+    createTrackbar("ball_v_lb", "control", &config.ball_v_lb, 255);
+    createTrackbar("car1_v_lb", "control", &config.car1_v_lb, 255);
+    createTrackbar("car2_v_lb", "control", &config.car2_v_lb, 255);
 	createTrackbar("area_car_lb", "control", &config.area_car_lb, 1000);
 	createTrackbar("area_ball_lb", "control", &config.area_ball_lb, 200);
 #endif
@@ -166,27 +183,41 @@ void ImgProc::Locate(Mat& mat)
 {
 	src = mat;
 	cvtColor(src, hsv, COLOR_BGR2HSV);
-	cv::inRange(hsv,
-		Scalar(0, config.ball_s_lb, config.v_lb),
-		Scalar(180, 255, 255),
-		mask_ball);
-	cv::inRange(hsv,
-		Scalar(0, config.car1_s_lb, config.v_lb),
-		Scalar(180, 255, 255),
-		mask_car1);
-	cv::inRange(hsv,
-		Scalar(0, config.car2_s_lb, config.v_lb),
-		Scalar(180, 255, 255),
-		mask_car2);
-	int ch[] = { 0,0 };
-	hue.create(src.size(), CV_8UC1);
-	mixChannels(&hsv, 1, &hue, 1, ch, 1);
-	inRange(hue, Scalar(config.ball_hue_lb), Scalar(config.ball_hue_ub), ball);
-	cv::bitwise_and(ball, mask_ball, ball);
-	inRange(hue, Scalar(config.car1_hue_lb), Scalar(config.car1_hue_ub), car1);
-	cv::bitwise_and(car1, mask_car1, car1);
-	inRange(hue, Scalar(config.car2_hue_lb), Scalar(config.car2_hue_ub), car2);
-	cv::bitwise_and(car2, mask_car2, car2);
+
+    cv::inRange(hsv,
+                Scalar(config.ball_hue_lb, config.ball_s_lb, config.ball_v_lb),
+                Scalar(config.ball_hue_ub, 255, 255),
+                ball);
+    cv::inRange(hsv,
+                Scalar(config.car1_hue_lb, config.car1_s_lb, config.car1_v_lb),
+                Scalar(config.car1_hue_ub, 255, 255),
+                car1);
+    cv::inRange(hsv,
+                Scalar(config.car2_hue_lb, config.car2_s_lb, config.car2_v_lb),
+                Scalar(config.car2_hue_ub, 255, 255),
+                car2);
+
+//	cv::inRange(hsv,
+//		Scalar(0, config.ball_s_lb, config.v_lb),
+//		Scalar(180, 255, 255),
+//		mask_ball);
+//	cv::inRange(hsv,
+//		Scalar(0, config.car1_s_lb, config.v_lb),
+//		Scalar(180, 255, 255),
+//		mask_car1);
+//	cv::inRange(hsv,
+//		Scalar(0, config.car2_s_lb, config.v_lb),
+//		Scalar(180, 255, 255),
+//		mask_car2);
+//	int ch[] = { 0,0 };
+//	hue.create(src.size(), CV_8UC1);
+//	mixChannels(&hsv, 1, &hue, 1, ch, 1);
+//	inRange(hue, Scalar(config.ball_hue_lb), Scalar(config.ball_hue_ub), ball);
+//	cv::bitwise_and(ball, mask_ball, ball);
+//	inRange(hue, Scalar(config.car1_hue_lb), Scalar(config.car1_hue_ub), car1);
+//	cv::bitwise_and(car1, mask_car1, car1);
+//	inRange(hue, Scalar(config.car2_hue_lb), Scalar(config.car2_hue_ub), car2);
+//	cv::bitwise_and(car2, mask_car2, car2);
 	src.copyTo(dst);
 	ball_centers = GetCenter(ball, config, Types::BALL);
 	car1_centers = GetCenter(car1, config, Types::CARA);
@@ -230,7 +261,11 @@ vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)
 		center.x = moment.m10 / moment.m00;
 		center.y = moment.m01 / moment.m00;
 		if ((nType == Types::CARA || nType == Types::CARB) && area < area_car_lb) continue;
-		if (nType == Types::BALL && area < area_ball_lb) continue;
+        if (nType == Types::BALL)
+        {
+            if (area < area_ball_lb) continue;
+            if (area > 500) continue;
+        }
 		rett.push_back(center);		
 	}
 	return rett;

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MainLogic.h"
+#include "config.h"
 
 constexpr int thePenalty = 50;
 
@@ -161,7 +162,7 @@ void MainLogic::Run(const CameraInfo & pts)
 		}
 	}
 	//Time up
-	if (theMatch.infoObjs.nTimeByRounds / nFPS == 360 && 
+    if (theMatch.infoObjs.nTimeByRounds / nFPS == GAME_TIME &&
 		theMatch.infoObjs.binShootout == SHOOTOUT::NO &&
 		theMatch.infoObjs.quaGameStatus == PHASE::RUNNING)
 	{

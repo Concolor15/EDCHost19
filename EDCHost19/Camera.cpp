@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "Camera.h"
+#include "config.h"
 
 #include <QPixmap>
-
-constexpr QSize sizeSet(1280, 720);
 
 Camera *Camera::pInstance = nullptr;
 using namespace cv;
@@ -23,8 +22,9 @@ Camera::Camera()
 	pHRView = new HighResCam;
 	pCamWork->setViewfinder(pHRView);
 	QCameraViewfinderSettings settings;
-	settings.setResolution(sizeSet);
+    settings.setResolution(CAMERA_SIZE);
 	pCamWork->setViewfinderSettings(settings);
+
 	QObject::connect(pHRView, &HighResCam::ImageArrived, this, &Camera::CameraProc);
 	QObject::connect(pHRView, &HighResCam::DebugPers, this, &Camera::DebugInfo);
 }
