@@ -2,12 +2,10 @@
 #include "config.h"
 #include "MatchMain.h"
 #include "EDCHost19.h"
-#include "Serial.h"
 
 MatchMain::MatchMain(QWidget *parent)
     : QDialog(parent), logic(new MainLogic)
 {
-	Serial::GetInstance();
 	ui.setupUi(this);
 	QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
     logic->ResetInfo();
@@ -16,15 +14,16 @@ MatchMain::MatchMain(QWidget *parent)
 MatchMain::~MatchMain()
 {
     delete logic;
-	Serial::DestroyInstance();
 }
 
 void MatchMain::paintEvent(QPaintEvent * event)
 {
     auto infoMatch = logic->GetInfo();
     auto infoPhase = infoMatch.quaGameStatus;
-    bool bAInHalt = infoMatch.nHaltRoundA != 0;
-    bool bBInHalt = infoMatch.nHaltRoundB != 0;
+    bool bInHalt[2] = {
+        infoMatch.nHaltRound[0] != 0,
+        infoMatch.nHaltRound[1] != 0,
+    };
 	int countDown;
     if (infoMatch.binShootout == NO)
 	{
@@ -36,8 +35,8 @@ void MatchMain::paintEvent(QPaintEvent * event)
 	}
 	ui.btnBeginEnd->setDisabled(false);
 	ui.btnPauseResume->setDisabled(infoPhase != PHASE::RUNNING && infoPhase != PHASE::PAUSE);
-	ui.btnPenaltyA->setDisabled(bAInHalt || infoPhase != PHASE::RUNNING);
-	ui.btnPenaltyB->setDisabled(bBInHalt || infoPhase != PHASE::RUNNING);
+    ui.btnPenaltyA->setDisabled(bInHalt[0] || infoPhase != PHASE::RUNNING);
+    ui.btnPenaltyB->setDisabled(bInHalt[1] || infoPhase != PHASE::RUNNING);
 	ui.btnPlusA->setDisabled(infoPhase != PHASE::RUNNING);
 	ui.btnPlusB->setDisabled(infoPhase != PHASE::RUNNING);
 	ui.btnSOA->setDisabled(infoPhase != PHASE::OVER && infoPhase != PHASE::NOTBEGIN);
@@ -59,23 +58,23 @@ void MatchMain::paintEvent(QPaintEvent * event)
 	case PHASE::RUNNING:
 		ui.btnBeginEnd->setText("结束");
 		ui.btnPauseResume->setText("暂停");
-        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvilA, 3, 10, QChar('0')));
-        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvilB, 3, 10, QChar('0')));
-		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
-		ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHaltB, 1, 10, QChar('0')));
-        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScoreA, 2, 10, QChar('0')));
-        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScoreB, 2, 10, QChar('0')));
+        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvil[0], 3, 10, QChar('0')));
+        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvil[1], 3, 10, QChar('0')));
+        ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHalt[0], 1, 10, QChar('0')));
+        ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHalt[1], 1, 10, QChar('0')));
+        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScore[0], 2, 10, QChar('0')));
+        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScore[1], 2, 10, QChar('0')));
 		ui.lblTVal->setText(QString("%1").arg(countDown, 3, 10, QChar('0')));
 		break;
 	case PHASE::PAUSE:
 		ui.btnBeginEnd->setText("结束");
 		ui.btnPauseResume->setText("继续");
-        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvilA, 3, 10, QChar('0')));
-        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvilB, 3, 10, QChar('0')));
-		ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHaltA, 1, 10, QChar('0')));
-		ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHaltB, 1, 10, QChar('0')));
-        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScoreA, 2, 10, QChar('0')));
-        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScoreB, 2, 10, QChar('0')));
+        ui.lblEAVal->setText(QString("%1").arg(infoMatch.nEvil[0], 3, 10, QChar('0')));
+        ui.lblEBVal->setText(QString("%1").arg(infoMatch.nEvil[1], 3, 10, QChar('0')));
+        ui.lblHAVal->setText(QString("%1").arg(infoMatch.nHalt[0], 1, 10, QChar('0')));
+        ui.lblHBVal->setText(QString("%1").arg(infoMatch.nHalt[1], 1, 10, QChar('0')));
+        ui.lblSAVal->setText(QString("%1").arg(infoMatch.nScore[0], 2, 10, QChar('0')));
+        ui.lblSBVal->setText(QString("%1").arg(infoMatch.nScore[1], 2, 10, QChar('0')));
 		ui.lblTVal->setText(QString("%1").arg(countDown, 3, 10, QChar('0')));
 		break;
 	default:

@@ -20,17 +20,15 @@ Perspective::~Perspective()
 
 void Perspective::mousePressEvent(QMouseEvent * event)
 {
-    auto pos = cv::Point2f(event->x() - 25, event->y() - 175 - 90);
-	auto centre = QPoint(pos.x, pos.y);
-	if (pos.x >= 0 &&
-		pos.x < 1280 &&
-		pos.y >= 0 &&
-		pos.y < 720 &&
+    int x = event->x() - 25;
+    int y = event->y() - 175 - 90;
+    if (x >= 0 && x < 1280 &&
+        y >= 0 && y < 720 &&
 		event->button() == Qt::LeftButton)
 	{
 		if (nSelected < ptsSelected.size())
 		{
-			ptsSelected[nSelected] = { pos.x,pos.y };
+            ptsSelected[nSelected] = { x, y };
 			++nSelected;
 		}
 	}

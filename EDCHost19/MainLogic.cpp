@@ -18,21 +18,21 @@ MainLogic::~MainLogic()
 void MainLogic::ResetInfo()
 {
 	//Set all data to init
-    info.nAInBRounds = 0;
-    info.nBInARounds = 0;
+    info.nInOpRound[0] = 0;
+    info.nInOpRound[1] = 0;
     info.binShootout = SHOOTOUT::NO;
     info.binSideShoot = SIDE::SIDE_B;
-    info.nEvilA = 0;
-    info.nEvilB = 0;
-    info.nHaltRoundA = 0;
-    info.nHaltRoundB = 0;
-    info.nScoreA = 0;
-    info.nScoreB = 0;
+    info.nEvil[0] = 0;
+    info.nEvil[1] = 0;
+    info.nHaltRound[0] = 0;
+    info.nHaltRound[1] = 0;
+    info.nScore[0] = 0;
+    info.nScore[1] = 0;
     info.nTimeByRounds = 0;
     info.posObjs = CameraInfo();
     info.quaGameStatus = PHASE::NOTBEGIN;
-    info.nHaltA = 0;
-    info.nHaltB = 0;
+    info.nHalt[0] = 0;
+    info.nHalt[1] = 0;
 }
 
 void MainLogic::EvaluateEvil()
@@ -40,40 +40,25 @@ void MainLogic::EvaluateEvil()
 	//Running to calculate
     if (info.quaGameStatus != PHASE::RUNNING) return;
     if (info.binShootout == SHOOTOUT::YES) return;
-    const auto &posA = info.posObjs.posCar1;
-    const auto &posB = info.posObjs.posCar2;
-    if (posA.y() > info.GetHalfLength() && info.nHaltRoundA != 0)
-	{
-        ++info.nAInBRounds;
-        if (info.nAInBRounds % nFPS == 0 && info.nHaltRoundA != 0)
-		{
-            auto d = info.GetLength() - posA.y();
-            info.nEvilA += 5 - d / 30;
-		}
-	}
-    if (posB.y() <= info.GetHalfLength() && info.nHaltRoundB != 0)
-	{
-        ++info.nBInARounds;
-        if (info.nBInARounds % nFPS == 0)
-		{
-            auto d = posB.y() - 0;
-            info.nEvilB += 5 - d / 30;
-		}
-	}
+    QPoint pos[2] = {info.posObjs.posCar1, info.posObjs.posCar2};
+    for (int side : {0, 1})
+    {
+        if (pos[side].y() > info.HALF_LENGTH && info.nHaltRound[side] !=0 )
+        {
+            ++info.nInOpRound[side];
+            if (info.nInOpRound[side] % nFPS == 0 && info.nHaltRound[side] !=0)
+            {
+                auto d = info.LENGTH - pos[side].y();
+                info.nEvil[side] += 5-d/30;
+            }
+        }
+    }
 }
 
-void MainLogic::ResetEvil(int nSide)
+void MainLogic::ResetEvil(int side)
 {
-	if (nSide == SIDE::SIDE_A)
-	{
-        info.nAInBRounds = 0;
-        info.nEvilA = 0;
-	}
-	if (nSide == SIDE::SIDE_B)
-	{
-        info.nBInARounds = 0;
-        info.nEvilB = 0;
-	}
+    info.nInOpRound[side] = 0;
+    info.nEvil[side] = 0;
 }
 
 void MainLogic::MatchBegin()
@@ -108,41 +93,29 @@ void MainLogic::Run(const CameraInfo & pts)
     if (info.binShootout == SHOOTOUT::NO && info.quaGameStatus == PHASE::RUNNING)
 	{
         ++info.nTimeByRounds;
-        if (info.nHaltRoundA == 0)
-		{
-            if (info.nEvilA >= 100)
-			{
-                auto nStopSecA = MAX((5 + 2 * info.nHaltA), 15);
-                info.nHaltRoundA = nStopSecA * nFPS;
-                ++info.nHaltA;
-			}
-		}
-		else
-		{
-            if (info.nHaltRoundA == 1)
-			{
-				ResetEvil(SIDE_A);
-			}
-            --info.nHaltRoundA;
-		}
-        if (info.nHaltRoundB == 0)
-		{
-            if (info.nEvilB >= 100)
-			{
-                auto nStopSecB = MAX((5 + 2 * info.nHaltB), 15);
-                info.nHaltRoundB = nStopSecB * nFPS;
-                ++info.nHaltB;
-			}
-		}
-		else
-		{
-            if (info.nHaltRoundB == 1)
-			{
-				ResetEvil(SIDE_B);
-			}
-            --info.nHaltRoundB;
-		}
+        for (int side : {0, 1})
+        {
+            if (info.nHaltRound[side] == 0)
+            {
+                if (info.nEvil[side] >= 100)
+                {
+                    auto nStopSec = MAX((5 + 2 * info.nHalt[side]), 15);
+                    info.nHaltRound[side] = nStopSec * nFPS;
+                    ++info.nHalt[0];
+
+                }
+            }
+            else
+            {
+                if (info.nHaltRound[side] == 1)
+                {
+                    ResetEvil(side);
+                }
+                --info.nHaltRound[side];
+            }
+        }
 	}
+
 	//Time up
     if (info.nTimeByRounds / nFPS == GAME_TIME &&
         info.binShootout == SHOOTOUT::NO &&
@@ -150,6 +123,7 @@ void MainLogic::Run(const CameraInfo & pts)
 	{
         info.quaGameStatus = PHASE::OVER;
 	}
+
     if (info.quaGameStatus == PHASE::RUNNING && info.binShootout == SHOOTOUT::YES)
 	{
         ++info.nTimeByRounds;
@@ -161,36 +135,22 @@ void MainLogic::Run(const CameraInfo & pts)
 	}
 }
 
-void MainLogic::ShootOut(int nSide)
+void MainLogic::ShootOut(int side)
 {
     info.binShootout = SHOOTOUT::YES;
-    info.binSideShoot = nSide;
+    info.binSideShoot = side;
     info.quaGameStatus = PHASE::RUNNING;
     info.nTimeByRounds = 0;
 }
 
-void MainLogic::PlusOne(int nSide)
+void MainLogic::PlusOne(int side)
 {
-	if (nSide == SIDE::SIDE_A)
-	{
-        ++info.nScoreA;
-	}
-	if (nSide == SIDE::SIDE_B)
-	{
-        ++info.nScoreB;
-	}
+    ++info.nScore[side];
 }
 
-void MainLogic::Penalty(int nSide)
+void MainLogic::Penalty(int side)
 {
-	if (nSide == SIDE::SIDE_A)
-	{
-        info.nEvilA += thePenalty;
-	}
-	if (nSide == SIDE::SIDE_B)
-	{
-        info.nEvilB += thePenalty;
-	}
+    info.nEvil[side] += thePenalty;
 }
 
 MatchInfo MainLogic::GetInfo()

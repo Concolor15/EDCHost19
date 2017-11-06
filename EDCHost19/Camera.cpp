@@ -15,8 +15,8 @@ void Camera::CameraProc(CameraInfo info, QPixmap pixShow)
 Camera::Camera()
 {
 	//Prepare a camera and a view
-	auto theDevice = QCamera::availableDevices().at(QCamera::availableDevices().size() - 1);
-	pCamWork = new QCamera(theDevice);
+    auto devices = QCameraInfo::availableCameras();
+    pCamWork = new QCamera(devices[devices.size()-1]);
     //pCamWork->imageProcessing()->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
     //pCamWork->imageProcessing()->setManualWhiteBalance(4000);
 	pHRView = new HighResCam;

@@ -2,7 +2,6 @@
 #include "config.h"
 #include "MyLogger.h"
 #include "Camera.h"
-#include "Serial.h"
 
 MyLogger::MyLogger(QWidget *parent)
 	: QDialog(parent)

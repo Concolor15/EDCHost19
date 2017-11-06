@@ -59,7 +59,7 @@ void Serial::Transmit(const MatchInfo & data)
 {
     auto const& pos = data.posObjs;
     byteToSend[0] = 0xFC | (data.binShootout << 1);
-    byteToSend[0] = byteToSend[0] | data.binSideShoot;
+    byteToSend[0] = byteToSend[0] | (data.binSideShoot^1);
     byteToSend[1] = (data.quaGameStatus << 6) | (data.nTimeByRounds >> 8);
     byteToSend[2] = data.nTimeByRounds & 0xFF;
 
@@ -75,14 +75,14 @@ void Serial::Transmit(const MatchInfo & data)
     byteToSend[10] = pos.posBall.y() >> 8;
     byteToSend[11] = pos.posBall.y() & 0xFF;
 
-    byteToSend[12] = data.nHaltRoundA >> 8;
-    byteToSend[13] = data.nHaltRoundA & 0xFF;
-    byteToSend[14] = data.nHaltRoundB >> 8;
-    byteToSend[15] = data.nHaltRoundB & 0xFF;
-    byteToSend[16] = data.nEvilA;
-    byteToSend[17] = data.nEvilB;
-    byteToSend[18] = data.nScoreA;
-    byteToSend[19] = data.nScoreB;
+    byteToSend[12] = data.nHaltRound[0] >> 8;
+    byteToSend[13] = data.nHaltRound[0] & 0xFF;
+    byteToSend[14] = data.nHaltRound[1] >> 8;
+    byteToSend[15] = data.nHaltRound[1] & 0xFF;
+    byteToSend[16] = data.nEvil[0];
+    byteToSend[17] = data.nEvil[1];
+    byteToSend[18] = data.nScore[0];
+    byteToSend[19] = data.nScore[1];
 	byteToSend[30] = 0x0D;
 	byteToSend[31] = 0x0A;
 }

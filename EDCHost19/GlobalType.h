@@ -4,9 +4,6 @@
 #include <QtCore/qpair.h>
 #include <opencv2/core/types.hpp>
 
-typedef unsigned short YType;
-typedef unsigned char XType;
-typedef QPair<XType, YType> Position;
 typedef unsigned short RoundType;
 typedef unsigned char ValType;
 
@@ -34,16 +31,6 @@ struct CameraInfo	//For Camera Only
         posCar1 = point_cv2qt(car1);
         posCar2 = point_cv2qt(car2);
     }
-
-//    CameraInfo(const cv::Point2f &ptBall = { 0.,0. }, const cv::Point2f &ptCarA = { 0.,0. }, const cv::Point2f &ptCarB = { 0.,0. })
-//	{
-//		posBall.first = static_cast<XType>((int)ptBall.x);
-//		posBall.second = static_cast<YType>((int)ptBall.y);
-//		posCarA.first = static_cast<XType>((int)ptCarA.x);
-//		posCarA.second = static_cast<YType>((int)ptCarA.y);
-//		posCarB.first = static_cast<XType>((int)ptCarB.x);
-//		posCarB.second = static_cast<YType>((int)ptCarB.y);
-//	}
 };
 
 enum PHASE		//For quaGameStatus
@@ -56,8 +43,8 @@ enum PHASE		//For quaGameStatus
 
 enum SIDE	//For binSideShoot
 {
-	SIDE_A = 0b1,	//Left
-	SIDE_B = 0b0	//Right
+    SIDE_A = 0b0,   //Left
+    SIDE_B = 0b1,   //Right
 };
 
 enum SHOOTOUT	//For binShootout
@@ -66,42 +53,23 @@ enum SHOOTOUT	//For binShootout
 	NO = 0b0
 };
 
-struct SerialInfo	//For Serial Only
-{
-	RoundType nTimeByRounds;
-	RoundType nHaltRoundA;
-	RoundType nHaltRoundB;
-	ValType nEvilA;
-	ValType nEvilB;
-	ValType nScoreA;
-	ValType nScoreB;
-	ValType quaGameStatus;
-	ValType binShootout;
-	ValType binSideShoot;
-	CameraInfo posObjs;
-};
-
 struct MatchInfo	//For Logic
 {
-    RoundType nTimeByRounds;
-    RoundType nHaltRoundA;
-    RoundType nHaltRoundB;
-    ValType nEvilA;
-    ValType nEvilB;
-    ValType nScoreA;
-    ValType nScoreB;
-    ValType quaGameStatus;
-    ValType binShootout;
-    ValType binSideShoot;
+    int nTimeByRounds;
+    int nHaltRound[2];
+    int nEvil[2];
+    int nScore[2];
+    int quaGameStatus;
+    int binShootout;
+    int binSideShoot;
     CameraInfo posObjs;
 
-    // above is needed to send to communication board through serialport
+    // below should NOT be send to communication board through serialport
 
-	RoundType nAInBRounds;
-	RoundType nBInARounds;
-	RoundType nHaltA;
-	RoundType nHaltB;
-	constexpr YType GetLength() { return nLogicWidth; }
-	constexpr XType GetWidth() { return nLogicHeight; }
-	constexpr YType GetHalfLength() { return nLogicWidth / 2; }
+    int nInOpRound[2];
+    int nHalt[2];
+
+    static constexpr int LENGTH = nLogicWidth;
+    static constexpr int WIDTH = nLogicHeight;
+    static constexpr int HALF_LENGTH = nLogicWidth / 2;
 };

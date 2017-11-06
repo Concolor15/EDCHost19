@@ -6,7 +6,7 @@
 
 constexpr int GAME_TIME = 36000;
 
-constexpr const char* SERIAL_PORT_NAME = "ttyUSB1";
+constexpr const char* SERIAL_PORT_NAME = "ttyUSB0";
 constexpr QSize CAMERA_SIZE(1920, 1080);
 constexpr QSize CAMERA_DOWNSAMPLE_SIZE(960, 540);
 
