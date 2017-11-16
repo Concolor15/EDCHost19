@@ -2,13 +2,14 @@
 #include "config.h"
 #include "MyLogger.h"
 #include "Camera.h"
+#include "controller.h"
 
 MyLogger::MyLogger(QWidget *parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
 	QObject::connect(Camera::GetInstance(), &Camera::DebugInfo, this, &MyLogger::OnCamDbg);
-	QObject::connect(Serial::GetInstance(), &Serial::DebugInfo, this, &MyLogger::OnSerDbg);
+    QObject::connect(GetController(), &Controller::SerialPortInfoUpdated, this, &MyLogger::OnSerDbg);
 }
 
 MyLogger::~MyLogger()

@@ -20,16 +20,16 @@ QDialog#MatchMain > QLabel {
 }
 
 QLabel#lblMainBGN {
-    background-image: url(Resources/MainBGN.png);
+    background-image: url(:/Resources/MainBGN.png);
 }
 QLabel#lblMatchBGN {
-    background-image: url(Resources/MatchBGN.png);
+    background-image: url(:/Resources/MatchBGN.png);
 }
 QLabel#lblPSPBGN {
-    background-image: url(Resources/PSPBGN.png);
+    background-image: url(:/Resources/PSPBGN.png);
 }
 QLabel#lblDebugBGN {
-    background-image: url(Resources/DebugBGN.png);
+    background-image: url(:/Resources/DebugBGN.png);
 }
 QLabel#lblSAVal,
 QLabel#lblSBVal,

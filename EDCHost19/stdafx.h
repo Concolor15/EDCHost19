@@ -1,7 +1,10 @@
 #pragma once
 
-#include <QtWidgets>
 #include <QtCore>
+#include <QtGui>
+#include <QtWidgets>
+#include <QtQml>
+#include <QtQuick>
 #include <QtMultimedia>
 #include <vector>
 #include <chrono>

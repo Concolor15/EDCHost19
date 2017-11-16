@@ -1,10 +1,11 @@
 # Created by and for Qt Creator. This file was created for editing the project sources only.
 # You may attempt to use it for building too, by modifying this file here.
 
-QT += core gui widgets quick multimedia serialport
+QT += core gui widgets qml quick multimedia serialport
 TARGET = EDCHost19
 TEMPLATE = app
 
+CONFIG += c++14
 CONFIG += precompile_header
 PRECOMPILED_HEADER = stdafx.h
 
@@ -23,7 +24,8 @@ HEADERS = \
     MyLogger.h \
     Perspective.h \
     stdafx.h \
-    globalconfig.h
+    globalconfig.h \
+    MyCamera.h
 
 SOURCES = \
     Camera.cpp \
@@ -37,7 +39,8 @@ SOURCES = \
     MyLogger.cpp \
     Perspective.cpp \
     stdafx.cpp \
-    globalconfig.cpp
+    globalconfig.cpp \
+    MyCamera.cpp
 
 FORMS = \
     EDCHost19.ui \

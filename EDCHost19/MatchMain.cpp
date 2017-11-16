@@ -2,9 +2,10 @@
 #include "config.h"
 #include "MatchMain.h"
 #include "EDCHost19.h"
+#include "controller.h"
 
 MatchMain::MatchMain(QWidget *parent)
-    : QDialog(parent), logic(new MainLogic)
+    : QDialog(parent), logic(&GetController()->GetLogic())
 {
 	ui.setupUi(this);
 	QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
@@ -13,7 +14,6 @@ MatchMain::MatchMain(QWidget *parent)
 
 MatchMain::~MatchMain()
 {
-    delete logic;
 }
 
 void MatchMain::paintEvent(QPaintEvent * event)
@@ -163,7 +163,7 @@ void MatchMain::OnPenaltyA()
     auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-        logic->Penalty(SIDE_A);
+        logic->Penalize(SIDE_A);
 	}
 }
 
@@ -172,7 +172,7 @@ void MatchMain::OnPenaltyB()
     auto info = logic->GetInfo().quaGameStatus;
 	if (info == PHASE::RUNNING || info == PHASE::PAUSE)
 	{
-        logic->Penalty(SIDE_B);
+        logic->Penalize(SIDE_B);
 	}
 }
 
@@ -180,5 +180,5 @@ void MatchMain::Running(CameraInfo infoReady,QPixmap pixShow)
 {
     logic->Run(infoReady);
 	ui.lblCamera->setPixmap(pixShow);
-    Serial::GetInstance()->Transmit(logic->GetInfo());
+    GetController()->sendLater(logic->GetInfo());
 }

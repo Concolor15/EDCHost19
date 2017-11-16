@@ -16,14 +16,16 @@ Camera::Camera()
 {
 	//Prepare a camera and a view
     auto devices = QCameraInfo::availableCameras();
-    pCamWork = new QCamera(devices[devices.size()-1]);
+    //pCamWork = new QCamera(devices[devices.size()-1]);
     //pCamWork->imageProcessing()->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
     //pCamWork->imageProcessing()->setManualWhiteBalance(4000);
 	pHRView = new HighResCam;
-	pCamWork->setViewfinder(pHRView);
-	QCameraViewfinderSettings settings;
-    settings.setResolution(CAMERA_SIZE);
-	pCamWork->setViewfinderSettings(settings);
+
+    //QCameraViewfinderSettings settings;
+    //settings.setResolution(CAMERA_SIZE);
+    //pCamWork->setViewfinderSettings(settings);
+
+    //pCamWork->setViewfinder(pHRView);
 
 	QObject::connect(pHRView, &HighResCam::ImageArrived, this, &Camera::CameraProc);
 	QObject::connect(pHRView, &HighResCam::DebugPers, this, &Camera::DebugInfo);
@@ -55,7 +57,7 @@ void Camera::DestroyInstance()
 
 void Camera::SetPerspecitve(const QVector<cv::Point2f>& pts)
 {
-	if (pts.size() != 4) return;
+    assert(pts.size() == 4);
 	pHRView->SetPerspective(pts);
 }
 

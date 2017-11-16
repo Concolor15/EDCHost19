@@ -59,9 +59,9 @@ struct MatchInfo	//For Logic
     int nHaltRound[2];
     int nEvil[2];
     int nScore[2];
-    int quaGameStatus;
-    int binShootout;
-    int binSideShoot;
+    PHASE quaGameStatus;
+    bool binShootout;
+    int shootSide;
     CameraInfo posObjs;
 
     // below should NOT be send to communication board through serialport
