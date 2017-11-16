@@ -39,7 +39,9 @@ HighResCam::~HighResCam()
 
 QList<QVideoFrame::PixelFormat> HighResCam::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
 {
-	return (QList<QVideoFrame::PixelFormat>()<<QVideoFrame::Format_BGR24<<QVideoFrame::Format_RGB32);
+    return QList<QVideoFrame::PixelFormat>()
+            <<QVideoFrame::Format_BGR24
+           <<QVideoFrame::Format_RGB32;
 }
 
 bool HighResCam::present(const QVideoFrame & frame)
@@ -52,11 +54,8 @@ bool HighResCam::present(const QVideoFrame & frame)
 		setError(IncorrectFormatError);
 		return false;
 	}
-	auto t = frame.handleType();
-	auto handle = frame.handle().toUInt();
-	QVideoFrame frametodraw(frame);
 
-	QSize size = frame.size();
+	QVideoFrame frametodraw(frame);
 
 	if (!frametodraw.map(QAbstractVideoBuffer::ReadOnly))
 	{
@@ -95,18 +94,14 @@ bool HighResCam::present(const QVideoFrame & frame)
                 downsample.step1(),
                 QImage::Format_RGB888);
 
+    auto info = locateMachine.GetLocation();
 
-//	QImage image = QImage(
-//		frametodraw.bits(),
-//		frametodraw.width(),
-//		frametodraw.height(),
-//		frametodraw.bytesPerLine(),
-//        QImage::Format_RGB888);
-
+    QPixmap pixSignal(QPixmap::fromImage(image));
+    auto infCompressed = CameraInfo(info[0], info[1], info[2]);
+    emit ImageArrived(infCompressed, pixSignal);
+    frametodraw.unmap();
 
 
-
-	auto info = locateMachine.GetLocation();
 #ifdef PERS_DEBUG
 	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));
 	qstrCam += QString("Camera-CarA:(%1,%2)\n").arg(int(info[1].x)).arg((int)info[1].y);
@@ -119,10 +114,7 @@ bool HighResCam::present(const QVideoFrame & frame)
 	qstrCam += QString("Logic-CarB:(%1,%2)\n").arg(int(info[2].x)).arg(int(info[2].y));
 	emit DebugPers(qstrCam);
 #endif
-	QPixmap pixSignal(QPixmap::fromImage(image));
-	auto infCompressed = CameraInfo(info[0], info[1], info[2]);
-	emit ImageArrived(infCompressed, pixSignal);
-	frametodraw.unmap();
+
 	return true;
 }
 
@@ -219,27 +211,6 @@ void ImgProc::Locate(Mat& mat)
                 Scalar(config.car2_hue_ub, 255, 255),
                 car2);
 
-//	cv::inRange(hsv,
-//		Scalar(0, config.ball_s_lb, config.v_lb),
-//		Scalar(180, 255, 255),
-//		mask_ball);
-//	cv::inRange(hsv,
-//		Scalar(0, config.car1_s_lb, config.v_lb),
-//		Scalar(180, 255, 255),
-//		mask_car1);
-//	cv::inRange(hsv,
-//		Scalar(0, config.car2_s_lb, config.v_lb),
-//		Scalar(180, 255, 255),
-//		mask_car2);
-//	int ch[] = { 0,0 };
-//	hue.create(src.size(), CV_8UC1);
-//	mixChannels(&hsv, 1, &hue, 1, ch, 1);
-//	inRange(hue, Scalar(config.ball_hue_lb), Scalar(config.ball_hue_ub), ball);
-//	cv::bitwise_and(ball, mask_ball, ball);
-//	inRange(hue, Scalar(config.car1_hue_lb), Scalar(config.car1_hue_ub), car1);
-//	cv::bitwise_and(car1, mask_car1, car1);
-//	inRange(hue, Scalar(config.car2_hue_lb), Scalar(config.car2_hue_ub), car2);
-//	cv::bitwise_and(car2, mask_car2, car2);
 	src.copyTo(dst);
 	ball_centers = GetCenter(ball, config, Types::BALL);
 	car1_centers = GetCenter(car1, config, Types::CARA);

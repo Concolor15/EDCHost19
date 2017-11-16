@@ -10,13 +10,15 @@ class Camera final :public QObject
 	Q_OBJECT
 private:
 	static Camera* pInstance;
-	QCamera *pCamWork;
+
     HighResCam *pHRView;
 	Camera();
 	~Camera();
 private slots:
 	void CameraProc(CameraInfo info,QPixmap pixShow);
 public:
+    QCamera *pCamWork;
+
 	static Camera *GetInstance();
 	static void DestroyInstance();
 	void SetPerspecitve(const QVector<cv::Point2f> &pts);
@@ -26,3 +28,5 @@ signals:
 	void InfoReady(CameraInfo, QPixmap);
 	void DebugInfo(QString);
 };
+
+

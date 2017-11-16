@@ -6,31 +6,7 @@
 #include <opencv2/core.hpp>
 #include "GlobalType.h"
 #include "CoordinateConverter.h"
-
-struct ProcConfig
-{
-    int red_reverse;
-
-	int ball_hue_lb;
-	int ball_hue_ub;
-
-	int car1_hue_lb;
-	int car1_hue_ub;
-
-	int car2_hue_lb;
-	int car2_hue_ub;
-
-	int car1_s_lb;
-	int car2_s_lb;
-	int ball_s_lb;
-
-    int car1_v_lb;
-    int car2_v_lb;
-    int ball_v_lb;
-
-	int area_car_lb;
-	int area_ball_lb;
-};
+#include "globalconfig.h"
 
 class ImgProc
 {

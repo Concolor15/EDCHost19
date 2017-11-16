@@ -1,19 +1,15 @@
 #include "stdafx.h"
 #include "config.h"
 #include "GlobalType.h"
+#include "MyCamera.h"
 #include "MainLogic.h"
 
 constexpr int thePenalty = 50;
 
-MainLogic::MainLogic()
+MainLogic::MainLogic(QObject* parent): QObject(parent)
 {
 	ResetInfo();
 }
-
-MainLogic::~MainLogic()
-{
-	
-} 
 
 void MainLogic::ResetInfo()
 {
@@ -21,7 +17,7 @@ void MainLogic::ResetInfo()
     info.nInOpRound[0] = 0;
     info.nInOpRound[1] = 0;
     info.binShootout = SHOOTOUT::NO;
-    info.binSideShoot = SIDE::SIDE_B;
+    info.shootSide = SIDE::SIDE_B;
     info.nEvil[0] = 0;
     info.nEvil[1] = 0;
     info.nHaltRound[0] = 0;
@@ -70,7 +66,6 @@ void MainLogic::MatchBegin()
 void MainLogic::MatchEnd()
 {
     info.quaGameStatus = PHASE::OVER;
-	ResetInfo();
 }
 
 void MainLogic::MatchPause()
@@ -138,7 +133,7 @@ void MainLogic::Run(const CameraInfo & pts)
 void MainLogic::ShootOut(int side)
 {
     info.binShootout = SHOOTOUT::YES;
-    info.binSideShoot = side;
+    info.shootSide = side;
     info.quaGameStatus = PHASE::RUNNING;
     info.nTimeByRounds = 0;
 }
@@ -148,12 +143,12 @@ void MainLogic::PlusOne(int side)
     ++info.nScore[side];
 }
 
-void MainLogic::Penalty(int side)
+void MainLogic::Penalize(int side)
 {
     info.nEvil[side] += thePenalty;
 }
 
-MatchInfo MainLogic::GetInfo()
+MatchInfo const& MainLogic::GetInfo()
 {
     return info;
 }

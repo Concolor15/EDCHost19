@@ -2,12 +2,25 @@
 #include "config.h"
 #include "controller.h"
 
+#include <opencv2/highgui.hpp>
+
+Controller* Controller::inst = 0;
+
 Controller::Controller(QObject *parent) : QObject(parent),
     timer(this),
+    cam(nullptr),
     sp(this),
     data_buffer(32, 0),
     buffer_has_data(false)
 {
+    auto devices = QCameraInfo::availableCameras();
+    cam = new MyCamera(devices[devices.size()-1], this);
+
+    auto* imgproc = cam->imageProcessing();
+    imgproc->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
+    imgproc->setManualWhiteBalance(4000);
+
+
     sp.setPortName(SERIAL_PORT_NAME);
     sp.setBaudRate(QSerialPort::Baud115200);
     sp.setDataBits(QSerialPort::Data8);
@@ -40,12 +53,35 @@ void Controller::serialport_timer_handle()
     }
 }
 
+void Controller::initCv_debug()
+{
+    cv_param.reset_debug();
+    cv::namedWindow("show");
+    cv::namedWindow("black");
+    cv::namedWindow("control", CV_WINDOW_NORMAL);
+    cv::createTrackbar("car1_red_reverse", "control", &cv_param.red_reverse, 1);
+    cv::createTrackbar("ball_hue_lb", "control", &cv_param.ball_hue_lb, 180);
+    cv::createTrackbar("ball_hue_ub", "control", &cv_param.ball_hue_ub, 180);
+    cv::createTrackbar("car1_hue_lb", "control", &cv_param.car1_hue_lb, 180);
+    cv::createTrackbar("car1_hue_ub", "control", &cv_param.car1_hue_ub, 180);
+    cv::createTrackbar("car2_hue_lb", "control", &cv_param.car2_hue_lb, 180);
+    cv::createTrackbar("car2_hue_ub", "control", &cv_param.car2_hue_ub, 180);
+    cv::createTrackbar("ball_s_lb", "control", &cv_param.ball_s_lb, 255);
+    cv::createTrackbar("car1_s_lb", "control", &cv_param.car1_s_lb, 255);
+    cv::createTrackbar("car2_s_lb", "control", &cv_param.car2_s_lb, 255);
+    cv::createTrackbar("ball_v_lb", "control", &cv_param.ball_v_lb, 255);
+    cv::createTrackbar("car1_v_lb", "control", &cv_param.car1_v_lb, 255);
+    cv::createTrackbar("car2_v_lb", "control", &cv_param.car2_v_lb, 255);
+    cv::createTrackbar("area_car_lb", "control", &cv_param.area_car_lb, 1000);
+    cv::createTrackbar("area_ball_lb", "control", &cv_param.area_ball_lb, 200);
+}
+
 void Controller::sendLater(MatchInfo const& data)
 {
     buffer_has_data = true;
 
     auto const& pos = data.posObjs;
-    data_buffer[0] = 0xFC | (data.binShootout << 1) | (data.binSideShoot^1);
+    data_buffer[0] = 0xFC | (data.binShootout << 1) | (data.shootSide^1);
     data_buffer[1] = (data.quaGameStatus << 6) | (data.nTimeByRounds >> 8);
     data_buffer[2] = data.nTimeByRounds & 0xFF;
 

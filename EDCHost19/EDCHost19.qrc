@@ -1,4 +1,10 @@
 <RCC>
-    <qresource prefix="EDCHost19">
+    <qresource prefix="/">
+        <file>Resources/DebugBGN.png</file>
+        <file>Resources/MainBGN.png</file>
+        <file>Resources/MatchBGN.png</file>
+        <file>Resources/PSPBGN.png</file>
+        <file>MyUI.css</file>
+        <file>MatchUI.qml</file>
     </qresource>
 </RCC>
