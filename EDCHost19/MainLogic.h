@@ -3,7 +3,6 @@
 #include <QtCore>
 #include <QObject>
 #include <QCamera>
-#include "Camera.h"
 #include "GlobalType.h"
 
 class MainLogic: public QObject

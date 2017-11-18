@@ -47,6 +47,8 @@ QVideoFrame MyFilterRunnable::run(
         if (!_.isLocked())
             goto unmap;
 
+        worker->frame_timestamp = QTime::currentTime();
+
         cv::Mat_<uint8_t> Y(
                     input->height(),
                     input->width(),
@@ -66,10 +68,11 @@ QVideoFrame MyFilterRunnable::run(
                     input->bytesPerLine(2));
 
         cv::Mat_<uint8_t> Y_half;
-        cv::resize(Y, Y_half,
+        cv::resize(Y, Y_half, \
                    cv::Size(input->width()/2, input->height()/2));
 
         cv::merge(std::vector<cv::Mat>{Y_half,U,V}, worker->frame);
+
     }
     worker->cv.wakeOne();
 
@@ -114,8 +117,11 @@ void ImgprocThread::run()
         }
 
         proc.Locate(frame);
+        LocateResult* r = proc.GetResult();
 
-        emit ResultEmitted(QSharedPointer<LocateResult>(proc.GetResult()));
+        r->timestamp = frame_timestamp;
+
+        emit ResultEmitted(r);
 
 
         //qWarning() << "running";

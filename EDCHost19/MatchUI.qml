@@ -113,8 +113,7 @@ ApplicationWindow {
                 np3 = vid.mapPointToSourceNormalized(Qt.point(c3.x, c3.y))
                 np4 = vid.mapPointToSourceNormalized(Qt.point(c4.x, c4.y))
 
-                console.warn(np1, np2, np3, np4)
-                My.Ctrl.setPerspective(1, np3, 2, np4, 3, np1, 4, np2, 6)
+                My.Ctrl.setPerspective(np1, np2, np3, np4)
             }
 
             Shape {

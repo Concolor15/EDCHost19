@@ -12,16 +12,21 @@ struct LocateResult
 {
     QPointF ball_center;
     QPointF cars_center[2];
+    bool ball_succeeded;
+    bool cars_succeeded;
+
+    // below is filled by ImgprocThread
+
     QPointF logic_ball_center;
     QPointF logic_cars_center[2];
 
-    QDateTime timestamp;
+    QTime timestamp;
 };
 
 class ImgProc
 {
 public:
-	QVector<cv::Point2f> GetLocation();
+    ImgProc(CoordinateConverter const& cvt): cvt(cvt) { }
 
 	//利用 opencv 生成滑动条，方便调试时改变参数
 	void InitCv();
@@ -34,8 +39,9 @@ public:
 
 	// 定位所需参数
 	ProcConfig config;
-	~ImgProc();
 private:
+    CoordinateConverter const& cvt;
+
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
 	//src : 二值化图像
 	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg, int nType);
@@ -57,22 +63,3 @@ private:
 	cv::Mat dst;
 };
 
-class HighResCam : public QAbstractVideoSurface
-{
-	Q_OBJECT
-
-private:
-	ImgProc locateMachine;
-	cv::Mat matPerspective;
-	CoordinateConverter ccToLogic;
-	void TransToLogic(QVector<cv::Point2f> &info);
-public:
-	HighResCam(QObject *parent = nullptr);
-	~HighResCam();
-	QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const override;
-	bool present(const QVideoFrame &frame) override;
-	void SetPerspective(const QVector<cv::Point2f> &pts);
-signals:
-	void ImageArrived(CameraInfo, QPixmap);
-	void DebugPers(QString);
-};

@@ -28,8 +28,8 @@ public:
 
     void updateParam();
 
-    QPointF cam2logic(const cv::Point2f &);
-    cv::Point2f logic2cam(const QPointF &);
+    QPointF cam2logic(const cv::Point2f &) const;
+    cv::Point2f logic2cam(const QPointF &) const;
 
 private:
 	Param _param;

@@ -14,7 +14,6 @@ CONFIG += qtquickcompiler
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS = \
-    Camera.h \
     config.h \
     controller.h \
     CoordinateConverter.h \
@@ -27,7 +26,6 @@ HEADERS = \
     MyCamera.h
 
 SOURCES = \
-    Camera.cpp \
     controller.cpp \
     CoordinateConverter.cpp \
     HighResCam.cpp \
