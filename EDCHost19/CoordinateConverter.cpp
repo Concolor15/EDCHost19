@@ -72,13 +72,13 @@ void CoordinateConverter::updateParam()
 	_logic2cam = _cam2logic.inverse();
 }
 
-QPointF CoordinateConverter::cam2logic(const Point2f& p)
+QPointF CoordinateConverter::cam2logic(const Point2f& p) const
 {
     Vector3d v = _cam2logic*Vector3d(p.x, p.y, 1.0);
     return {v[0]/v[2], v[1]/v[2]};
 }
 
-Point2f CoordinateConverter::logic2cam(const QPointF& p)
+Point2f CoordinateConverter::logic2cam(const QPointF& p) const
 {
     Vector3d v = _logic2cam*Vector3d(p.x(), p.y(), 1.0);
     return {float(v[0]/v[2]), float(v[1]/v[2])};

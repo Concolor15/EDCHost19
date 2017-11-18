@@ -44,7 +44,6 @@ class Controller : public QObject
     QSerialPort sp;
     QByteArray data_buffer;
     bool buffer_has_data;
-    void serialport_timer_handle();
 
     void setCamera(MyCamera* newCamera);
 
@@ -73,7 +72,8 @@ signals:
     void CameraDebugInfoEmitted(QString info);
     void SerialDebugInfoEmitted(QString info);
 public slots:
-
+    void imgproc_handle(LocateResult* data);
+    void serialport_timer_handle();
 };
 
 inline Controller* GetController()

@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-    qputenv( "QSG_RENDER_LOOP", "threaded");
+    //qputenv( "QSG_RENDER_LOOP", "threaded");
     QQuickStyle::setStyle("Material");
 
 	QApplication theApp(argc, argv);

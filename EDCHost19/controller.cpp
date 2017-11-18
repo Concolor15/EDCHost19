@@ -8,7 +8,6 @@
 Controller* Controller::inst = 0;
 
 Controller::Controller(QObject *parent) : QObject(parent),
-    imgThread(new ImgprocThread()),
     data_buffer(32, 0),
     buffer_has_data(false)
 {
@@ -19,7 +18,11 @@ Controller::Controller(QObject *parent) : QObject(parent),
     imgproc->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
     imgproc->setManualWhiteBalance(4000);
 
+    imgThread = new ImgprocThread();
     imgThread->start();
+    QObject::connect(
+                imgThread, &ImgprocThread::ResultEmitted,
+                this, &Controller::imgproc_handle);
 
     sp.setPortName(SERIAL_PORT_NAME);
     sp.setBaudRate(QSerialPort::Baud115200);
@@ -36,6 +39,21 @@ Controller::Controller(QObject *parent) : QObject(parent),
     timer.start(100);
 
     initComponent();
+
+    logic.MatchBegin();
+}
+
+void Controller::imgproc_handle(LocateResult* _data)
+{
+    LocateResult* r = _data;
+    CameraInfo info;
+    info.posBall = r->logic_ball_center.toPoint();
+    info.posCar1 = r->logic_cars_center[0].toPoint();
+    info.posCar2 = r->logic_cars_center[1].toPoint();
+
+    logic.Run(info);
+    sendLater(logic.GetInfo());
+    delete _data;
 }
 
 void Controller::serialport_timer_handle()
@@ -46,13 +64,28 @@ void Controller::serialport_timer_handle()
 
         sp.write(data_buffer);
 
-        QString debugInfo = QTime::currentTime().toString() + "\n" + QString(data_buffer.toHex());
+        static char hex[16+1]="0123456789ABCDEF";
+
+        QString debugInfo = QTime::currentTime().toString() + "\n";
+        for (int i=0;i<8;i++)
+        {
+            for (int j=0;j<4;j++)
+            {
+                uint8_t v = data_buffer[4*i+j];
+                debugInfo.append(hex[v >> 4]);
+                debugInfo.append(hex[v & 0xF]);
+            }
+            debugInfo += '\n';
+        }
         emit SerialDebugInfoEmitted(debugInfo);
     }
     else
     {
         emit SerialDebugInfoEmitted("No Data Send");
     }
+
+    //logic.Run(CameraInfo());
+    //this->sendLater(logic.GetInfo());
 }
 
 QQuickWindow* Controller::getMainWindow()
@@ -101,7 +134,8 @@ void Controller::initComponent()
     if (probeWindowComponent->isError())
         qCritical() << probeWindowComponent->errors();
 
-    getMainWindow()->show();
+    //getMainWindow()->show();
+    getMatchWindow()->show();
 }
 
 void Controller::initCv_debug()

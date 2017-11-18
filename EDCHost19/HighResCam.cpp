@@ -7,133 +7,9 @@
 using namespace std;
 using namespace cv;
 
-void HighResCam::TransToLogic(QVector<cv::Point2f>& info)
+QPointF cvToQ(cv::Point2f p)
 {
-	for (auto &pt : info)
-	{
-        //pt = ccToLogic.cam2logic(pt);
-	}
-}
-
-HighResCam::HighResCam(QObject *parent)
-	:QAbstractVideoSurface(parent)
-{
-	locateMachine.InitCv();
-	CoordinateConverter::Param theParam;
-    int nCamWidth = CAMERA_DOWNSAMPLE_SIZE.width();
-    int nCamHeight = CAMERA_DOWNSAMPLE_SIZE.height();
-    theParam.CameraSize = QSize(nCamWidth, nCamHeight);
-    theParam.LogicSize = QSizeF(nLogicWidth, nLogicHeight);
-    //theParam.CornersInCamera[0] = Point2f(0, 0);
-    //theParam.CornersInCamera[1] = Point2f(nCamWidth, 0);
-    //theParam.CornersInCamera[2] = Point2f(0, nCamHeight);
-    //theParam.CornersInCamera[3] = Point2f(nCamWidth, nCamHeight);
-	ccToLogic.SetParam(theParam);
-} 
-
-HighResCam::~HighResCam()
-{
-
-}
-
-QList<QVideoFrame::PixelFormat> HighResCam::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
-{
-    return QList<QVideoFrame::PixelFormat>()
-            <<QVideoFrame::Format_BGR24
-           <<QVideoFrame::Format_RGB32;
-}
-
-bool HighResCam::present(const QVideoFrame & frame)
-{
-    QVideoFrame::PixelFormat pixelFormat = frame.pixelFormat();
-    switch (pixelFormat) {
-        case QVideoFrame::Format_RGB32:
-        case QVideoFrame::Format_BGR24: break;
-    default:
-		setError(IncorrectFormatError);
-		return false;
-	}
-
-	QVideoFrame frametodraw(frame);
-
-	if (!frametodraw.map(QAbstractVideoBuffer::ReadOnly))
-	{
-		setError(ResourceError);
-		return false;
-	}
-
-    cv::Mat matToLocate;
-
-    if (pixelFormat == QVideoFrame::Format_RGB32)
-    {
-        matToLocate = cv::Mat(frametodraw.height(),
-		frametodraw.width(),
-		CV_8UC4,
-		frametodraw.bits(),
-		frametodraw.bytesPerLine());
-    }
-    else if (pixelFormat == QVideoFrame::Format_BGR24)
-    {
-        matToLocate = cv::Mat(frametodraw.height(),
-                              frametodraw.width(),
-                              CV_8UC3,
-                              frametodraw.bits(),
-                              frametodraw.bytesPerLine());
-    }
-
-    cv::Mat downsample;
-    cv::resize(matToLocate, downsample, cv::Size2f(960, 540));
-
-    locateMachine.Locate(downsample);
-
-    QImage image = QImage(
-                downsample.data,
-                downsample.cols,
-                downsample.rows,
-                downsample.step1(),
-                QImage::Format_RGB888);
-
-    auto info = locateMachine.GetLocation();
-
-    QPixmap pixSignal(QPixmap::fromImage(image));
-    auto infCompressed = CameraInfo(info[0], info[1], info[2]);
-    emit ImageArrived(infCompressed, pixSignal);
-    frametodraw.unmap();
-
-
-#ifdef PERS_DEBUG
-	auto qstrCam = QString("Camera-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));
-	qstrCam += QString("Camera-CarA:(%1,%2)\n").arg(int(info[1].x)).arg((int)info[1].y);
-	qstrCam += QString("Camera-CarB:(%1,%2)\n").arg(int(info[2].x)).arg((int)info[2].y);
-#endif
-	TransToLogic(info);
-#ifdef PERS_DEBUG
-	qstrCam += QString("Logic-Ball:(%1,%2)\n").arg(int(info[0].x)).arg(int(info[0].y));
-	qstrCam += QString("Logic-CarA:(%1,%2)\n").arg(int(info[1].x)).arg(int(info[1].y));
-	qstrCam += QString("Logic-CarB:(%1,%2)\n").arg(int(info[2].x)).arg(int(info[2].y));
-	emit DebugPers(qstrCam);
-#endif
-
-	return true;
-}
-
-void HighResCam::SetPerspective(const QVector<cv::Point2f>& pts)
-{
-	CoordinateConverter::Param theParam = ccToLogic.GetParam();
-    //theParam.CornersInCamera[0] = pts[0];
-    //theParam.CornersInCamera[1] = pts[1];
-    //theParam.CornersInCamera[2] = pts[2];
-    //theParam.CornersInCamera[3] = pts[3];
-	ccToLogic.SetParam(theParam);
-}
-
-QVector<cv::Point2f> ImgProc::GetLocation()
-{
-	Point2f ptA(0,0), ptB(0,0), ptBall(0,0);
-	if (!ball_centers.empty()) ptBall = ball_centers[0];
-	if (!car1_centers.empty()) ptA = car1_centers[0];
-	if (!car2_centers.empty()) ptB = car2_centers[0];
-	return QVector<cv::Point2f>{ptBall, ptA, ptB};
+    return {p.x, p.y};
 }
 
 void ImgProc::InitCv()
@@ -177,13 +53,39 @@ void ImgProc::InitCv()
 }
 
 LocateResult* ImgProc::GetResult() {
-    return nullptr;
+    LocateResult* r = new LocateResult;
+
+    r->ball_succeeded = false;
+    r->cars_succeeded = false;
+
+    if (!ball_centers.empty())
+    {
+        r->ball_succeeded = true;
+        cv::Point2f p = ball_centers[0];
+        r->ball_center = cvToQ(p);
+        r->logic_ball_center = cvt.cam2logic(p);
+    }
+
+    if (!car1_centers.empty() && !car2_centers.empty())
+    {
+        r->cars_succeeded = true;
+        cv::Point2f ps[2] = {car1_centers[0], car2_centers[0]};
+
+        for (int i: {0,1})
+        {
+            r->cars_center[i]=cvToQ(ps[i]);
+            r->logic_cars_center[i] = cvt.cam2logic(ps[i]);
+
+        }
+    }
+
+    return r;
 }
 
 void ImgProc::Locate(Mat& mat)
 {
 	src = mat;
-	cvtColor(src, hsv, COLOR_BGR2HSV);
+    hsv = mat;
 
     cv::inRange(hsv,
                 Scalar(config.ball_hue_lb, config.ball_s_lb, config.ball_v_lb),
@@ -235,11 +137,6 @@ void ImgProc::Locate(Mat& mat)
     cv::merge(vector<Mat>{ ball, car1, car2}, merged);
 	imshow("black", merged);
 #endif
-}
-
-ImgProc::~ImgProc()
-{
-	
 }
 
 vector<Point2f> ImgProc::GetCenter(Mat src, const ProcConfig & cfg, int nType)

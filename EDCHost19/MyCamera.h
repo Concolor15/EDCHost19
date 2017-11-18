@@ -106,12 +106,14 @@ private:
 
     cv::Mat frame;
     CoordinateConverter cvt;
-    ImgProc proc;
+    ImgProc proc{cvt};
+
+    QTime frame_timestamp;
 
     void run() override;
 
 signals:
-    void ResultEmitted(QSharedPointer<LocateResult> result);
+    void ResultEmitted(LocateResult* result);
 };
 
 #endif // MYCAMERA_H

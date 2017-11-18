@@ -12,8 +12,13 @@ Window {
         textCamera.text = text
     }
 
+    function setSerialText(text) {
+        textSerial.text = text
+    }
+
     Component.onCompleted: {
         My.Ctrl.onCameraDebugInfoEmitted.connect(setCameraText)
+        My.Ctrl.onSerialDebugInfoEmitted.connect(setSerialText)
     }
 
 
