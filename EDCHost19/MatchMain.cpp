@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include "config.h"
 #include "MatchMain.h"
-#include "EDCHost19.h"
 #include "controller.h"
 
 MatchMain::MatchMain(QWidget *parent)
     : QDialog(parent), logic(&GetController()->GetLogic())
 {
 	ui.setupUi(this);
-	QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
+    //QObject::connect(dynamic_cast<EDCHost19*>(parent), &EDCHost19::PassInfo, this, &MatchMain::Running);
     logic->ResetInfo();
 }
 

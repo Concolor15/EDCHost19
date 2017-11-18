@@ -7,18 +7,7 @@
 using namespace cv;
 using namespace Eigen;
 
-inline Vector3d ToEigenVector3(Point2f p)
-{
-	return Vector3d(p.x, p.y, 1.0);
-}
-
-inline Point2f ToCvPoint(Vector3d v)
-{
-	return Point2f(v[0] / v[2], v[1] / v[2]);
-}
-
-
-static void getPerspectiveTransform(Point2f(&src)[4], Point2f(&dst)[4], Matrix3d& res)
+static void getPerspectiveTransform(Vector2d(&src)[4], Vector2d(&dst)[4], Matrix3d& res)
 {
 	// Copy from OpenCv Source Code
 
@@ -26,20 +15,20 @@ static void getPerspectiveTransform(Point2f(&src)[4], Point2f(&dst)[4], Matrix3d
 	Matrix<double, 8, 1> B;
 	for (int i = 0; i < 4; ++i)
 	{
-		A(i, 0) = A(i + 4, 3) = src[i].x;
-		A(i, 1) = A(i + 4, 4) = src[i].y;
+        A(i, 0) = A(i + 4, 3) = src[i].x();
+        A(i, 1) = A(i + 4, 4) = src[i].y();
 		A(i, 2) = A(i + 4, 5) = 1;
 
 		A(i, 3) = A(i, 4) = A(i, 5) =
 			A(i + 4, 0) = A(i + 4, 1) = A(i + 4, 2) = 0.0;
 
-		A(i, 6) = -src[i].x*dst[i].x;
-		A(i, 7) = -src[i].y*dst[i].x;
-		A(i + 4, 6) = -src[i].x*dst[i].y;
-		A(i + 4, 7) = -src[i].y*dst[i].y;
+        A(i, 6) = -src[i].x()*dst[i].x();
+        A(i, 7) = -src[i].y()*dst[i].x();
+        A(i + 4, 6) = -src[i].x()*dst[i].y();
+        A(i + 4, 7) = -src[i].y()*dst[i].y();
 
-		B[i] = dst[i].x;
-		B[i + 4] = dst[i].y;
+        B[i] = dst[i].x();
+        B[i + 4] = dst[i].y();
 	}
 
     Matrix<double, 8, 1> X = A.jacobiSvd(ComputeFullU | ComputeFullV).solve(B);
@@ -57,40 +46,41 @@ static void getPerspectiveTransform(Point2f(&src)[4], Point2f(&dst)[4], Matrix3d
 
 void CoordinateConverter::updateParam()
 {
-	Point2f displayCorners[4] = {
-		{0,0},
-		{(float)_param.DisplaySize.width, 0},
-		{0, (float)_param.LogicSize.height},
-		{ (float)_param.DisplaySize.width, (float)_param.DisplaySize.height},
+    Array2d vlogicSize(_param.LogicSize.width(),_param.LogicSize.height());
+    Array2d vcamSize(_param.CameraSize.width(), _param.CameraSize.height());
+
+    Vector2d logicCorners[4] = {
+        {0, 0},
+        {1.0, 0.0},
+        {0.0, 1.0},
+        {1.0, 1.0},
 	};
 
-	transformMatrix = getPerspectiveTransform(_param.CornersInCamera, displayCorners);
+    for (Vector2d& x : logicCorners) x.array() *= vlogicSize;
 
-	Point2f logicCorners[4] = {
-		{0, 0},
-		{ (float)_param.LogicSize.width, 0},
-		{0, (float)_param.LogicSize.height},
-		{ (float)_param.LogicSize.width, (float)_param.LogicSize.height},
-	};
+    auto const& corners = _param.CornersInCamera;
+    Vector2d cornersInCamera[4] = {
+        {corners[0].x(), corners[0].y()},
+        {corners[1].x(), corners[1].y()},
+        {corners[2].x(), corners[2].y()},
+        {corners[3].x(), corners[3].y()},
+    };
 
-	getPerspectiveTransform(_param.CornersInCamera, logicCorners, _cam2logic);
+    for (Vector2d& x: cornersInCamera) x.array() *= vcamSize;
+
+    getPerspectiveTransform(cornersInCamera, logicCorners, _cam2logic);
 	_logic2cam = _cam2logic.inverse();
 }
 
-void CoordinateConverter::TransformImage(const cv::Mat &src, cv::Mat& dst)
+QPointF CoordinateConverter::cam2logic(const Point2f& p)
 {
-	dst.create(_param.DisplaySize, src.type());
-	cv::warpPerspective(src, dst, transformMatrix, _param.DisplaySize);
+    Vector3d v = _cam2logic*Vector3d(p.x, p.y, 1.0);
+    return {v[0]/v[2], v[1]/v[2]};
 }
 
-Point2f CoordinateConverter::cam2logic(const Point2f &p)
+Point2f CoordinateConverter::logic2cam(const QPointF& p)
 {
-	auto p1 = ToCvPoint(_cam2logic*ToEigenVector3(p));
-	return Point2f(p1.y, p1.x);
-}
-
-Point2f CoordinateConverter::logic2cam(const Point2f &p)
-{
-	return ToCvPoint(_logic2cam*ToEigenVector3(p));
+    Vector3d v = _logic2cam*Vector3d(p.x(), p.y(), 1.0);
+    return {float(v[0]/v[2]), float(v[1]/v[2])};
 }
 

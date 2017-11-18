@@ -8,6 +8,16 @@
 #include "CoordinateConverter.h"
 #include "globalconfig.h"
 
+struct LocateResult
+{
+    QPointF ball_center;
+    QPointF cars_center[2];
+    QPointF logic_ball_center;
+    QPointF logic_cars_center[2];
+
+    QDateTime timestamp;
+};
+
 class ImgProc
 {
 public:
@@ -18,6 +28,9 @@ public:
 
 	//保证不会修改 mat
 	void Locate(cv::Mat& mat);
+
+    //得到定位结果，指针由调用者负责释放
+    LocateResult* GetResult();
 
 	// 定位所需参数
 	ProcConfig config;

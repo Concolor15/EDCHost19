@@ -3,6 +3,9 @@
 
 #include <QtCore>
 #include <QtMultimedia>
+#include <opencv2/core.hpp>
+#include "HighResCam.h"
+#include "globalconfig.h"
 
 class MyCamera: public QCamera
 {
@@ -46,23 +49,69 @@ public:
 
 class MyFilterRunnable: public QVideoFilterRunnable
 {
+    QThread* worker;
 public:
+    MyFilterRunnable(QThread* worker): worker(worker) { }
     QVideoFrame run(QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags) override;
 };
 
-inline QVideoFilterRunnable* MyFilter::createFilterRunnable()
+template<typename T>
+class AtomicData
 {
-    return new MyFilterRunnable();
-}
+    //using T=int;
+    QAtomicPointer<T> pointer;
+public:
+    void set_heap_pointer(T* newData)
+    {
+        T* old = pointer.fetchAndStoreOrdered(newData);
+        delete old;
+    }
 
-class ImgprocThread: QThread
+    void set(T const& newData)
+    {
+        set_heap_pointer(new T(newData));
+    }
+
+    T* get_and_clear()
+    {
+        return pointer.fetchAndStoreOrdered(nullptr);
+    }
+
+    bool get_and_clear_to(T& store)
+    {
+        T* newData=get_and_clear();
+
+        if (newData!=nullptr)
+        {
+            store = *newData;
+            delete newData;
+            return true;
+        }
+
+        return false;
+    }
+};
+
+class ImgprocThread: public QThread
 {
     Q_OBJECT
-    QMutex* inst_lock;
-    QMutex* cv_lock;
-    QWaitCondition* cv;
-    QAtomicPointer<void>* param;
+    friend class MyFilterRunnable;
+public:
+    AtomicData<ProcConfig> config;
+    AtomicData<CoordinateConverter::Param> coord_param;
+private:
+    static QMutex inst_lock;
+    QMutex cv_mutex;
+    QWaitCondition cv;
+
+    cv::Mat frame;
+    CoordinateConverter cvt;
+    ImgProc proc;
+
     void run() override;
+
+signals:
+    void ResultEmitted(QSharedPointer<LocateResult> result);
 };
 
 #endif // MYCAMERA_H
