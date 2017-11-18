@@ -99,6 +99,7 @@ class ImgprocThread: public QThread
 public:
     AtomicData<ProcConfig> config;
     AtomicData<CoordinateConverter::Param> coord_param;
+    void InitCv() { proc.InitCv();}
 private:
     static QMutex inst_lock;
     QMutex cv_mutex;

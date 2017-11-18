@@ -20,6 +20,7 @@ Controller::Controller(QObject *parent) : QObject(parent),
 
     imgThread = new ImgprocThread();
     imgThread->start();
+    imgThread->InitCv();
     QObject::connect(
                 imgThread, &ImgprocThread::ResultEmitted,
                 this, &Controller::imgproc_handle);

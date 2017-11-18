@@ -94,7 +94,7 @@ void ImgprocThread::run()
         return;
     }
 
-    proc.InitCv();
+    //proc.InitCv();
 
     for (;;)
     {
