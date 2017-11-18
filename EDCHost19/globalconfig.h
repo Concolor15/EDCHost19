@@ -4,45 +4,35 @@
 #include <QtCore>
 struct ProcConfig
 {
-    int red_reverse;
+    int ball_Y_lb;
+    int ball_Y_ub;
+    int ball_U_lb;
+    int ball_U_ub;
+    int ball_V_lb;
+    int ball_V_ub;
 
-    int ball_hue_lb;
-    int ball_hue_ub;
+    int car1_Y_lb;
+    int car1_Y_ub;
+    int car1_U_lb;
+    int car1_U_ub;
+    int car1_V_lb;
+    int car1_V_ub;
 
-    int car1_hue_lb;
-    int car1_hue_ub;
-
-    int car2_hue_lb;
-    int car2_hue_ub;
-
-    int car1_s_lb;
-    int car2_s_lb;
-    int ball_s_lb;
-
-    int car1_v_lb;
-    int car2_v_lb;
-    int ball_v_lb;
+    int car2_Y_lb;
+    int car2_Y_ub;
+    int car2_U_lb;
+    int car2_U_ub;
+    int car2_V_lb;
+    int car2_V_ub;
 
     int area_car_lb;
     int area_ball_lb;
 
     void reset_debug()
     {
-        red_reverse = 0;
-        ball_hue_lb = 0;
-        ball_hue_ub = 0;
-        car1_hue_lb = 0;
-        car1_hue_ub = 0;
-        car2_hue_lb = 0;
-        car2_hue_ub = 0;
-        car1_s_lb = 0;
-        car2_s_lb = 0;
-        ball_s_lb = 0;
-        ball_v_lb = 0;
-        car1_v_lb = 0;
-        car2_v_lb = 0;
+        *this = {};
         area_car_lb = 100;
-        area_ball_lb = 100;
+        area_ball_lb = 10;
     }
 };
 

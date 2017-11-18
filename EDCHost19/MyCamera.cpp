@@ -95,6 +95,8 @@ void ImgprocThread::run()
     }
 
     //proc.InitCv();
+    proc.cvt = &cvt;
+    proc.config = &config;
 
     for (;;)
     {
@@ -121,10 +123,44 @@ void ImgprocThread::run()
 
         r->timestamp = frame_timestamp;
 
-        emit ResultEmitted(r);
+        emit ResultEmitted(r, &proc.dst, &proc.merged);
 
 
         //qWarning() << "running";
         continue;
     }
+}
+
+void ImgprocThread::InitCv()
+{
+    using namespace cv;
+    config.reset_debug();
+
+    namedWindow("show");
+    namedWindow("black");
+    namedWindow("control");
+    namedWindow("control2");
+    cv::createTrackbar("ball_Y_lb", "control", &config.ball_Y_lb, 255);
+    cv::createTrackbar("ball_Y_ub", "control", &config.ball_Y_ub, 255);
+    cv::createTrackbar("ball_U_lb", "control", &config.ball_U_lb, 255);
+    cv::createTrackbar("ball_U_ub", "control", &config.ball_U_ub, 255);
+    cv::createTrackbar("ball_V_lb", "control", &config.ball_V_lb, 255);
+    cv::createTrackbar("ball_V_ub", "control", &config.ball_V_ub, 255);
+
+    createTrackbar("area_car_lb", "control", &config.area_car_lb, 1000);
+    createTrackbar("area_ball_lb", "control", &config.area_ball_lb, 200);
+
+    cv::createTrackbar("car1_Y_lb", "control2", &config.car1_Y_lb, 255);
+    cv::createTrackbar("car1_Y_ub", "control2", &config.car1_Y_ub, 255);
+    cv::createTrackbar("car1_U_lb", "control2", &config.car1_U_lb, 255);
+    cv::createTrackbar("car1_U_ub", "control2", &config.car1_U_ub, 255);
+    cv::createTrackbar("car1_V_lb", "control2", &config.car1_V_lb, 255);
+    cv::createTrackbar("car1_V_ub", "control2", &config.car1_V_ub, 255);
+
+    cv::createTrackbar("car2_Y_lb", "control2", &config.car2_Y_lb, 255);
+    cv::createTrackbar("car2_Y_ub", "control2", &config.car2_Y_ub, 255);
+    cv::createTrackbar("car2_U_lb", "control2", &config.car2_U_lb, 255);
+    cv::createTrackbar("car2_U_ub", "control2", &config.car2_U_ub, 255);
+    cv::createTrackbar("car2_V_lb", "control2", &config.car2_V_lb, 255);
+    cv::createTrackbar("car2_V_ub", "control2", &config.car2_V_ub, 255);
 }

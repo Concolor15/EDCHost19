@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QtMultimedia>
 #include <opencv2/core.hpp>
-#include "HighResCam.h"
+#include "imgproc.h"
 #include "globalconfig.h"
 
 class MyCamera: public QCamera
@@ -97,9 +97,9 @@ class ImgprocThread: public QThread
     Q_OBJECT
     friend class MyFilterRunnable;
 public:
-    AtomicData<ProcConfig> config;
+    AtomicData<ProcConfig> _config;
     AtomicData<CoordinateConverter::Param> coord_param;
-    void InitCv() { proc.InitCv();}
+    void InitCv();
 private:
     static QMutex inst_lock;
     QMutex cv_mutex;
@@ -107,14 +107,15 @@ private:
 
     cv::Mat frame;
     CoordinateConverter cvt;
-    ImgProc proc{cvt};
+    ProcConfig config;
+    ImgProc proc;
 
     QTime frame_timestamp;
 
     void run() override;
 
 signals:
-    void ResultEmitted(LocateResult* result);
+    void ResultEmitted(LocateResult* result, cv::Mat* src1, cv::Mat* src2);
 };
 
 #endif // MYCAMERA_H

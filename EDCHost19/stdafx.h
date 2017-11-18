@@ -2,12 +2,10 @@
 
 #include <QtCore>
 #include <QtGui>
-#include <QtWidgets>
 #include <QtQml>
 #include <QtQuick>
 #include <QtMultimedia>
 #include <vector>
-#include <chrono>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
