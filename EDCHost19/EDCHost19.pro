@@ -1,7 +1,7 @@
 # Created by and for Qt Creator. This file was created for editing the project sources only.
 # You may attempt to use it for building too, by modifying this file here.
 
-QT += core gui widgets quickcontrols2 qml quick  multimedia serialport
+QT += core gui quickcontrols2 qml quick  multimedia serialport
 TARGET = EDCHost19
 TEMPLATE = app
 
@@ -18,26 +18,22 @@ HEADERS = \
     controller.h \
     CoordinateConverter.h \
     GlobalType.h \
-    HighResCam.h \
-    MainLogic.h \
-    MatchMain.h \
     stdafx.h \
     globalconfig.h \
-    MyCamera.h
+    MyCamera.h \
+    imgproc.h \
+    logic.h
 
 SOURCES = \
     controller.cpp \
     CoordinateConverter.cpp \
-    HighResCam.cpp \
     main.cpp \
-    MainLogic.cpp \
-    MatchMain.cpp \
-    stdafx.cpp \
     globalconfig.cpp \
-    MyCamera.cpp
+    MyCamera.cpp \
+    imgproc.cpp \
+    logic.cpp
 
-FORMS = \
-    MatchMain.ui
+FORMS =
 
 
 #QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu

@@ -4,9 +4,8 @@
         <file>Resources/MainBGN.png</file>
         <file>Resources/MatchBGN.png</file>
         <file>Resources/PSPBGN.png</file>
-        <file>MyUI.css</file>
         <file>MatchUI.qml</file>
-        <file>Probe.qml</file>
+        <file>Debug.qml</file>
         <file>Main.qml</file>
         <file>Resources/Circle.qml</file>
         <file>Resources/MyButton.qml</file>

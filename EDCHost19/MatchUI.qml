@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import QtMultimedia 5.9
 import QtQuick.Shapes 1.0
+import my.uri 1.0
 import my.uri 1.0 as My
 import "./Resources"
 
@@ -17,6 +18,16 @@ ApplicationWindow {
     readonly property color backColor: "#66bb6a"
     readonly property bool isSetPerspective: btnSetPerspective.checked
     readonly property int viewIndex: btnSetPerspective.checked ? 1 : 0
+
+    property bool canStart:
+        logic.status === Logic.NotStart ||
+        logic.status === Logic.Finished
+
+    property bool canPause: logic.status === Logic.Running
+
+    Component.onCompleted: function() {
+        vid.source.start()
+    }
 
     footer: ToolBar {
         RowLayout {
@@ -77,10 +88,6 @@ ApplicationWindow {
             source: My.Ctrl.camera
             filters: [filter]
             anchors.fill: parent
-
-            Component.onCompleted: function() {
-                source.start()
-            }
         }
 
 
@@ -245,14 +252,32 @@ ApplicationWindow {
 
                 MyButton {
                     id: btnPauseResume
+                    text: root.canPause ? "暂停" : "继续"
+
+                    enabled: !root.canStart
 
                     anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: {
+                        if (root.canPause)
+                            logic.pause()
+                        else
+                            logic.resume()
+                    }
                 }
 
                 MyButton {
                     id: btnBeginEnd
+                    text: root.canStart ? "开始" : "结束"
 
                     anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: {
+                        if (root.canStart)
+                            logic.start()
+                        else
+                            logic.stop()
+                    }
                 }
 
                 MyButton {

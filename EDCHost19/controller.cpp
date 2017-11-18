@@ -7,9 +7,7 @@
 
 Controller* Controller::inst = 0;
 
-Controller::Controller(QObject *parent) : QObject(parent),
-    data_buffer(32, 0),
-    buffer_has_data(false)
+Controller::Controller(QObject *parent) : QObject(parent)
 {
     auto devices = QCameraInfo::availableCameras();
     cam = new MyCamera(devices[devices.size()-1], this);
@@ -41,33 +39,71 @@ Controller::Controller(QObject *parent) : QObject(parent),
 
     initComponent();
 
-    logic.MatchBegin();
+    logic.start();
 }
 
-void Controller::imgproc_handle(LocateResult* _data)
+void Controller::imgproc_handle(LocateResult* _data, cv::Mat* src1, cv::Mat* src2)
 {
     LocateResult* r = _data;
     CameraInfo info;
     info.posBall = r->logic_ball_center.toPoint();
-    info.posCar1 = r->logic_cars_center[0].toPoint();
-    info.posCar2 = r->logic_cars_center[1].toPoint();
+    info.posCar[0] = r->logic_cars_center[0];
+    info.posCar[1] = r->logic_cars_center[1];
 
-    logic.Run(info);
-    sendLater(logic.GetInfo());
+    logic.run(info);
+    sendLater();
+
+    QString debugInfo;
+    //debugInfo += QString("posBall: (%1, %2)\n").ar
+
     delete _data;
+
+    cv::imshow("show", *src1);
+    cv::imshow("black", *src2);
 }
 
 void Controller::serialport_timer_handle()
 {
     if (buffer_has_data)
     {
+        QString debugInfo = QTime::currentTime().toString() + "\n";
+
         buffer_has_data = false;
 
-        sp.write(data_buffer);
+        {
+        if (!sp.isOpen())
+        {
+            debugInfo += QStringLiteral("device not open!\n");
+            goto send;
+        }
+
+        if (!sp.isWritable())
+        {
+            debugInfo += QStringLiteral("device not writable!\n");
+            goto send;
+        }
+
+        auto count = sp.write((const char*)data_buffer, sizeof(data_buffer));
+
+        if (count == -1)
+        {
+            debugInfo += QStringLiteral("device write failed!\n");
+            goto send;
+        }
+
+        if (count != sizeof(data_buffer))
+        {
+            debugInfo += QStringLiteral("write partly failed: sent %1\n").arg(count);
+            goto send;
+        }
+
+        debugInfo += QStringLiteral("succeed\n");
+        }
+
+    send:
 
         static char hex[16+1]="0123456789ABCDEF";
 
-        QString debugInfo = QTime::currentTime().toString() + "\n";
         for (int i=0;i<8;i++)
         {
             for (int j=0;j<4;j++)
@@ -117,14 +153,17 @@ void Controller::initComponent()
 {
     static auto* this_inst = this;
     qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return this_inst;});
+    qmlRegisterType<Logic>("my.uri", 1, 0, "Logic");
     qmlRegisterType<MyFilter>("my.uri", 1, 0, "Filter");
 
     engine = new QQmlEngine(this);
     engine->rootContext()->setContextProperty("logic", &logic);
 
+    QObject::connect(engine, &QQmlEngine::quit, qGuiApp, &QGuiApplication::quit);
+
     mainWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Main.qml"), this);
     matchWindowComponent = new QQmlComponent(engine, QUrl("qrc:/MatchUI.qml"), this);
-    probeWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Probe.qml"), this);
+    probeWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Debug.qml"), this);
 
     if (mainWindowComponent->isError())
         qCritical() << mainWindowComponent->errors();
@@ -139,33 +178,12 @@ void Controller::initComponent()
     getMatchWindow()->show();
 }
 
-void Controller::initCv_debug()
+void Controller::sendLater()
 {
-    cv_param.reset_debug();
-    cv::namedWindow("show");
-    cv::namedWindow("black");
-    cv::namedWindow("control", CV_WINDOW_NORMAL);
-    cv::createTrackbar("car1_red_reverse", "control", &cv_param.red_reverse, 1);
-    cv::createTrackbar("ball_hue_lb", "control", &cv_param.ball_hue_lb, 180);
-    cv::createTrackbar("ball_hue_ub", "control", &cv_param.ball_hue_ub, 180);
-    cv::createTrackbar("car1_hue_lb", "control", &cv_param.car1_hue_lb, 180);
-    cv::createTrackbar("car1_hue_ub", "control", &cv_param.car1_hue_ub, 180);
-    cv::createTrackbar("car2_hue_lb", "control", &cv_param.car2_hue_lb, 180);
-    cv::createTrackbar("car2_hue_ub", "control", &cv_param.car2_hue_ub, 180);
-    cv::createTrackbar("ball_s_lb", "control", &cv_param.ball_s_lb, 255);
-    cv::createTrackbar("car1_s_lb", "control", &cv_param.car1_s_lb, 255);
-    cv::createTrackbar("car2_s_lb", "control", &cv_param.car2_s_lb, 255);
-    cv::createTrackbar("ball_v_lb", "control", &cv_param.ball_v_lb, 255);
-    cv::createTrackbar("car1_v_lb", "control", &cv_param.car1_v_lb, 255);
-    cv::createTrackbar("car2_v_lb", "control", &cv_param.car2_v_lb, 255);
-    cv::createTrackbar("area_car_lb", "control", &cv_param.area_car_lb, 1000);
-    cv::createTrackbar("area_ball_lb", "control", &cv_param.area_ball_lb, 200);
-}
-
-void Controller::sendLater(MatchInfo const& data)
-{
+    logic.packToByteArray(data_buffer);
     buffer_has_data = true;
 
+    /*
     auto const& pos = data.posObjs;
     data_buffer[0] = 0xFC | (data.binShootout << 1) | (data.shootSide^1);
     data_buffer[1] = (data.quaGameStatus << 6) | (data.nTimeByRounds >> 8);
@@ -193,6 +211,7 @@ void Controller::sendLater(MatchInfo const& data)
     data_buffer[19] = data.nScore[1];
     data_buffer[30] = 0x0D;
     data_buffer[31] = 0x0A;
+    */
 }
 
 void Controller::setPerspective(
@@ -211,4 +230,13 @@ void Controller::setPerspective(
     param->CornersInCamera[3] = p4;
 
     imgThread->coord_param.set_heap_pointer(param);
+}
+
+void Controller::restartSerial()
+{
+    sp.close();
+    sp.clearError();
+
+    if (!sp.open(QIODevice::WriteOnly))
+        qCritical() << sp.errorString();
 }

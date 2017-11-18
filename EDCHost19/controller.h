@@ -7,7 +7,7 @@
 #include <QtQuick>
 #include <QtSerialPort>
 #include "GlobalType.h"
-#include "MainLogic.h"
+#include "logic.h"
 #include "MyCamera.h"
 #include "globalconfig.h"
 
@@ -22,6 +22,42 @@ class Controller : public QObject
     explicit Controller(QObject *parent = nullptr);
     static Controller* inst;
 
+
+public:
+    friend Controller* GetController();
+    static void Init();
+    static void Destroy();
+
+    ImgprocThread* imgThread;
+
+    Logic& GetLogic() {return logic;}
+
+    void sendLater();
+
+    Q_INVOKABLE void setPerspective(
+                QPointF p1,
+                QPointF p2,
+                QPointF p3,
+                QPointF p4);
+
+    Q_INVOKABLE void restartSerial();
+
+    MyCamera* getCamera() const {return cam;}
+    QQuickWindow* getMainWindow();
+    QQuickWindow* getMatchWindow();
+    QQuickWindow* getProbeWindow();
+
+signals:
+    void cameraChanged(MyCamera* newCamera);
+    void CameraDebugInfoEmitted(QString info);
+    void SerialDebugInfoEmitted(QString info);
+
+public slots:
+    void imgproc_handle(LocateResult* data, cv::Mat* src1, cv::Mat* src2);
+    void serialport_timer_handle();
+
+
+private:
     QQmlEngine* engine;
     QQmlComponent* mainWindowComponent;
     QQmlComponent* matchWindowComponent;
@@ -30,50 +66,21 @@ class Controller : public QObject
     QPointer<QQuickWindow> matchWindow;
     QPointer<QQuickWindow> probeWindow;
 
-    QQuickWindow* getMainWindow();
-    QQuickWindow* getMatchWindow();
-    QQuickWindow* getProbeWindow();
+    Logic logic;
 
-    MainLogic logic;
-
-    QTimer timer; 
+    QTimer timer;
 
     MyCamera* cam;
     ProcConfig cv_param;
 
     QSerialPort sp;
-    QByteArray data_buffer;
-    bool buffer_has_data;
+    uint8_t data_buffer[32];
+    bool buffer_has_data {false};
 
     void setCamera(MyCamera* newCamera);
 
     void initCv_debug();
     void initComponent();
-public:
-    friend Controller* GetController();
-    static void Init();
-    static void Destroy();
-
-    ImgprocThread* imgThread;
-    MyCamera* getCamera() const {return cam;}
-
-    MainLogic& GetLogic() {return logic;}
-
-    void sendLater(MatchInfo const& info);
-
-    Q_INVOKABLE void setPerspective(
-            QPointF p1,
-            QPointF p2,
-            QPointF p3,
-            QPointF p4);
-
-signals:
-    void cameraChanged(MyCamera* newCamera);
-    void CameraDebugInfoEmitted(QString info);
-    void SerialDebugInfoEmitted(QString info);
-public slots:
-    void imgproc_handle(LocateResult* data);
-    void serialport_timer_handle();
 };
 
 inline Controller* GetController()

@@ -1,9 +1,10 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
+import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import my.uri 1.0 as My
 
-Window {
+ApplicationWindow {
     width: 750
     height: 600
     //title: "调试信息"
@@ -21,6 +22,31 @@ Window {
         My.Ctrl.onSerialDebugInfoEmitted.connect(setSerialText)
     }
 
+    footer: ToolBar {
+        RowLayout {
+            anchors.fill: parent
+
+            ToolButton {
+                text: "重启串口"
+
+                onClicked: My.Ctrl.restartSerial()
+            }
+
+            ToolButton {
+                text: "全屏主界面"
+
+                onClicked: My.Ctrl.matchWindow.showFullScreen()
+            }
+
+            Item { Layout.fillWidth: true }
+
+            ToolButton {
+                text: "结束进程"
+
+                onClicked: Qt.quit()
+            }
+        }
+    }
 
     Label {
         id: labelCamera

@@ -15,18 +15,18 @@ struct LocateResult
     bool ball_succeeded;
     bool cars_succeeded;
 
-    // below is filled by ImgprocThread
-
     QPointF logic_ball_center;
     QPointF logic_cars_center[2];
 
     QTime timestamp;
+
+    // below is for debug
 };
 
 class ImgProc
 {
 public:
-    ImgProc(CoordinateConverter const& cvt): cvt(cvt) { }
+    ImgProc() { }
 
 	//利用 opencv 生成滑动条，方便调试时改变参数
 	void InitCv();
@@ -38,10 +38,10 @@ public:
     LocateResult* GetResult();
 
 	// 定位所需参数
-	ProcConfig config;
-private:
-    CoordinateConverter const& cvt;
+    ProcConfig const* config;
+    CoordinateConverter const* cvt;
 
+//private:
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
 	//src : 二值化图像
 	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg, int nType);
