@@ -1,20 +1,22 @@
 #pragma once
+#include <QtCore>
 #include <opencv2/core.hpp>
 #include <eigen3/Eigen/Eigen>
 class CoordinateConverter
 {
 public:
 	struct Param {
-		cv::Size2i CameraSize;
-		cv::Point2f CornersInCamera[4];
+        QSize CameraSize;
+        QPointF CornersInCamera[4];
 
-		cv::Size2f LogicSize;
-
-		cv::Size2i DisplaySize;
-		//cv::Point2f CornersInDisplay[4];
+        QSizeF LogicSize;
 	};
 
-	void TransformImage(const cv::Mat &src, cv::Mat& dst);
+    CoordinateConverter()
+    {
+        _cam2logic.setIdentity();
+        _logic2cam.setIdentity();
+    }
 
 	void SetParam(const Param &param)
 	{
@@ -22,15 +24,15 @@ public:
 		updateParam();
 	}
 	Param GetParam() const { return _param; }
-	cv::Point2f cam2logic(const cv::Point2f &);
-	cv::Point2f logic2cam(const cv::Point2f &);
+    Param* GetParamAddress() { return &_param; }
+
+    void updateParam();
+
+    QPointF cam2logic(const cv::Point2f &);
+    cv::Point2f logic2cam(const QPointF &);
 
 private:
 	Param _param;
 	Eigen::Matrix3d _cam2logic;
 	Eigen::Matrix3d _logic2cam;
-
-	cv::Mat transformMatrix;
-
-	void updateParam();
 };

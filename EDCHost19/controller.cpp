@@ -3,13 +3,12 @@
 #include "controller.h"
 
 #include <opencv2/highgui.hpp>
+#include <CoordinateConverter.h>
 
 Controller* Controller::inst = 0;
 
 Controller::Controller(QObject *parent) : QObject(parent),
-    timer(this),
-    cam(nullptr),
-    sp(this),
+    imgThread(new ImgprocThread()),
     data_buffer(32, 0),
     buffer_has_data(false)
 {
@@ -20,6 +19,7 @@ Controller::Controller(QObject *parent) : QObject(parent),
     imgproc->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
     imgproc->setManualWhiteBalance(4000);
 
+    imgThread->start();
 
     sp.setPortName(SERIAL_PORT_NAME);
     sp.setBaudRate(QSerialPort::Baud115200);
@@ -34,6 +34,8 @@ Controller::Controller(QObject *parent) : QObject(parent),
 
     QObject::connect(&timer, &QTimer::timeout, this, &Controller::serialport_timer_handle);
     timer.start(100);
+
+    initComponent();
 }
 
 void Controller::serialport_timer_handle()
@@ -45,12 +47,61 @@ void Controller::serialport_timer_handle()
         sp.write(data_buffer);
 
         QString debugInfo = QTime::currentTime().toString() + "\n" + QString(data_buffer.toHex());
-        emit SerialPortInfoUpdated(debugInfo);
+        emit SerialDebugInfoEmitted(debugInfo);
     }
     else
     {
-        emit SerialPortInfoUpdated("No Data Send");
+        emit SerialDebugInfoEmitted("No Data Send");
     }
+}
+
+QQuickWindow* Controller::getMainWindow()
+{
+    if (mainWindow == nullptr)
+        mainWindow = qobject_cast<QQuickWindow*>(mainWindowComponent->create());
+
+    return mainWindow;
+}
+
+QQuickWindow* Controller::getMatchWindow()
+{
+    if (matchWindow == nullptr)
+        matchWindow = qobject_cast<QQuickWindow*>(matchWindowComponent->create());
+
+    return matchWindow;
+}
+
+QQuickWindow* Controller::getProbeWindow()
+{
+    if (probeWindow == nullptr)
+        probeWindow = qobject_cast<QQuickWindow*>(probeWindowComponent->create());
+
+    return probeWindow;
+}
+
+void Controller::initComponent()
+{
+    static auto* this_inst = this;
+    qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return this_inst;});
+    qmlRegisterType<MyFilter>("my.uri", 1, 0, "Filter");
+
+    engine = new QQmlEngine(this);
+    engine->rootContext()->setContextProperty("logic", &logic);
+
+    mainWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Main.qml"), this);
+    matchWindowComponent = new QQmlComponent(engine, QUrl("qrc:/MatchUI.qml"), this);
+    probeWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Probe.qml"), this);
+
+    if (mainWindowComponent->isError())
+        qCritical() << mainWindowComponent->errors();
+
+    if (matchWindowComponent->isError())
+        qCritical() << matchWindowComponent->errors();
+
+    if (probeWindowComponent->isError())
+        qCritical() << probeWindowComponent->errors();
+
+    getMainWindow()->show();
 }
 
 void Controller::initCv_debug()
@@ -107,4 +158,22 @@ void Controller::sendLater(MatchInfo const& data)
     data_buffer[19] = data.nScore[1];
     data_buffer[30] = 0x0D;
     data_buffer[31] = 0x0A;
+}
+
+void Controller::setPerspective(
+        QPointF p1,
+        QPointF p2,
+        QPointF p3,
+        QPointF p4)
+{
+    qWarning() << p1 << p2 << p3 << p4;
+    auto* param = new CoordinateConverter::Param;
+    param->CameraSize = {0, 0};
+    param->LogicSize = {297, 210};
+    param->CornersInCamera[0] = p1;
+    param->CornersInCamera[1] = p2;
+    param->CornersInCamera[2] = p3;
+    param->CornersInCamera[3] = p4;
+
+    imgThread->coord_param.set_heap_pointer(param);
 }

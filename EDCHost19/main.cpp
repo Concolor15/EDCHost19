@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "config.h"
 
-#include "EDCHost19.h"
-#include <QtWidgets/QApplication>
+#include <QtCore>
 #include <QtQuick>
+#include <QtQuickControls2/QQuickStyle>
 #include <QtQml>
 
 #include "HighResCam.h"
@@ -13,6 +13,7 @@
 int main(int argc, char *argv[])
 {
     qputenv( "QSG_RENDER_LOOP", "threaded");
+    QQuickStyle::setStyle("Material");
 
 	QApplication theApp(argc, argv);
 
@@ -24,19 +25,6 @@ int main(int argc, char *argv[])
 	myStylesheets.close();
 
     Controller::Init();
-
-    qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return GetController();});
-    qmlRegisterType<MyFilter>("my.uri", 1, 0, "Filter");
-
-    QQmlEngine engine;
-    engine.rootContext()->setContextProperty("logic", &GetController()->GetLogic());
-
-    QQmlComponent comp1(&engine, QUrl("qrc:/MatchUI.qml"));
-
-    qInfo() << comp1.errors();
-
-    QQuickWindow* window = qobject_cast<QQuickWindow*>(comp1.create());
-    window->show();
 
     //EDCHost19 theMainWindow;
     //theMainWindow.show();

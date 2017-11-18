@@ -11,7 +11,7 @@ void HighResCam::TransToLogic(QVector<cv::Point2f>& info)
 {
 	for (auto &pt : info)
 	{
-		pt = ccToLogic.cam2logic(pt);
+        //pt = ccToLogic.cam2logic(pt);
 	}
 }
 
@@ -22,13 +22,12 @@ HighResCam::HighResCam(QObject *parent)
 	CoordinateConverter::Param theParam;
     int nCamWidth = CAMERA_DOWNSAMPLE_SIZE.width();
     int nCamHeight = CAMERA_DOWNSAMPLE_SIZE.height();
-    theParam.CameraSize = Size2i(nCamWidth, nCamHeight);
-	theParam.DisplaySize = Size2i(nViewWidth, nViewHeight);
-	theParam.LogicSize = Size2i(nLogicWidth, nLogicHeight); 
-	theParam.CornersInCamera[0] = Point2f(0, 0);
-	theParam.CornersInCamera[1] = Point2f(nCamWidth, 0); 
-	theParam.CornersInCamera[2] = Point2f(0, nCamHeight);
-	theParam.CornersInCamera[3] = Point2f(nCamWidth, nCamHeight);
+    theParam.CameraSize = QSize(nCamWidth, nCamHeight);
+    theParam.LogicSize = QSizeF(nLogicWidth, nLogicHeight);
+    //theParam.CornersInCamera[0] = Point2f(0, 0);
+    //theParam.CornersInCamera[1] = Point2f(nCamWidth, 0);
+    //theParam.CornersInCamera[2] = Point2f(0, nCamHeight);
+    //theParam.CornersInCamera[3] = Point2f(nCamWidth, nCamHeight);
 	ccToLogic.SetParam(theParam);
 } 
 
@@ -121,10 +120,10 @@ bool HighResCam::present(const QVideoFrame & frame)
 void HighResCam::SetPerspective(const QVector<cv::Point2f>& pts)
 {
 	CoordinateConverter::Param theParam = ccToLogic.GetParam();
-	theParam.CornersInCamera[0] = pts[0];
-	theParam.CornersInCamera[1] = pts[1];
-	theParam.CornersInCamera[2] = pts[2];
-	theParam.CornersInCamera[3] = pts[3];
+    //theParam.CornersInCamera[0] = pts[0];
+    //theParam.CornersInCamera[1] = pts[1];
+    //theParam.CornersInCamera[2] = pts[2];
+    //theParam.CornersInCamera[3] = pts[3];
 	ccToLogic.SetParam(theParam);
 }
 
@@ -175,6 +174,10 @@ void ImgProc::InitCv()
 	createTrackbar("area_car_lb", "control", &config.area_car_lb, 1000);
 	createTrackbar("area_ball_lb", "control", &config.area_ball_lb, 200);
 #endif
+}
+
+LocateResult* ImgProc::GetResult() {
+    return nullptr;
 }
 
 void ImgProc::Locate(Mat& mat)
