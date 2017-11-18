@@ -136,6 +136,7 @@ void ImgProc::Locate(Mat& mat)
 	imshow("show", dst);
     cv::merge(vector<Mat>{ ball, car1, car2}, merged);
 	imshow("black", merged);
+    //QEventLoop::processEvents();
 #endif
 }
 
