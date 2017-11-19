@@ -6,7 +6,7 @@
 #include <QtQml>
 #include <QtQuick>
 #include <QtSerialPort>
-#include "GlobalType.h"
+#include "type.h"
 #include "logic.h"
 #include "MyCamera.h"
 #include "globalconfig.h"
@@ -25,8 +25,10 @@ class Controller : public QObject
 
 public:
     friend Controller* GetController();
-    static void Init();
-    static void Destroy();
+    static void static_Init();
+    static void static_Destroy();
+
+    void init();
 
     ImgprocThread* imgThread;
 
@@ -40,9 +42,11 @@ public:
                 QPointF p3,
                 QPointF p4);
 
-    Q_INVOKABLE void restartSerial();
+    Q_INVOKABLE void setSerial(bool openOrClose);
 
-    MyCamera* getCamera() const {return cam;}
+    Q_INVOKABLE void setCvDebugEnabled(bool cvDebugEnabled);
+
+    MyCamera* getCamera();
     QQuickWindow* getMainWindow();
     QQuickWindow* getMatchWindow();
     QQuickWindow* getProbeWindow();
@@ -53,7 +57,7 @@ signals:
     void SerialDebugInfoEmitted(QString info);
 
 public slots:
-    void imgproc_handle(LocateResult* data, cv::Mat* src1, cv::Mat* src2);
+    void imgproc_handle(LocateResult* data);
     void serialport_timer_handle();
 
 
@@ -79,6 +83,7 @@ private:
 
     void setCamera(MyCamera* newCamera);
 
+    void initSerial();
     void initCv_debug();
     void initComponent();
 };
@@ -88,12 +93,13 @@ inline Controller* GetController()
     return Controller::inst;
 }
 
-inline void Controller::Init()
+inline void Controller::static_Init()
 {
     inst = new Controller();
+    inst->init();
 }
 
-inline void Controller::Destroy()
+inline void Controller::static_Destroy()
 {
     delete inst;
     inst = nullptr;
@@ -102,6 +108,8 @@ inline void Controller::Destroy()
 inline void Controller::setCamera(MyCamera* newCamera)
 {
     if (cam == newCamera) return;
+
+    delete cam;
 
     cam = newCamera;
     emit cameraChanged(newCamera);

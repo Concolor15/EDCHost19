@@ -1,7 +1,7 @@
 #pragma once
 #include <QtCore>
-#include <opencv2/core.hpp>
-#include <eigen3/Eigen/Eigen>
+#include <opencv2/core/types.hpp>
+#include <eigen3/Eigen/Dense>
 class CoordinateConverter
 {
 public:
@@ -23,7 +23,7 @@ public:
 		_param = param;
 		updateParam();
 	}
-	Param GetParam() const { return _param; }
+    Param const& getParam() const { return _param; }
     Param* GetParamAddress() { return &_param; }
 
     void updateParam();

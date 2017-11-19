@@ -17,12 +17,12 @@ HEADERS = \
     config.h \
     controller.h \
     CoordinateConverter.h \
-    GlobalType.h \
     stdafx.h \
     globalconfig.h \
     MyCamera.h \
     imgproc.h \
-    logic.h
+    logic.h \
+    type.h
 
 SOURCES = \
     controller.cpp \

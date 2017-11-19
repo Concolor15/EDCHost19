@@ -4,32 +4,18 @@
 #include <QtMultimedia/QCamera>
 #include <QAbstractVideoSurface>
 #include <opencv2/core.hpp>
-#include "GlobalType.h"
+#include "type.h"
 #include "CoordinateConverter.h"
 #include "globalconfig.h"
 
-struct LocateResult
-{
-    QPointF ball_center;
-    QPointF cars_center[2];
-    bool ball_succeeded;
-    bool cars_succeeded;
 
-    QPointF logic_ball_center;
-    QPointF logic_cars_center[2];
-
-    QTime timestamp;
-
-    // below is for debug
-};
 
 class ImgProc
 {
 public:
     ImgProc() { }
 
-	//利用 opencv 生成滑动条，方便调试时改变参数
-	void InitCv();
+    bool debugEnabled = false;
 
 	//保证不会修改 mat
 	void Locate(cv::Mat& mat);
@@ -43,16 +29,9 @@ public:
 
 //private:
 	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
-	//src : 二值化图像
-	static std::vector<cv::Point2f> GetCenter(cv::Mat src, const ProcConfig & cfg, int nType);
+    //v2 : 二值化图像
+    std::vector<cv::Point2f> GetCenter(cv::Mat v2, int nType);
 	enum Types { CARA = 1, CARB = 2,BALL = 3 };
-	cv::Mat src, hsv;
-
-	// 8UC1, hsv 的 h 部分
-	cv::Mat hue;
-
-	// 单值化图像，s >= s_lb && h >= h_lb
-	cv::Mat mask_ball,mask_car1,mask_car2;
 
 	// 单值化图像
 	cv::Mat car1, car2, ball;

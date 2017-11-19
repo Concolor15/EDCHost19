@@ -26,6 +26,7 @@ ApplicationWindow {
     property bool canPause: logic.status === Logic.Running
 
     Component.onCompleted: function() {
+        My.Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
         vid.source.start()
     }
 
@@ -98,8 +99,8 @@ ApplicationWindow {
 
             property point np1 : Qt.point(0,0)
             property point np2 : Qt.point(1,0)
-            property point np3 : Qt.point(0.1,1)
-            property point np4 : Qt.point(0.9,1)
+            property point np3 : Qt.point(0,1)
+            property point np4 : Qt.point(1,1)
 
             readonly property rect bound: vid.contentRect
 

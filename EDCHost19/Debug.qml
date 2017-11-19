@@ -27,9 +27,27 @@ ApplicationWindow {
             anchors.fill: parent
 
             ToolButton {
-                text: "重启串口"
+                text: "启用调试"
 
-                onClicked: My.Ctrl.restartSerial()
+                onClicked: My.Ctrl.setCvDebugEnabled(true)
+            }
+
+            ToolButton {
+                text: "禁用调试"
+
+                onClicked: My.Ctrl.setCvDebugEnabled(false)
+            }
+
+            ToolButton {
+                text: "打开串口"
+
+                onClicked: My.Ctrl.setSerial(true)
+            }
+
+            ToolButton {
+                text: "关闭串口"
+
+                onClicked: My.Ctrl.setSerial(false)
             }
 
             ToolButton {

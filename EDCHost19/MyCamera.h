@@ -3,7 +3,8 @@
 
 #include <QtCore>
 #include <QtMultimedia>
-#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
+#include "type.h"
 #include "imgproc.h"
 #include "globalconfig.h"
 
@@ -55,42 +56,7 @@ public:
     QVideoFrame run(QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags) override;
 };
 
-template<typename T>
-class AtomicData
-{
-    //using T=int;
-    QAtomicPointer<T> pointer;
-public:
-    void set_heap_pointer(T* newData)
-    {
-        T* old = pointer.fetchAndStoreOrdered(newData);
-        delete old;
-    }
 
-    void set(T const& newData)
-    {
-        set_heap_pointer(new T(newData));
-    }
-
-    T* get_and_clear()
-    {
-        return pointer.fetchAndStoreOrdered(nullptr);
-    }
-
-    bool get_and_clear_to(T& store)
-    {
-        T* newData=get_and_clear();
-
-        if (newData!=nullptr)
-        {
-            store = *newData;
-            delete newData;
-            return true;
-        }
-
-        return false;
-    }
-};
 
 class ImgprocThread: public QThread
 {
@@ -99,7 +65,7 @@ class ImgprocThread: public QThread
 public:
     AtomicData<ProcConfig> _config;
     AtomicData<CoordinateConverter::Param> coord_param;
-    void InitCv();
+    void setDebugEnabled(bool newDebugEnabled);
 private:
     static QMutex inst_lock;
     QMutex cv_mutex;
@@ -112,10 +78,12 @@ private:
 
     QTime frame_timestamp;
 
+    bool debugEnabled = false;
+
     void run() override;
 
 signals:
-    void ResultEmitted(LocateResult* result, cv::Mat* src1, cv::Mat* src2);
+    void ResultEmitted(LocateResult* result);
 };
 
 #endif // MYCAMERA_H

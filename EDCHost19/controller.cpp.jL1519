@@ -7,28 +7,48 @@
 
 Controller* Controller::inst = 0;
 
-Controller::Controller(QObject *parent) : QObject(parent) { }
-
-void Controller::init()
+Controller::Controller(QObject *parent) : QObject(parent)
 {
+    auto devices = QCameraInfo::availableCameras();
+    cam = new MyCamera(devices[devices.size()-1], this);
+
+    auto* imgproc = cam->imageProcessing();
+    imgproc->setWhiteBalanceMode(QCameraImageProcessing::WhiteBalanceManual);
+    imgproc->setManualWhiteBalance(4000);
+
     imgThread = new ImgprocThread();
     imgThread->start();
-
+    imgThread->InitCv();
     QObject::connect(
                 imgThread, &ImgprocThread::ResultEmitted,
                 this, &Controller::imgproc_handle);
 
-    initSerial();
+    sp.setPortName(SERIAL_PORT_NAME);
+    sp.setBaudRate(QSerialPort::Baud115200);
+    sp.setDataBits(QSerialPort::Data8);
+    sp.setParity(QSerialPort::NoParity);
+    sp.setFlowControl(QSerialPort::NoFlowControl);
+    sp.setStopBits(QSerialPort::OneStop);
+
+    if (!sp.open(QIODevice::ReadWrite)) {
+        qInfo() << sp.error();
+    }
 
     QObject::connect(&timer, &QTimer::timeout, this, &Controller::serialport_timer_handle);
     timer.start(100);
 
     initComponent();
+
+    logic.start();
 }
 
-void Controller::imgproc_handle(LocateResult* _data)
+void Controller::imgproc_handle(LocateResult* _data, cv::Mat* src1, cv::Mat* src2)
 {
     LocateResult* r = _data;
+    //CameraInfo info;
+    //info.posBall = r->logic_ball_center.toPoint();
+    //info.posCar[0] = r->logic_cars_center[0];
+    //info.posCar[1] = r->logic_cars_center[1];
 
     logic.run(*r);
     sendLater();
@@ -60,6 +80,9 @@ void Controller::imgproc_handle(LocateResult* _data)
     emit CameraDebugInfoEmitted(debugInfo);
 
     delete _data;
+
+    cv::imshow("show", *src1);
+    cv::imshow("black", *src2);
 }
 
 void Controller::serialport_timer_handle()
@@ -97,12 +120,6 @@ void Controller::serialport_timer_handle()
             goto send;
         }
 
-        if (!sp.flush())
-        {
-            debugInfo += QStringLiteral("flush failed!\n");
-            goto send;
-        }
-
         debugInfo += QStringLiteral("succeed\n");
         }
 
@@ -127,20 +144,8 @@ void Controller::serialport_timer_handle()
         emit SerialDebugInfoEmitted("No Data Send");
     }
 
-}
-
-void Controller::initSerial()
-{
-    sp.setPortName(SERIAL_PORT_NAME);
-    sp.setBaudRate(QSerialPort::Baud115200);
-    sp.setDataBits(QSerialPort::Data8);
-    sp.setParity(QSerialPort::NoParity);
-    sp.setFlowControl(QSerialPort::NoFlowControl);
-    sp.setStopBits(QSerialPort::OneStop);
-
-    if (!sp.open(QIODevice::ReadWrite)) {
-        qInfo() << sp.error();
-    }
+    //logic.Run(CameraInfo());
+    //this->sendLater(logic.GetInfo());
 }
 
 QQuickWindow* Controller::getMainWindow()
@@ -169,7 +174,8 @@ QQuickWindow* Controller::getProbeWindow()
 
 void Controller::initComponent()
 {
-    qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return inst;});
+    static auto* this_inst = this;
+    qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return this_inst;});
     qmlRegisterType<Logic>("my.uri", 1, 0, "Logic");
     qmlRegisterType<MyFilter>("my.uri", 1, 0, "Filter");
 
@@ -248,40 +254,11 @@ void Controller::setPerspective(
     imgThread->coord_param.set_heap_pointer(param);
 }
 
-void Controller::setSerial(bool openOrClose)
+void Controller::restartSerial()
 {
-    if (openOrClose)
-    {
-        if (!sp.open(QIODevice::ReadWrite))
-            qCritical() << sp.errorString();
-    }
-    else
-    {
-        sp.close();
-        sp.clearError();
-    }
-}
+    sp.close();
+    sp.clearError();
 
-void Controller::setCvDebugEnabled(bool cvDebugEnabled)
-{
-    imgThread->setDebugEnabled(cvDebugEnabled);
-}
-
-MyCamera *Controller::getCamera()
-{
-    if (cam == nullptr)
-    {
-        auto devices = QCameraInfo::availableCameras();
-
-        if (devices.empty())
-        {
-            qCritical() << "no camera available!";
-            goto ret;
-        }
-
-        cam = new MyCamera(devices.last(), this);
-    }
-
-ret:
-    return cam;
+    if (!sp.open(QIODevice::WriteOnly))
+        qCritical() << sp.errorString();
 }

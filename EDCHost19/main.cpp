@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    Controller::Init();
+    Controller::static_Init();
 
     GetController()->getMatchWindow()->show();
     return QGuiApplication::exec();

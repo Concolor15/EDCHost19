@@ -54,12 +54,14 @@ void Logic::reset()
 
 void Logic::packToByteArray(uint8_t (&data)[32])
 {
+    for (auto& x : data) x=0;
+
     auto writePoint = [&data](int idx, QPointF const& p)
     {
         int x = (int)p.x();
         data[idx] = (uint8_t)p.y();
-        data[idx] = x >> 8;
-        data[idx] = x & 0xFF;
+        data[idx+1] = x >> 8;
+        data[idx+2] = x & 0xFF;
     };
 
     data[0] = 0xFC;
@@ -70,9 +72,9 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     writePoint(6, m_cars[1]);
     writePoint(9, m_ball);
 
-    uint16_t checksum = qChecksum((const char*)data, 28);
-    data[28] = checksum >> 8;
-    data[29] = checksum & 0xFF;
+    //uint16_t checksum = qChecksum((const char*)data, 28);
+    //data[28] = checksum >> 8;
+    //data[29] = checksum & 0xFF;
 
     data[30] = 0x0D;
     data[31] = 0x0A;
@@ -106,13 +108,13 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data_buffer[31] = 0x0A;*/
 }
 
-void Logic::run(const CameraInfo &info)
+void Logic::run(const LocateResult &info)
 {
     m_elapsedTime += 1;
 
-    m_ball = info.posBall;
-    m_cars[0] = info.posCar[0];
-    m_cars[1] = info.posCar[1];
+    m_ball = info.logic_ball_center;
+    m_cars[0] = info.logic_cars_center[0];
+    m_cars[1] = info.logic_cars_center[1];
 
     emit elapsedTimeChanged(m_elapsedTime);
     emit ballPosChanged(m_ball);
