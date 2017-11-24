@@ -27,7 +27,7 @@ public:
     Logic(QObject* parent = Q_NULLPTR);
 
     void packToByteArray(uint8_t (&data)[32]);
-    void run(LocateResult const& info);
+    void run(LocateResult const* info);
 
     State getStatus()    const { return m_status; }
     int getElapsedTime() const { return m_elapsedTime; }

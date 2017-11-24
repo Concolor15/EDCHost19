@@ -13,6 +13,7 @@
 int main(int argc, char *argv[])
 {
     //qputenv( "QSG_RENDER_LOOP", "threaded");
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QQuickStyle::setStyle("Material");
 
     QGuiApplication app(argc, argv);

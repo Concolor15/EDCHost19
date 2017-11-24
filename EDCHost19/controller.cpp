@@ -30,9 +30,6 @@ void Controller::imgproc_handle(LocateResult* _data)
 {
     LocateResult* r = _data;
 
-    logic.run(*r);
-    sendLater();
-
     QString debugInfo;
     debugInfo += QString("logic Ball: (%1, %2)\n")
             .arg(r->logic_ball_center.x(), 0, 'f', 1)
@@ -64,6 +61,12 @@ void Controller::imgproc_handle(LocateResult* _data)
 
 void Controller::serialport_timer_handle()
 {
+    LocateResult* r = nullptr;
+    logic.run(r);
+
+    logic.packToByteArray(data_buffer);
+    buffer_has_data = true;
+
     if (buffer_has_data)
     {
         QString debugInfo = QTime::currentTime().toString() + "\n";
@@ -195,10 +198,9 @@ void Controller::initComponent()
     getMatchWindow()->show();
 }
 
-void Controller::sendLater()
-{
-    logic.packToByteArray(data_buffer);
-    buffer_has_data = true;
+//void Controller::sendLater()
+//{
+
 
     /*
     auto const& pos = data.posObjs;
@@ -229,7 +231,7 @@ void Controller::sendLater()
     data_buffer[30] = 0x0D;
     data_buffer[31] = 0x0A;
     */
-}
+//}
 
 void Controller::setPerspective(
         QPointF p1,
@@ -262,6 +264,29 @@ void Controller::setSerial(bool openOrClose)
     }
 }
 
+void Controller::toggleCamera()
+{
+    if (cam != nullptr)
+    {
+        cam->unload();
+        cam->deleteLater();
+        cam = nullptr;
+        return;
+    }
+
+        auto devices = QCameraInfo::availableCameras();
+
+        if (devices.empty())
+        {
+            qCritical() << "no camera available!";
+            return;
+        }
+
+        cam = new MyCamera(devices.last(), this);
+
+    emit cameraChanged(cam);
+}
+
 void Controller::setCvDebugEnabled(bool cvDebugEnabled)
 {
     imgThread->setDebugEnabled(cvDebugEnabled);
@@ -269,19 +294,5 @@ void Controller::setCvDebugEnabled(bool cvDebugEnabled)
 
 MyCamera *Controller::getCamera()
 {
-    if (cam == nullptr)
-    {
-        auto devices = QCameraInfo::availableCameras();
-
-        if (devices.empty())
-        {
-            qCritical() << "no camera available!";
-            goto ret;
-        }
-
-        cam = new MyCamera(devices.last(), this);
-    }
-
-ret:
     return cam;
 }

@@ -11,7 +11,7 @@
 class MyCamera: public QCamera
 {
     Q_OBJECT
-    Q_PROPERTY(QAbstractVideoSurface* videoSurface READ getVideoSurface WRITE setVideoSurface)
+    Q_PROPERTY(QCamera* mediaObject READ getMediaObject)
 public:
     MyCamera(QObject* parent = Q_NULLPTR):
         QCamera(parent) { }
@@ -21,23 +21,12 @@ public:
         QCamera(cameraInfo, parent) { }
     MyCamera(QCamera::Position position, QObject *parent = Q_NULLPTR):
         QCamera(position, parent) { }
-public slots:
-    void setVideoSurface(QAbstractVideoSurface* surface);
-    QAbstractVideoSurface* getVideoSurface();
+
+    QCamera* getMediaObject() {return this; }
 private:
-    QAbstractVideoSurface* m_surface;
+    //QPointer<QAbstractVideoSurface> m_surface;
 };
 
-inline void MyCamera::setVideoSurface(QAbstractVideoSurface* surface)
-{
-    m_surface = surface;
-    setViewfinder(m_surface);
-}
-
-inline QAbstractVideoSurface* MyCamera::getVideoSurface()
-{
-    return m_surface;
-}
 
 class MyFilter: public QAbstractVideoFilter
 {

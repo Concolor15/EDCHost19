@@ -108,15 +108,20 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data_buffer[31] = 0x0A;*/
 }
 
-void Logic::run(const LocateResult &info)
+void Logic::run(const LocateResult *info)
 {
     m_elapsedTime += 1;
 
-    m_ball = info.logic_ball_center;
-    m_cars[0] = info.logic_cars_center[0];
-    m_cars[1] = info.logic_cars_center[1];
-
     emit elapsedTimeChanged(m_elapsedTime);
+
+    if (info==nullptr)
+        return;
+
+    m_ball = info->logic_ball_center;
+    m_cars[0] = info->logic_cars_center[0];
+    m_cars[1] = info->logic_cars_center[1];
+
+
     emit ballPosChanged(m_ball);
     emit carAPosChanged(m_cars[0]);
     emit carBPosChanged(m_cars[1]);

@@ -34,8 +34,6 @@ public:
 
     Logic& GetLogic() {return logic;}
 
-    void sendLater();
-
     Q_INVOKABLE void setPerspective(
                 QPointF p1,
                 QPointF p2,
@@ -43,6 +41,7 @@ public:
                 QPointF p4);
 
     Q_INVOKABLE void setSerial(bool openOrClose);
+    Q_INVOKABLE void toggleCamera();
 
     Q_INVOKABLE void setCvDebugEnabled(bool cvDebugEnabled);
 

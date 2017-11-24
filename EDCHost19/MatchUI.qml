@@ -27,7 +27,7 @@ ApplicationWindow {
 
     Component.onCompleted: function() {
         My.Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
-        vid.source.start()
+        My.Ctrl.toggleCamera()
     }
 
     footer: ToolBar {
@@ -89,6 +89,11 @@ ApplicationWindow {
             source: My.Ctrl.camera
             filters: [filter]
             anchors.fill: parent
+
+            onSourceChanged: {
+                if (source != null)
+                    source.start();
+            }
         }
 
 

@@ -23,8 +23,38 @@ ApplicationWindow {
     }
 
     footer: ToolBar {
-        RowLayout {
+        ColumnLayout {
             anchors.fill: parent
+        RowLayout {
+            Layout.fillWidth: true
+
+            ToolButton {
+                text: "打开/关闭摄像头"
+
+                onClicked: My.Ctrl.toggleCamera()
+            }
+
+            TextField {
+
+            }
+
+            Item {Layout.fillWidth: true}
+
+            ToolButton {
+                text: "打开串口"
+
+                onClicked: My.Ctrl.setSerial(true)
+            }
+
+            ToolButton {
+                text: "关闭串口"
+
+                onClicked: My.Ctrl.setSerial(false)
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
 
             ToolButton {
                 text: "启用调试"
@@ -39,15 +69,8 @@ ApplicationWindow {
             }
 
             ToolButton {
-                text: "打开串口"
-
-                onClicked: My.Ctrl.setSerial(true)
-            }
-
-            ToolButton {
-                text: "关闭串口"
-
-                onClicked: My.Ctrl.setSerial(false)
+                text: "显示主界面"
+                onClicked: My.Ctrl.matchWindow.showNormal()
             }
 
             ToolButton {
@@ -63,6 +86,7 @@ ApplicationWindow {
 
                 onClicked: Qt.quit()
             }
+        }
         }
     }
 
