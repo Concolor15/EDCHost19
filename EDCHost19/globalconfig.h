@@ -33,10 +33,10 @@ struct ProcConfig
     void reset_debug()
     {
         *this = {};
-        area_car_lb = 100;
-        area_ball_lb = 10;
-        area_ball_ub = 50;
-        area_ball_r_lb = 50;
+        area_car_lb = 500;
+        area_ball_lb = 30;
+        area_ball_ub = 200;
+        area_ball_r_lb = 40;
     }
 };
 

@@ -6,7 +6,7 @@ static QString readString(QJsonObject& json, QString name)
 {
     auto iter = json.find(name);
 
-    assert(iter->type() == QJsonValue::String);
+    Q_ASSERT(iter->type() == QJsonValue::String);
 
     return iter->toString();
 }
@@ -15,7 +15,7 @@ static int readInt(QJsonObject& json, QString name)
 {
     auto iter = json.find(name);
 
-    assert(iter->type() == QJsonValue::Double);
+    Q_ASSERT(iter->type() == QJsonValue::Double);
 
     return static_cast<int>(iter->toDouble());
 }

@@ -42,8 +42,10 @@ void Controller::imgproc_handle(LocateResult* _data)
             .arg(r->logic_cars_center[1].y(), 0, 'f', 1);
     debugInfo += QStringLiteral("ball located: %1\n")
             .arg(r->ball_succeeded);
-    debugInfo += QStringLiteral("cars located: %1\n")
-            .arg(r->cars_succeeded);
+    debugInfo += QStringLiteral("car1 located: %1\n")
+            .arg(r->cars_succeeded[0]);
+    debugInfo += QStringLiteral("car2 located: %1\n")
+            .arg(r->cars_succeeded[1]);
     debugInfo += QString("camera Ball: (%1, %2)\n")
             .arg(r->ball_center.x(), 0, 'f', 1)
             .arg(r->ball_center.y(), 0, 'f', 1);
@@ -56,13 +58,24 @@ void Controller::imgproc_handle(LocateResult* _data)
 
     emit CameraDebugInfoEmitted(debugInfo);
 
-    delete _data;
+    if (lastResult==nullptr)
+    {
+        delete lastResult;
+        lastResult = nullptr;
+    }
+
+    lastResult = r;
 }
 
 void Controller::serialport_timer_handle()
 {
-    LocateResult* r = nullptr;
-    logic.run(r);
+    logic.run(lastResult);
+
+    if (lastResult==nullptr)
+    {
+        delete lastResult;
+        lastResult = nullptr;
+    }
 
     logic.packToByteArray(data_buffer);
     buffer_has_data = true;

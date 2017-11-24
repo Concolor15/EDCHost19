@@ -35,13 +35,12 @@ SOURCES = \
 
 FORMS =
 
-
-#QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu
+linux {
 LIBS += \
     -lopencv_core \
     -lopencv_imgproc \
     -lopencv_highgui \
-
+}
 
 
 #DEFINES = 

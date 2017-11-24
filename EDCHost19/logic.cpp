@@ -72,9 +72,9 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     writePoint(6, m_cars[1]);
     writePoint(9, m_ball);
 
-    //uint16_t checksum = qChecksum((const char*)data, 28);
-    //data[28] = checksum >> 8;
-    //data[29] = checksum & 0xFF;
+    uint16_t checksum = qChecksum((const char*)data, 28);
+    data[28] = checksum >> 8;
+    data[29] = checksum & 0xFF;
 
     data[30] = 0x0D;
     data[31] = 0x0A;
@@ -110,6 +110,9 @@ void Logic::packToByteArray(uint8_t (&data)[32])
 
 void Logic::run(const LocateResult *info)
 {
+    if (m_status != Running)
+        return;
+
     m_elapsedTime += 1;
 
     emit elapsedTimeChanged(m_elapsedTime);
@@ -117,9 +120,20 @@ void Logic::run(const LocateResult *info)
     if (info==nullptr)
         return;
 
-    m_ball = info->logic_ball_center;
-    m_cars[0] = info->logic_cars_center[0];
-    m_cars[1] = info->logic_cars_center[1];
+    if (info->ball_succeeded)
+    {
+        m_ball = info->logic_ball_center;
+    }
+
+    if (info->cars_succeeded[0])
+    {
+        m_cars[0] = info->logic_cars_center[0];
+    }
+
+    if (info->cars_succeeded[1])
+    {
+        m_cars[1] = info->logic_cars_center[1];
+    }
 
 
     emit ballPosChanged(m_ball);

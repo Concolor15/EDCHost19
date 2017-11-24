@@ -1,9 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>Resources/DebugBGN.png</file>
         <file>Resources/MainBGN.png</file>
-        <file>Resources/MatchBGN.png</file>
-        <file>Resources/PSPBGN.png</file>
         <file>MatchUI.qml</file>
         <file>Debug.qml</file>
         <file>Main.qml</file>

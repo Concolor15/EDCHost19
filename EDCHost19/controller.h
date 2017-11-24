@@ -73,7 +73,9 @@ private:
 
     QTimer timer;
 
-    MyCamera* cam;
+    LocateResult* lastResult = nullptr;
+
+    MyCamera* cam = nullptr;
     ProcConfig cv_param;
 
     QSerialPort sp;

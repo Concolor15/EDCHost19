@@ -2,12 +2,15 @@ import QtQuick 2.7
 import QtQuick.Shapes 1.0
 
 Item {
+    id: root
     readonly property alias dragArea: dragArea
     property rect dragBound
+    default property color color: "#FFFFFF"
 
     Shape {
         ShapePath {
             id:path
+            fillColor: color
             readonly property double r : 5.0
 
             startX: -r

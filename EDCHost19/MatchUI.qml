@@ -44,7 +44,7 @@ ApplicationWindow {
             ToolButton {
                 id: btnSetPerspective
                 checkable: true
-                text: "设置透视"
+                text: "设置区域"
 
                 onToggled: {
                     if (checked)
@@ -60,7 +60,7 @@ ApplicationWindow {
 
             ToolButton {
                 visible: btnSetPerspective.checked
-                text: "确认透视"
+                text: "确认区域"
 
                 onClicked: {
                     loc.set()
@@ -96,7 +96,24 @@ ApplicationWindow {
             }
         }
 
+        Item {
+            Shape {
+                ShapePath {
+                    strokeColor: "red"
+                    strokeWidth: 2
 
+                    fillColor: "#3fffffff"
+
+                    startX: c1.x
+                    startY: c1.y
+
+                    PathLine {x: c2.x; y: c2.y}
+                    PathLine {x: c4.x; y: c4.y}
+                    PathLine {x: c3.x; y: c3.y}
+                    PathLine {x: c1.x; y: c1.y}
+                }
+            }
+        }
 
         Item {
             id: loc
@@ -129,31 +146,16 @@ ApplicationWindow {
                 My.Ctrl.setPerspective(np1, np2, np3, np4)
             }
 
-            Shape {
-                ShapePath {
-                    strokeColor: "red"
-                    strokeWidth: 2
-
-                    fillColor: "#3fffffff"
-
-                    startX: c1.x
-                    startY: c1.y
-
-                    PathLine {x: c2.x; y: c2.y}
-                    PathLine {x: c4.x; y: c4.y}
-                    PathLine {x: c3.x; y: c3.y}
-                    PathLine {x: c1.x; y: c1.y}
-                }
-            }
-
             Circle {
                 id: c1
                 dragBound: loc.bound
+                color: "#000000"
             }
 
             Circle {
                 id: c2
                 dragBound: loc.bound
+                color: "#FFAAAA"
             }
 
             Circle {

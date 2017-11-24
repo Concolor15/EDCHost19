@@ -12,9 +12,8 @@ QPointF cvToQ(cv::Point2f p)
     return {p.x, p.y};
 }
 
-LocateResult* ImgProc::GetResult() {
-    LocateResult* r = new LocateResult;
-
+void ImgProc::genResult(LocateResult* r)
+{
     r->ball_succeeded = false;
 
     if (!ball_centers.empty())
@@ -25,23 +24,21 @@ LocateResult* ImgProc::GetResult() {
         r->logic_ball_center = cvt->cam2logic(p);
     }
 
-    r->cars_succeeded = !car1_centers.empty() && !car2_centers.empty();
-
-    cv::Point2f ps[2] = {
-        !car1_centers.empty() ? car1_centers[0] : cv::Point2f(0, 0),
-        !car2_centers.empty() ? car2_centers[0] : cv::Point2f(0, 0),
-    };
-
     for (int i: {0,1})
     {
-        r->cars_center[i]=cvToQ(ps[i]);
-        r->logic_cars_center[i] = cvt->cam2logic(ps[i]);
-    }
+        r->cars_succeeded[i] = false;
 
-    return r;
+        if (!cars_centers[i].empty())
+        {
+            r->cars_succeeded[i] = true;
+            cv::Point2f p = cars_centers[i][0];
+            r->cars_center[i] = cvToQ(p);
+            r->logic_cars_center[i] = cvt->cam2logic(p);
+        }
+    }
 }
 
-void ImgProc::Locate(Mat& yuv)
+void ImgProc::binarize(const Mat &yuv)
 {
     auto const& config = *this->config;
 
@@ -57,6 +54,11 @@ void ImgProc::Locate(Mat& yuv)
                 Scalar(config.car2_Y_lb, config.car2_U_lb, config.car2_V_lb),
                 Scalar(config.car2_Y_ub, config.car2_U_ub, config.car2_V_ub),
                 car2);
+}
+
+LocateResult* ImgProc::Locate(Mat const& yuv)
+{
+    binarize(yuv);
 
     if (debugEnabled)
     {
@@ -64,8 +66,8 @@ void ImgProc::Locate(Mat& yuv)
     }
 
     ball_centers = GetCenter(ball, Types::BALL);
-    car1_centers = GetCenter(car1, Types::CARA);
-    car2_centers = GetCenter(car2, Types::CARB);
+    cars_centers[0] = GetCenter(car1, Types::CARA);
+    cars_centers[1] = GetCenter(car2, Types::CARB);
 
     if (debugEnabled)
     {
@@ -74,11 +76,11 @@ void ImgProc::Locate(Mat& yuv)
         {
             circle(dst, cts, 10, Scalar(255, 0, 0),-1);
         }
-        for (auto & cts : car1_centers)
+        for (auto & cts : cars_centers[0])
         {
             circle(dst, cts, 10, Scalar(0, 255, 0), -1);
         }
-        for (auto & cts : car2_centers)
+        for (auto & cts : cars_centers[1])
         {
             circle(dst, cts, 10, Scalar(0, 0, 255), -1);
         }
@@ -87,9 +89,13 @@ void ImgProc::Locate(Mat& yuv)
 
         QTimer::singleShot(0, qApp, [p_dst=&dst, p_merged=&merged](){
             imshow("show", *p_dst);
-            imshow("balck", *p_merged);
+            imshow("black", *p_merged);
         });
     }
+
+    LocateResult* r = new LocateResult();
+    genResult(r);
+    return r;
 }
 
 vector<Point2f> ImgProc::GetCenter(Mat v2, int nType)

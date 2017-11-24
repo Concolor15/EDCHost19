@@ -95,7 +95,7 @@ void ImgprocThread::run()
         return;
     }
 
-    //proc.InitCv();
+    config.reset_debug();
     proc.cvt = &cvt;
     proc.config = &config;
 
@@ -111,16 +111,15 @@ void ImgprocThread::run()
         {
             p->CameraSize = {frame.cols, frame.rows};
             cvt.updateParam();
-            qWarning() << "updated";
+            qDebug() << "updated";
         }
         else if (succeeded)
         {
             cvt.updateParam();
-            qWarning() << "updated";
+            qDebug() << "updated";
         }
 
-        proc.Locate(frame);
-        LocateResult* r = proc.GetResult();
+        LocateResult* r = proc.Locate(frame);
 
         r->timestamp = frame_timestamp;
 
@@ -147,8 +146,6 @@ void ImgprocThread::setDebugEnabled(bool newDebugEnabled)
         using namespace cv;
         if (newDebugEnabled)
         {
-            config.reset_debug();
-
             namedWindow("show");
             namedWindow("black");
             namedWindow("control");

@@ -18,17 +18,22 @@ public:
     bool debugEnabled = false;
 
 	//保证不会修改 mat
-	void Locate(cv::Mat& mat);
-
-    //得到定位结果，指针由调用者负责释放
-    LocateResult* GetResult();
+    //返回值由调用者负责释放
+    LocateResult* Locate(cv::Mat const& mat);
 
 	// 定位所需参数
     ProcConfig const* config;
     CoordinateConverter const* cvt;
 
 //private:
-	std::vector<cv::Point2f> ball_centers, car1_centers, car2_centers;
+
+    //二值化
+    void binarize(cv::Mat const& src);
+
+    //获取结果
+    void genResult(LocateResult* r);
+
+    std::vector<cv::Point2f> ball_centers, cars_centers[2];
     //v2 : 二值化图像
     std::vector<cv::Point2f> GetCenter(cv::Mat v2, int nType);
 	enum Types { CARA = 1, CARB = 2,BALL = 3 };
