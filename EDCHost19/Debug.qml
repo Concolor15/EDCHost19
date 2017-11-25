@@ -7,7 +7,8 @@ import my.uri 1.0 as My
 ApplicationWindow {
     width: 750
     height: 600
-    //title: "调试信息"
+    id: root
+    title: "调试信息"
 
     function setCameraText(text) {
         textCamera.text = text
@@ -32,24 +33,24 @@ ApplicationWindow {
                 text: "打开/关闭摄像头"
 
                 onClicked: My.Ctrl.toggleCamera()
-            }
-
-            TextField {
-
-            }
+            }           
 
             Item {Layout.fillWidth: true}
+
+            TextField {
+                id: serialName
+            }
 
             ToolButton {
                 text: "打开串口"
 
-                onClicked: My.Ctrl.setSerial(true)
+                onClicked: My.Ctrl.setSerial(true, serialName)
             }
 
             ToolButton {
                 text: "关闭串口"
 
-                onClicked: My.Ctrl.setSerial(false)
+                onClicked: My.Ctrl.setSerial(false, "")
             }
         }
 
@@ -96,15 +97,20 @@ ApplicationWindow {
         y: 25
         width: 325
         height: 50
+
         text: "相机"
     }
 
     TextArea {
         id: textCamera
         x: 25
-        y: 100
         width: 325
-        height: 400
+
+        anchors.top: labelCamera.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 15
+
+        font.family: "monospace"
 
         readOnly: true
     }
@@ -121,9 +127,13 @@ ApplicationWindow {
     TextArea {
         id: textSerial
         x: 400
-        y: 100
         width: 325
-        height: 400
+
+        anchors.top: labelCamera.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 15
+
+        font.family: "monospace"
 
         readOnly: true
     }

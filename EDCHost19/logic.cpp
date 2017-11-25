@@ -120,6 +120,48 @@ void Logic::reset_start()
     updateAll();
 }
 
+void Logic::addElapsedTime(int delta)
+{
+    if (delta == 0)
+        return;
+
+    int old = m_elapsedTime;
+    m_elapsedTime += delta;
+
+    emit elapsedTimeChanged(m_elapsedTime);
+
+    if (old < m_stopUntil[0] && m_stopUntil[0] <= old+delta)
+        emit shouldStopAChanged(false);
+
+    if (old < m_stopUntil[1] && m_stopUntil[1] <= old+delta)
+        emit shouldStopBChanged(false);
+
+    if (m_elapsedTime <= m_stopUntil[0])
+        emit restStopAChanged(m_stopUntil[0]-m_elapsedTime);
+
+    if (m_elapsedTime <= m_stopUntil[1])
+        emit restStopBChanged(m_stopUntil[1]-m_elapsedTime);
+}
+
+void Logic::updateStopInfo(int side, int newStopUntil)
+{
+    Q_ASSERT(side==0 || side==1);
+    Q_ASSERT(newStopUntil > std::max(m_elapsedTime, m_stopUntil[side]));
+
+    m_stopUntil[side] = newStopUntil;
+
+    if (side==0)
+    {
+        emit shouldStopAChanged(true);
+        emit restStopAChanged(getRestStopA());
+    }
+    else
+    {
+        emit shouldStopBChanged(true);
+        emit restStopBChanged(getRestStopB());
+    }
+}
+
 static void writePoint(uint8_t* addr, ObjectTracker::Report const& data)
 {
     int x = (int)data.center.x();
@@ -153,10 +195,14 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data[17] = m_evil[1];
     data[18] = m_score[0];
     data[19] = m_score[1];
+    data[20] = m_status << 6;
 
     //uint16_t checksum = qChecksum((const char*)data, 28);
     //data[28] = checksum >> 8;
     //data[29] = checksum & 0xFF;
+    uint8_t checksum = 0;
+    for (int i=0;i<28;i++) checksum ^= data[i];
+    data[29] = checksum;
 
     data[30] = 0x0D;
     data[31] = 0x0A;
@@ -192,6 +238,8 @@ void Logic::packToByteArray(uint8_t (&data)[32])
 
 void Logic::run(const LocateResult *info)
 {
+    constexpr int EVIL_THRESHOLD = 100;
+
     // The frame is downsampled
     // multiply each component by 2 to get the original position
     auto mult2=[](QPointF p)->QPointF{return {2*p.x(), 2*p.y()};};
@@ -199,9 +247,10 @@ void Logic::run(const LocateResult *info)
     if (m_status != Running)
         return;
 
-    m_elapsedTime += 1;
+    addElapsedTime(1);
 
-    emit elapsedTimeChanged(m_elapsedTime);
+    if (info == nullptr)
+        return;
 
     m_ball = info->ball;
     m_car[0] = info->cars[0];
@@ -214,4 +263,19 @@ void Logic::run(const LocateResult *info)
     emit rawBallPosChanged(m_ball.raw_center);
     emit rawCarAPosChanged(m_ball.raw_center);
     emit rawCarBPosChanged(m_ball.raw_center);
+
+    int defend_side = 1-m_shootSide;
+    int& evil_defend = m_evil[defend_side];
+
+    // TODO: update evil
+
+    if (defend_side==0)
+        emit evilAChanged(m_evil[0]);
+    else
+        emit evilBChanged(m_evil[1]);
+
+    if (evil_defend >= EVIL_THRESHOLD)
+    {
+        updateStopInfo(defend_side, 0);
+    }
 }

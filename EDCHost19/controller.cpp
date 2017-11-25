@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "config.h"
 #include "controller.h"
 
 #include <opencv2/highgui.hpp>
@@ -78,6 +77,31 @@ void Controller::imgproc_handle(LocateResult* _data)
     lastResult = r;
 }
 
+static void appendSerialDebugInfo(QString& str, uint8_t (&data)[32])
+{
+    static char hex[16+1]="0123456789ABCDEF";
+
+    auto f = [&](QString prefix, int start, int end) {
+        str += prefix;
+        for (int i=start; i<end; i++)
+            str.append(hex[data[i]>>4])
+                    .append(hex[data[i] & 0xF])
+                    .append(" ");
+        str += "\n";
+    };
+
+    f("       : ", 0, 3);
+    f("carA   : ", 3, 6);
+    f("carB   : ", 6, 9);
+    f("ball   : ", 9 ,12);
+    f("stopA  : ", 12, 14);
+    f("stopB  : ", 14, 16);
+    f("evilAB : ", 16, 18);
+    f("scoreAB  ", 18, 20);
+    f("  ", 20, 26);
+    f("  ", 26, 32);
+}
+
 void Controller::serialport_timer_handle()
 {
     logic.run(lastResult);
@@ -93,7 +117,10 @@ void Controller::serialport_timer_handle()
 
     if (buffer_has_data)
     {
-        QString debugInfo = QTime::currentTime().toString() + "\n";
+        QString debugInfo;
+        debugInfo.reserve(500);
+
+        debugInfo += QTime::currentTime().toString() + "\n";
 
         buffer_has_data = false;
 
@@ -134,39 +161,35 @@ void Controller::serialport_timer_handle()
         }
 
     send:
-
-        static char hex[16+1]="0123456789ABCDEF";
-
-        for (int i=0;i<8;i++)
-        {
-            for (int j=0;j<4;j++)
-            {
-                uint8_t v = data_buffer[4*i+j];
-                debugInfo.append(hex[v >> 4]);
-                debugInfo.append(hex[v & 0xF]);
-            }
-            debugInfo += '\n';
-        }
+        appendSerialDebugInfo(debugInfo, data_buffer);
         emit SerialDebugInfoEmitted(debugInfo);
     }
     else
     {
-        emit SerialDebugInfoEmitted("No Data Send");
+        emit SerialDebugInfoEmitted(QStringLiteral("No Data Send"));
     }
 
 }
 
 void Controller::initSerial()
 {
-    sp.setPortName(SERIAL_PORT_NAME);
     sp.setBaudRate(QSerialPort::Baud115200);
     sp.setDataBits(QSerialPort::Data8);
     sp.setParity(QSerialPort::NoParity);
     sp.setFlowControl(QSerialPort::NoFlowControl);
     sp.setStopBits(QSerialPort::OneStop);
 
+    auto list = QSerialPortInfo::availablePorts();
+    if (list.empty())
+    {
+        qWarning() << "no available serialport";
+        return;
+    }
+
+    sp.setPortName(list.first().portName());
+
     if (!sp.open(QIODevice::WriteOnly)) {
-        qInfo() << sp.error();
+        qCritical() << sp.error();
     }
 }
 
@@ -274,10 +297,12 @@ void Controller::setPerspective(
     imgThread->coord_param.set_heap_pointer(param);
 }
 
-void Controller::setSerial(bool openOrClose)
-{
+void Controller::setSerial(bool openOrClose, QString serialName)
+{   
     if (openOrClose)
     {
+        if (serialName != "")
+            sp.setPortName(serialName);
         if (!sp.open(QIODevice::WriteOnly))
             qCritical() << sp.errorString();
     }

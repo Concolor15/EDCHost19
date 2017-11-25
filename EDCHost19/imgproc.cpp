@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "config.h"
 
 #include "imgproc.h"
 #include <vector>

@@ -257,6 +257,8 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
+                enabled: logic.evilA !== 0
+
                 title: "红方邪恶"
                 content: logic.evilA
             }
@@ -265,6 +267,8 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
+
+                enabled: logic.evilB !== 0
 
                 title: "蓝方邪恶"
                 content: logic.evilB
@@ -275,7 +279,7 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                visible: logic.shouldStopA
+                enabled: logic.shouldStopA
 
                 title: "红方剩余强停"
                 content: logic.restStopA
@@ -286,7 +290,7 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                visible: logic.shouldStopB
+                enabled: logic.shouldStopB
 
                 title: "蓝方剩余强停"
                 content: logic.restStopB
@@ -370,7 +374,7 @@ ApplicationWindow {
                 MyButton {
                     anchors.horizontalCenter: parent.horizontalCenter
                     id: btnPlusA
-                    text: "A方加分"
+                    text: "红方得分"
 
                     onClicked: logic.setScore(0, logic.scoreA+1)
                 }
@@ -383,7 +387,7 @@ ApplicationWindow {
 
                 MyButton {
                     id: btnPlusB
-                    text: "B方加分"
+                    text: "蓝方加分"
 
                     anchors.horizontalCenter: parent.horizontalCenter
 

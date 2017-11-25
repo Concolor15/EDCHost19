@@ -14,26 +14,25 @@ CONFIG += qtquickcompiler
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS = \
-    config.h \
     controller.h \
     CoordinateConverter.h \
     stdafx.h \
     globalconfig.h \
-    MyCamera.h \
     imgproc.h \
     logic.h \
     type.h \
-    locate.h
+    locate.h \
+    camera.h
 
 SOURCES = \
     controller.cpp \
     CoordinateConverter.cpp \
     main.cpp \
     globalconfig.cpp \
-    MyCamera.cpp \
     imgproc.cpp \
     logic.cpp \
-    locate.cpp
+    locate.cpp \
+    camera.cpp
 
 FORMS =
 

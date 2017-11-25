@@ -1,7 +1,5 @@
 #include "locate.h"
 
-
-
 void ObjectTracker::update(QPointF center, QPointF raw, int64_t timestamp_ms)
 {
     m_located = true;

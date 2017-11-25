@@ -29,10 +29,10 @@ class Logic: public QObject
 
 public:
     enum State {
-        NotStart,
-        Running,
-        Paused,
-        Finished
+        NotStart = 0,
+        Running = 1,
+        Paused = 2,
+        Finished =3,
     };
     Q_ENUM(State)
 
@@ -94,6 +94,9 @@ public slots:
 private:
     void updateAll();
     void reset_start();
+
+    void addElapsedTime(int delta=1);
+    void updateStopInfo(int side, int newStopUntil);
 
     int m_elapsedTime = 0;
     State m_status = NotStart;

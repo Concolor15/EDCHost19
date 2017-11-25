@@ -1,9 +1,7 @@
 #pragma once
 
-#include <QPixmap>
-#include <QtMultimedia/QCamera>
-#include <QAbstractVideoSurface>
-#include <opencv2/core.hpp>
+#include <QtMultimedia>
+#include <opencv2/core/types.hpp>
 #include "locate.h"
 #include "CoordinateConverter.h"
 #include "globalconfig.h"

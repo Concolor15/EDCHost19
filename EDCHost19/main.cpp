@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "config.h"
 
 #include <QtCore>
 #include <QtQuick>
@@ -7,7 +6,7 @@
 #include <QtQml>
 
 #include "imgproc.h"
-#include "MyCamera.h"
+#include "camera.h"
 #include "controller.h"
 
 int main(int argc, char *argv[])

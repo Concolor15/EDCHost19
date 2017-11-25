@@ -8,7 +8,7 @@
 #include <QtSerialPort>
 #include "type.h"
 #include "logic.h"
-#include "MyCamera.h"
+#include "camera.h"
 #include "globalconfig.h"
 
 class Controller : public QObject
@@ -42,7 +42,7 @@ public:
                 QPointF p3,
                 QPointF p4);
 
-    Q_INVOKABLE void setSerial(bool openOrClose);
+    Q_INVOKABLE void setSerial(bool openOrClose, QString serialName);
     Q_INVOKABLE void toggleCamera();
 
     Q_INVOKABLE void setCvDebugEnabled(bool cvDebugEnabled);

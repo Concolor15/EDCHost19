@@ -1,4 +1,4 @@
-#include "MyCamera.h"
+#include "camera.h"
 #include "globalconfig.h"
 #include "controller.h"
 #include <QtCore>
