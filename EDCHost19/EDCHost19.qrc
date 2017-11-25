@@ -8,5 +8,6 @@
         <file>Resources/MyButton.qml</file>
         <file>Resources/BallIndicator.qml</file>
         <file>Resources/CarIndicator.qml</file>
+        <file>Resources/MyLabel.qml</file>
     </qresource>
 </RCC>

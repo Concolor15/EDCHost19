@@ -23,10 +23,11 @@ ApplicationWindow {
         logic.status === Logic.NotStart ||
         logic.status === Logic.Finished
 
-    property bool canPause: logic.status === Logic.Running
+    property bool onProgress:
+        logic.status === Logic.Running ||
+        logic.status === Logic.Paused
 
-    property int scoreA: 0
-    property int scoreB: 0
+    property bool canPause: logic.status === Logic.Running
 
     Component.onCompleted: function() {
         My.Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
@@ -233,46 +234,62 @@ ApplicationWindow {
                 }
             }
 
-            Item {
+            MyLabel {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
-                Label {
-                    id: labelScoreA
 
-                    text: "A方得分"
-
-                    font.pointSize: 24
-                }
-                Label {
-                    anchors.top: labelScoreA.bottom
-                    anchors.topMargin: 20
-
-                    text: root.scoreA
-
-                    font.pointSize: 24
-                }
+                title: "红方得分"
+                content: logic.scoreA
             }
 
-            Item {
+            MyLabel {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
-                Label {
-                    id: labelScoreB
 
-                    text: "B方得分"
+                title: "蓝方得分"
+                content: logic.scoreB
+            }
 
-                    font.pointSize: 24
-                }
-                Label {
-                    anchors.top: labelScoreB.bottom
-                    anchors.topMargin: 20
+            MyLabel {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
 
-                    text: root.scoreA
+                title: "红方邪恶"
+                content: logic.evilA
+            }
 
-                    font.pointSize: 24
-                }
+            MyLabel {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+
+                title: "蓝方邪恶"
+                content: logic.evilB
+            }
+
+            MyLabel {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+
+                visible: logic.shouldStopA
+
+                title: "红方剩余强停"
+                content: logic.restStopA
+            }
+
+            MyLabel {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+
+                visible: logic.shouldStopB
+
+                title: "蓝方剩余强停"
+                content: logic.restStopB
             }
         }
 
@@ -297,32 +314,6 @@ ApplicationWindow {
 
                 topPadding: 20
                 spacing: 20
-
-                MyButton {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    id: btnPlusA
-                    text: "A方加分"
-                }
-
-                MyButton {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    id: btnPenalizeA
-                    text: "A方犯规"
-                }
-
-                MyButton {
-                    id: btnPlusB
-                    text: "B方加分"
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-
-                MyButton {
-                    id: btnPenalizeB
-                    text: "B方犯规"
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
 
                 MyButton {
                     id: btnPauseResume
@@ -356,17 +347,58 @@ ApplicationWindow {
 
                 MyButton {
                     id: btnSOA
-                    text: "点球A"
+                    text: "红方点球"
+
+                    enabled: !root.onProgress
 
                     anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: logic.setSide(0)
                 }
 
                 MyButton {
                     id: btnSOB
-                    text: "点球B"
+                    text: "蓝方点球"
+
+                    enabled: !root.onProgress
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: logic.setSide(1)
+                }
+
+                MyButton {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    id: btnPlusA
+                    text: "A方加分"
+
+                    onClicked: logic.setScore(0, logic.scoreA+1)
+                }
+
+                MyButton {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    id: btnPenalizeA
+                    text: "A方犯规"
+                }
+
+                MyButton {
+                    id: btnPlusB
+                    text: "B方加分"
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: logic.setScore(1, logic.scoreB+1)
+                }
+
+                MyButton {
+                    id: btnPenalizeB
+                    text: "B方犯规"
 
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
+
+
+
             }
 
             Item {

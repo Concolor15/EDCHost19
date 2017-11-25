@@ -11,6 +11,8 @@ Controller::Controller(QObject *parent) : QObject(parent) { }
 
 void Controller::init()
 {
+    elapsedTimer.start();
+
     imgThread = new ImgprocThread();
     imgThread->start();
 
@@ -31,6 +33,14 @@ void Controller::imgproc_handle(LocateResult* _data)
     LocateResult* r = _data;
 
     QString debugInfo;
+    debugInfo += QStringLiteral("Ball:\n");
+    debugInfo += r->ball;
+
+    debugInfo += QStringLiteral("\nCarA:\n");
+    debugInfo += r->cars[0];
+
+    debugInfo += QStringLiteral("\nCarB:\n");
+    debugInfo += r->cars[1];
     /*
     debugInfo += QString("logic Ball: (%1, %2)\n")
             .arg(r->logic_ball_center.x(), 0, 'f', 1)

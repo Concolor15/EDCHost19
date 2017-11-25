@@ -12,7 +12,7 @@ QPointF cvToQ(cv::Point2f p)
     return {p.x, p.y};
 }
 
-void ImgProc::genResult(LocateResult* r, QTime const& timestamp)
+void ImgProc::genResult(LocateResult* r, int64_t timestamp)
 {
     if (!ball_centers.empty())
     {
@@ -63,7 +63,7 @@ void ImgProc::binarize(const Mat &yuv)
                 car2);
 }
 
-LocateResult* ImgProc::Locate(Mat const& yuv, QTime const& timestamp)
+LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
 {
     binarize(yuv);
 

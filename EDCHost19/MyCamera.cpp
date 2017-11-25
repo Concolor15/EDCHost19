@@ -48,7 +48,7 @@ QVideoFrame MyFilterRunnable::run(
         if (!_.isLocked())
             goto unmap;
 
-        worker->frame_timestamp = QTime::currentTime();
+        worker->frame_timestamp_ms = GetElapsedTime(); //TODO
 
         cv::Mat_<uint8_t> Y(
                     input->height(),
@@ -119,7 +119,7 @@ void ImgprocThread::run()
             qDebug() << "updated";
         }
 
-        LocateResult* r = proc.Locate(frame, frame_timestamp);
+        LocateResult* r = proc.Locate(frame, frame_timestamp_ms);
 
         emit ResultEmitted(r);
 

@@ -13,13 +13,13 @@ class MyCamera: public QCamera
     Q_OBJECT
     Q_PROPERTY(QCamera* mediaObject READ getMediaObject)
 public:
-    MyCamera(QObject* parent = Q_NULLPTR):
+    explicit MyCamera(QObject* parent = Q_NULLPTR):
         QCamera(parent) { }
-    MyCamera(const QByteArray &deviceName, QObject *parent = Q_NULLPTR):
+    explicit MyCamera(const QByteArray &deviceName, QObject *parent = Q_NULLPTR):
         QCamera(deviceName, parent) { }
-    MyCamera(const QCameraInfo &cameraInfo, QObject *parent = Q_NULLPTR):
+    explicit MyCamera(const QCameraInfo &cameraInfo, QObject *parent = Q_NULLPTR):
         QCamera(cameraInfo, parent) { }
-    MyCamera(QCamera::Position position, QObject *parent = Q_NULLPTR):
+    explicit MyCamera(QCamera::Position position, QObject *parent = Q_NULLPTR):
         QCamera(position, parent) { }
 
     QCamera* getMediaObject() {return this; }
@@ -32,7 +32,7 @@ class MyFilter: public QAbstractVideoFilter
 {
     Q_OBJECT
 public:
-    MyFilter(QObject* parent = Q_NULLPTR):
+    explicit MyFilter(QObject* parent = Q_NULLPTR):
         QAbstractVideoFilter(parent) { }
     QVideoFilterRunnable* createFilterRunnable() override;
 };
@@ -41,7 +41,7 @@ class MyFilterRunnable: public QVideoFilterRunnable
 {
     QThread* worker;
 public:
-    MyFilterRunnable(QThread* worker): worker(worker) { }
+    explicit MyFilterRunnable(QThread* worker): worker(worker) { }
     QVideoFrame run(QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags) override;
 };
 
@@ -65,7 +65,7 @@ private:
     ProcConfig config;
     ImgProc proc;
 
-    QTime frame_timestamp;
+    int64_t frame_timestamp_ms;
 
     bool debugEnabled = false;
 

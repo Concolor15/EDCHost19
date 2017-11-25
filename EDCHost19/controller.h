@@ -28,6 +28,8 @@ public:
     static void static_Init();
     static void static_Destroy();
 
+    friend int64_t GetElapsedTime();
+
     void init();
 
     ImgprocThread* imgThread;
@@ -72,6 +74,7 @@ private:
     Logic logic;
 
     QTimer timer;
+    QElapsedTimer elapsedTimer;
 
     LocateResult* lastResult = nullptr;
 
@@ -114,6 +117,11 @@ inline void Controller::setCamera(MyCamera* newCamera)
 
     cam = newCamera;
     emit cameraChanged(newCamera);
+}
+
+inline int64_t GetElapsedTime()
+{
+    return GetController()->elapsedTimer.elapsed();
 }
 
 #endif // CONTROLLER_H

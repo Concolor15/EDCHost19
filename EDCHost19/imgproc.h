@@ -19,7 +19,7 @@ public:
 
 	//保证不会修改 mat
     //返回值由调用者负责释放
-    LocateResult* Locate(cv::Mat const& mat, QTime const& timestamp);
+    LocateResult* Locate(cv::Mat const& mat, int64_t timestamp_ms);
 
 	// 定位所需参数
     ProcConfig const* config;
@@ -31,7 +31,7 @@ public:
     void binarize(cv::Mat const& src);
 
     //获取结果
-    void genResult(LocateResult* r, QTime const& timestamp);
+    void genResult(LocateResult* r, int64_t timestamp_ms);
 
     std::vector<cv::Point2f> ball_centers, cars_centers[2];
     //v2 : 二值化图像

@@ -3,14 +3,14 @@
 
 Logic::Logic(QObject* parent) : QObject(parent)
 {
-    reset();
+
 }
 
 void Logic::start()
 {
     Q_ASSERT(m_status == NotStart || m_status == Finished);
 
-    reset();
+    reset_start();
     m_status = Running;
     updateAll();
 }
@@ -40,16 +40,84 @@ void Logic::resume()
     emit statusChanged(m_status);
 }
 
+void Logic::setSide(int side)
+{
+    if (side!=0 && side !=1)
+    {
+        qCritical() << "setScore: side must be 0 or 1, but get " << side << "\n";
+        return;
+    }
+
+    if (m_status == Running || m_status == Paused)
+    {
+        qWarning() << "setScore: status should net be " << m_status;
+        return;
+    }
+
+    if (m_shootSide == side)
+        return;
+
+    m_shootSide = side;
+    emit shootSideChanged(side);
+}
+
+void Logic::setScore(int side, int score)
+{
+    if (side!=0 && side !=1)
+    {
+        qCritical() << "setScore: side must be 0 or 1, but get " << side;
+        return;
+    }
+
+    if (score<0)
+    {
+        qWarning() << "setScore: score must be positive, but get " << score;
+        return;
+    }
+
+    if (m_score[side] == score)
+        return;
+
+    m_score[side] = score;
+
+    if (side==0)
+        emit scoreAChanged(score);
+    else
+        emit scoreBChanged(score);
+}
+
 void Logic::updateAll()
 {
     emit statusChanged(m_status);
     emit elapsedTimeChanged(m_elapsedTime);
+    emit shootSideChanged(m_shootSide);
+    emit scoreAChanged(m_score[0]);
+    emit scoreBChanged(m_score[1]);
+    emit evilAChanged(m_evil[0]);
+    emit evilBChanged(m_evil[1]);
+    emit shouldStopAChanged(getShouldStopA());
+    emit shouldStopBChanged(getShouldStopB());
+    emit restStopAChanged(getRestStopA());
+    emit restStopBChanged(getRestStopB());
+    emit rawBallPosChanged(m_ball.raw_center);
+    emit rawCarAPosChanged(m_car[0].raw_center);
+    emit rawCarBPosChanged(m_car[1].raw_center);
 }
 
-void Logic::reset()
+void Logic::reset_start()
 {
     m_status = NotStart;
     m_elapsedTime = 0;
+    m_stopUntil[0] = 0;
+    m_stopUntil[1] = 0;
+    m_evil[0] = 0;
+    m_evil[1] = 0;
+    m_shootSide = 0;
+    m_ball = {};
+    m_car[0] = {};
+    m_car[1] = {};
+
+    updateAll();
 }
 
 static void writePoint(uint8_t* addr, ObjectTracker::Report const& data)
@@ -66,13 +134,25 @@ void Logic::packToByteArray(uint8_t (&data)[32])
 {
     for (auto& x : data) x=0;
 
-    data[0] = 0xFC;
+    data[0] = 0xFE | (m_shootSide^1);
     data[1] = ((m_elapsedTime >> 8) & 0x3F) | 0x40;
     data[2] = m_elapsedTime & 0xFF;
 
     writePoint(&data[3], m_car[0]);
     writePoint(&data[6], m_car[1]);
     writePoint(&data[9], m_ball);
+
+    int stopRestA = getRestStopA();
+    int stopRestB = getRestStopB();
+
+    data[12] = stopRestA >> 8;
+    data[13] = stopRestA & 0xFF;
+    data[14] = stopRestB >> 8;
+    data[15] = stopRestB & 0xFF;
+    data[16] = m_evil[0];
+    data[17] = m_evil[1];
+    data[18] = m_score[0];
+    data[19] = m_score[1];
 
     //uint16_t checksum = qChecksum((const char*)data, 28);
     //data[28] = checksum >> 8;
