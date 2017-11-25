@@ -119,9 +119,7 @@ void ImgprocThread::run()
             qDebug() << "updated";
         }
 
-        LocateResult* r = proc.Locate(frame);
-
-        r->timestamp = frame_timestamp;
+        LocateResult* r = proc.Locate(frame, frame_timestamp);
 
         emit ResultEmitted(r);
 

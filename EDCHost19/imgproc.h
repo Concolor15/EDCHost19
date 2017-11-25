@@ -4,7 +4,7 @@
 #include <QtMultimedia/QCamera>
 #include <QAbstractVideoSurface>
 #include <opencv2/core.hpp>
-#include "type.h"
+#include "locate.h"
 #include "CoordinateConverter.h"
 #include "globalconfig.h"
 
@@ -19,7 +19,7 @@ public:
 
 	//保证不会修改 mat
     //返回值由调用者负责释放
-    LocateResult* Locate(cv::Mat const& mat);
+    LocateResult* Locate(cv::Mat const& mat, QTime const& timestamp);
 
 	// 定位所需参数
     ProcConfig const* config;
@@ -31,12 +31,15 @@ public:
     void binarize(cv::Mat const& src);
 
     //获取结果
-    void genResult(LocateResult* r);
+    void genResult(LocateResult* r, QTime const& timestamp);
 
     std::vector<cv::Point2f> ball_centers, cars_centers[2];
     //v2 : 二值化图像
     std::vector<cv::Point2f> GetCenter(cv::Mat v2, int nType);
 	enum Types { CARA = 1, CARB = 2,BALL = 3 };
+
+    ObjectTracker ball_tracker;
+    ObjectTracker car_tracker[2];
 
 	// 单值化图像
 	cv::Mat car1, car2, ball;

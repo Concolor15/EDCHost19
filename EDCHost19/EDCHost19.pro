@@ -22,7 +22,8 @@ HEADERS = \
     MyCamera.h \
     imgproc.h \
     logic.h \
-    type.h
+    type.h \
+    locate.h
 
 SOURCES = \
     controller.cpp \
@@ -31,7 +32,8 @@ SOURCES = \
     globalconfig.cpp \
     MyCamera.cpp \
     imgproc.cpp \
-    logic.cpp
+    logic.cpp \
+    locate.cpp
 
 FORMS =
 

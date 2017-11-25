@@ -12,30 +12,37 @@ QPointF cvToQ(cv::Point2f p)
     return {p.x, p.y};
 }
 
-void ImgProc::genResult(LocateResult* r)
+void ImgProc::genResult(LocateResult* r, QTime const& timestamp)
 {
-    r->ball_succeeded = false;
-
     if (!ball_centers.empty())
     {
-        r->ball_succeeded = true;
-        cv::Point2f p = ball_centers[0];
-        r->ball_center = cvToQ(p);
-        r->logic_ball_center = cvt->cam2logic(p);
+        cv::Point2f rawP = ball_centers[0];
+        QPointF p = cvt->cam2logic(rawP);
+        ball_tracker.update(p, cvToQ(rawP), timestamp);
+    }
+    else
+    {
+        ball_tracker.update_failure(timestamp);
     }
 
     for (int i: {0,1})
     {
-        r->cars_succeeded[i] = false;
-
         if (!cars_centers[i].empty())
         {
-            r->cars_succeeded[i] = true;
-            cv::Point2f p = cars_centers[i][0];
-            r->cars_center[i] = cvToQ(p);
-            r->logic_cars_center[i] = cvt->cam2logic(p);
+            cv::Point2f rawP = cars_centers[i][0];
+            QPointF p = cvt->cam2logic(rawP);
+            car_tracker[i].update(p, cvToQ(rawP), timestamp);
+        }
+        else
+        {
+            car_tracker[i].update_failure(timestamp);
         }
     }
+
+    r->timestamp = timestamp;
+    ball_tracker.genReport(&r->ball);
+    car_tracker[0].genReport(&r->cars[0]);
+    car_tracker[1].genReport(&r->cars[1]);
 }
 
 void ImgProc::binarize(const Mat &yuv)
@@ -56,7 +63,7 @@ void ImgProc::binarize(const Mat &yuv)
                 car2);
 }
 
-LocateResult* ImgProc::Locate(Mat const& yuv)
+LocateResult* ImgProc::Locate(Mat const& yuv, QTime const& timestamp)
 {
     binarize(yuv);
 
@@ -94,7 +101,7 @@ LocateResult* ImgProc::Locate(Mat const& yuv)
     }
 
     LocateResult* r = new LocateResult();
-    genResult(r);
+    genResult(r, timestamp);
     return r;
 }
 

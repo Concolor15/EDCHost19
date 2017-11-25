@@ -44,17 +44,3 @@ inline QPointF point_cv2qt(cv::Point2f p)
     return {p.x, p.y};
 }
 
-struct LocateResult
-{
-    QPointF ball_center;
-    QPointF cars_center[2];
-    bool ball_succeeded;
-    bool cars_succeeded[2];
-
-    QPointF logic_ball_center;
-    QPointF logic_cars_center[2];
-
-    QTime timestamp;
-
-    // below is for debug
-};

@@ -31,6 +31,7 @@ void Controller::imgproc_handle(LocateResult* _data)
     LocateResult* r = _data;
 
     QString debugInfo;
+    /*
     debugInfo += QString("logic Ball: (%1, %2)\n")
             .arg(r->logic_ball_center.x(), 0, 'f', 1)
             .arg(r->logic_ball_center.y(), 0, 'f', 1);
@@ -55,7 +56,7 @@ void Controller::imgproc_handle(LocateResult* _data)
     debugInfo += QString("camera Car2: (%1, %2)\n\n")
             .arg(r->cars_center[1].x(), 0, 'f', 1)
             .arg(r->cars_center[1].y(), 0, 'f', 1);
-
+    */
     emit CameraDebugInfoEmitted(debugInfo);
 
     if (lastResult==nullptr)
@@ -154,7 +155,7 @@ void Controller::initSerial()
     sp.setFlowControl(QSerialPort::NoFlowControl);
     sp.setStopBits(QSerialPort::OneStop);
 
-    if (!sp.open(QIODevice::ReadWrite)) {
+    if (!sp.open(QIODevice::WriteOnly)) {
         qInfo() << sp.error();
     }
 }
@@ -267,7 +268,7 @@ void Controller::setSerial(bool openOrClose)
 {
     if (openOrClose)
     {
-        if (!sp.open(QIODevice::ReadWrite))
+        if (!sp.open(QIODevice::WriteOnly))
             qCritical() << sp.errorString();
     }
     else

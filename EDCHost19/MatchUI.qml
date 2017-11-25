@@ -25,6 +25,9 @@ ApplicationWindow {
 
     property bool canPause: logic.status === Logic.Running
 
+    property int scoreA: 0
+    property int scoreB: 0
+
     Component.onCompleted: function() {
         My.Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
         My.Ctrl.toggleCamera()
@@ -97,12 +100,21 @@ ApplicationWindow {
         }
 
         Item {
+            id: adorner
+            property point ballPos: vid.mapPointToItem(logic.rawBallPos)
+            property point carAPos: vid.mapPointToItem(logic.rawCarAPos)
+            property point carBPos: vid.mapPointToItem(logic.rawCarBPos)
+
+            readonly property color car1Color: "#FF0000"
+            readonly property color car2Color: "#0000FF"
+
+            anchors.fill: parent
             Shape {
                 ShapePath {
                     strokeColor: "red"
                     strokeWidth: 2
 
-                    fillColor: "#3fffffff"
+                    fillColor: root.isSetPerspective ? "#3fffffff" : "transparent"
 
                     startX: c1.x
                     startY: c1.y
@@ -112,6 +124,23 @@ ApplicationWindow {
                     PathLine {x: c3.x; y: c3.y}
                     PathLine {x: c1.x; y: c1.y}
                 }
+            }
+
+            BallIndicator {
+                x: adorner.ballPos.x
+                y: adorner.ballPos.y
+            }
+
+            CarIndicator {
+                x: adorner.carAPos.x
+                y: adorner.carAPos.y
+                color: adorner.car2Color
+            }
+
+            CarIndicator {
+                x: adorner.carBPos.x
+                y: adorner.carBPos.y
+                color: adorner.car1Color
             }
         }
 
@@ -178,38 +207,75 @@ ApplicationWindow {
         height: 150
         color: root.backColor
 
-        StackLayout {
-            id: view1
+        RowLayout {
+            id: textPanel
             anchors.fill: parent
-            currentIndex: root.viewIndex
+            anchors.topMargin: 20
 
-            RowLayout {
-                id: textPanel
+            Item {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+                Label {
+                    id: labelTime
 
+                    text: "时间"
 
-                Component {
-                    id: lblComponent
-                    Label {
-                        width: 125
-                        height: 25
-                        verticalAlignment: Text.AlignBottom
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                    font.pointSize: 24
                 }
+                Label {
+                    anchors.top: labelTime.bottom
+                    anchors.topMargin: 20
 
-                /*Label {
+                    text: logic.elapsedTime
+
+                    font.pointSize: 24
+                }
+            }
+
+            Item {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+                Label {
                     id: labelScoreA
-                    x: 25
-                    y: 25
-                    width: 125
-                    height: 25
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
 
                     text: "A方得分"
-                }*/
+
+                    font.pointSize: 24
+                }
+                Label {
+                    anchors.top: labelScoreA.bottom
+                    anchors.topMargin: 20
+
+                    text: root.scoreA
+
+                    font.pointSize: 24
+                }
+            }
+
+            Item {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.preferredWidth: 150
+                Layout.fillHeight: true
+                Label {
+                    id: labelScoreB
+
+                    text: "B方得分"
+
+                    font.pointSize: 24
+                }
+                Label {
+                    anchors.top: labelScoreB.bottom
+                    anchors.topMargin: 20
+
+                    text: root.scoreA
+
+                    font.pointSize: 24
+                }
             }
         }
+
     }
 
     Rectangle {

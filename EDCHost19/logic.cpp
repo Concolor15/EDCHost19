@@ -52,29 +52,31 @@ void Logic::reset()
     m_elapsedTime = 0;
 }
 
+static void writePoint(uint8_t* addr, ObjectTracker::Report const& data)
+{
+    int x = (int)data.center.x();
+    int y = (int)data.center.y();
+    bool located = data.located;
+    addr[0] = (uint8_t)y;
+    addr[1] = (x >> 8) | (located ? 0 : 0x80);
+    addr[2] = x & 0xFF;
+}
+
 void Logic::packToByteArray(uint8_t (&data)[32])
 {
     for (auto& x : data) x=0;
 
-    auto writePoint = [&data](int idx, QPointF const& p)
-    {
-        int x = (int)p.x();
-        data[idx] = (uint8_t)p.y();
-        data[idx+1] = x >> 8;
-        data[idx+2] = x & 0xFF;
-    };
-
     data[0] = 0xFC;
-    data[1] = m_elapsedTime >> 8;
+    data[1] = ((m_elapsedTime >> 8) & 0x3F) | 0x40;
     data[2] = m_elapsedTime & 0xFF;
 
-    writePoint(3, m_cars[0]);
-    writePoint(6, m_cars[1]);
-    writePoint(9, m_ball);
+    writePoint(&data[3], m_car[0]);
+    writePoint(&data[6], m_car[1]);
+    writePoint(&data[9], m_ball);
 
-    uint16_t checksum = qChecksum((const char*)data, 28);
-    data[28] = checksum >> 8;
-    data[29] = checksum & 0xFF;
+    //uint16_t checksum = qChecksum((const char*)data, 28);
+    //data[28] = checksum >> 8;
+    //data[29] = checksum & 0xFF;
 
     data[30] = 0x0D;
     data[31] = 0x0A;
@@ -110,6 +112,10 @@ void Logic::packToByteArray(uint8_t (&data)[32])
 
 void Logic::run(const LocateResult *info)
 {
+    // The frame is downsampled
+    // multiply each component by 2 to get the original position
+    auto mult2=[](QPointF p)->QPointF{return {2*p.x(), 2*p.y()};};
+
     if (m_status != Running)
         return;
 
@@ -117,26 +123,15 @@ void Logic::run(const LocateResult *info)
 
     emit elapsedTimeChanged(m_elapsedTime);
 
-    if (info==nullptr)
-        return;
+    m_ball = info->ball;
+    m_car[0] = info->cars[0];
+    m_car[1] = info->cars[1];
 
-    if (info->ball_succeeded)
-    {
-        m_ball = info->logic_ball_center;
-    }
+    m_ball.raw_center = mult2(m_ball.raw_center);
+    m_car[0].raw_center = mult2(m_car[0].raw_center);
+    m_car[1].raw_center = mult2(m_car[1].raw_center);
 
-    if (info->cars_succeeded[0])
-    {
-        m_cars[0] = info->logic_cars_center[0];
-    }
-
-    if (info->cars_succeeded[1])
-    {
-        m_cars[1] = info->logic_cars_center[1];
-    }
-
-
-    emit ballPosChanged(m_ball);
-    emit carAPosChanged(m_cars[0]);
-    emit carBPosChanged(m_cars[1]);
+    emit rawBallPosChanged(m_ball.raw_center);
+    emit rawCarAPosChanged(m_ball.raw_center);
+    emit rawCarBPosChanged(m_ball.raw_center);
 }

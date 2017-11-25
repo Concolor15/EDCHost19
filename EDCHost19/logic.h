@@ -2,7 +2,7 @@
 #define LOGIC_H
 
 #include <QtCore>
-#include "type.h"
+#include "locate.h"
 
 class Logic: public QObject
 {
@@ -11,9 +11,9 @@ class Logic: public QObject
     Q_PROPERTY(State status    READ getStatus      NOTIFY statusChanged)
     Q_PROPERTY(int elapsedTime READ getElapsedTime NOTIFY elapsedTimeChanged)
 
-    Q_PROPERTY(QPointF ballPos READ getBallPos  NOTIFY ballPosChanged)
-    Q_PROPERTY(QPointF carAPos READ getCarAPos  NOTIFY carAPosChanged)
-    Q_PROPERTY(QPointF carBPos READ getCarBPos  NOTIFY carBPosChanged)
+    Q_PROPERTY(QPointF rawBallPos READ getRawBallPos  NOTIFY rawBallPosChanged)
+    Q_PROPERTY(QPointF rawCarAPos READ getRawCarAPos  NOTIFY rawCarAPosChanged)
+    Q_PROPERTY(QPointF rawCarBPos READ getRawCarBPos  NOTIFY rawCarBPosChanged)
 
 public:
     enum State {
@@ -32,17 +32,21 @@ public:
     State getStatus()    const { return m_status; }
     int getElapsedTime() const { return m_elapsedTime; }
 
-    QPointF getBallPos() const { return m_ball; }
-    QPointF getCarAPos() const { return m_cars[0]; }
-    QPointF getCarBPos() const { return m_cars[1]; }
+    QPointF getRawBallPos() const { return m_ball.raw_center; }
+    QPointF getRawCarAPos() const { return m_car[0].raw_center; }
+    QPointF getRawCarBPos() const { return m_car[1].raw_center; }
+
+    bool getBallLocated() const { return m_ball.located; }
+    bool getCarALocated() const { return m_car[0].located; }
+    bool getCarBLocated() const { return m_car[1].located; }
 
 signals:
     void elapsedTimeChanged(int newElapsedTime);
     void statusChanged(State newStatus);
 
-    void ballPosChanged(QPointF newBallPos);
-    void carAPosChanged(QPointF newCarAPos);
-    void carBPosChanged(QPointF newCarBPos);
+    void rawBallPosChanged(QPointF newBallPos);
+    void rawCarAPosChanged(QPointF newCarAPos);
+    void rawCarBPosChanged(QPointF newCarBPos);
 public slots:
     void start();
     void stop(bool runOutTime=false);
@@ -56,8 +60,8 @@ private:
     int m_elapsedTime;
     State m_status;
 
-    QPointF m_ball;
-    QPointF m_cars[2];
+    ObjectTracker::Report m_ball;
+    ObjectTracker::Report m_car[2];
 
     static constexpr double LogicWidth = 297;
     static constexpr double LogicHeight = 210;
