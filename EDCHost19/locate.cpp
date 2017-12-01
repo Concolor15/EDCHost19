@@ -62,16 +62,18 @@ void ObjectTracker::genReport(Report* report)
     report->velocity = {(cur.center.x()-prev.center.x())/time_span_s,
                         (cur.center.y()-prev.center.y())/time_span_s};
 }
-
+static double hypot(QPointF p)
+{
+    return sqrt(p.x()*p.x()+p.y()*p.y());
+}
 QString& operator+=(QString &str, const ObjectTracker::Report &obj)
 {
-    auto hyper = [](QPointF p){return sqrt(p.x()*p.x()+p.y()*p.y());};
 
     str += QStringLiteral("located: %1\n").arg(obj.located);
     str += QStringLiteral("vel stable: %1\n").arg(obj.vel_stable);
     str += QStringLiteral("center: %1, %2\n").arg(obj.center.x()).arg(obj.center.y());
     str += QStringLiteral("cam   : %1, %2\n").arg(obj.raw_center.x()).arg(obj.raw_center.y());
-    str += QStringLiteral("velocity: %1\n").arg(hyper(obj.velocity));
+    str += QStringLiteral("velocity: %1\n").arg(hypot(obj.velocity));
 
     return str;
 }

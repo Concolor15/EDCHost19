@@ -49,4 +49,12 @@ LIBS += \
 RESOURCES += \
     EDCHost19.qrc
 
+win32 {
+    INCLUDEPATH += E:\Library\opencv-3.3.0-official\build\include
+    INCLUDEPATH += E:\Library\Eigen
+    QMAKE_LIBDIR += E:\Library\opencv-3.3.0-official\build\x64\vc14\lib
+    release: LIBS += opencv_world330.lib
+    debug: LIBS += opencv_world330d.lib
+}
+
 
