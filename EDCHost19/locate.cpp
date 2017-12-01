@@ -25,7 +25,6 @@ void ObjectTracker::update(QPointF center, QPointF raw, int64_t timestamp_ms)
         }
 
         queue_full = true;
-        head = 0;
     }
 
     //circular queue must be full
@@ -46,6 +45,7 @@ void ObjectTracker::update_failure(int64_t timestamp_ms)
 
 void ObjectTracker::genReport(Report* report)
 {
+    report->located = m_located;
     report->raw_center = m_current_raw;
     report->center = m_current_center;
     report->velocity = {};
@@ -57,10 +57,10 @@ void ObjectTracker::genReport(Report* report)
     }
     auto& prev = queue[head];
     auto& cur  = queue[head==0 ? CAPICITY-1 : head-1];
-    double time_span_ms = cur.timestamp_ms - prev.timestamp_ms;
+    double time_span_s = (cur.timestamp_ms - prev.timestamp_ms)/1000.0;
     report->vel_stable = true;
-    report->velocity = {(cur.center.x()-prev.center.y())/time_span_ms,
-                        (cur.center.y()-prev.center.y())/time_span_ms};
+    report->velocity = {(cur.center.x()-prev.center.x())/time_span_s,
+                        (cur.center.y()-prev.center.y())/time_span_s};
 }
 
 QString& operator+=(QString &str, const ObjectTracker::Report &obj)

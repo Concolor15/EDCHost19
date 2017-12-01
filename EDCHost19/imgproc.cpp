@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "imgproc.h"
+#include "globalconfig.h"
 #include <vector>
 
 using namespace std;
@@ -46,7 +47,7 @@ void ImgProc::genResult(LocateResult* r, int64_t timestamp)
 
 void ImgProc::binarize(const Mat &yuv)
 {
-    auto const& config = *this->config;
+    auto const& config = *GetProcConfig();
 
     cv::inRange(yuv,
                 Scalar(config.ball_Y_lb, config.ball_U_lb, config.ball_V_lb),
@@ -106,6 +107,7 @@ LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
 
 vector<Point2f> ImgProc::GetCenter(Mat v2, int nType)
 {
+    ProcConfig const* config = GetProcConfig();
     auto max_sqr = [](double x, double y){double r=x>y?x:y; return r*r;};
 
     QRectF logicBound(QPointF(0, 0), cvt->getParam().LogicSize);
@@ -128,6 +130,9 @@ vector<Point2f> ImgProc::GetCenter(Mat v2, int nType)
         QPointF logicCenter = cvt->cam2logic(center);
         if (!logicBound.contains(logicCenter))
             continue;
+
+        //if (nType == Types::CARA && logicCenter.x()<20)
+        //   continue;
 
 		if ((nType == Types::CARA || nType == Types::CARB) && area < area_car_lb) continue;
         if (nType == Types::BALL)

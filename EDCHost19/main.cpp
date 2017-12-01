@@ -7,6 +7,7 @@
 
 #include "imgproc.h"
 #include "camera.h"
+#include "globalconfig.h"
 #include "controller.h"
 
 int main(int argc, char *argv[])
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    Config::static_init();
     Controller::static_Init();
 
     GetController()->getMatchWindow()->show();

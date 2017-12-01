@@ -26,68 +26,91 @@ ApplicationWindow {
     footer: ToolBar {
         ColumnLayout {
             anchors.fill: parent
-        RowLayout {
-            Layout.fillWidth: true
 
-            ToolButton {
-                text: "打开/关闭摄像头"
+            RowLayout {
+                Layout.fillWidth: true
 
-                onClicked: My.Ctrl.toggleCamera()
-            }           
+                ToolButton {
+                    text: "获取参数"
 
-            Item {Layout.fillWidth: true}
+                    onClicked: txtParam.text = My.Config.getProcConfigByString()
+                }
 
-            TextField {
-                id: serialName
+                TextField {
+                    Layout.fillWidth: true
+                    id: txtParam
+                }
+
+                ToolButton {
+                    text: "设置参数"
+
+                    onClicked: My.Config.setProcConfigByString(txtParam.text)
+                }
+
             }
 
-            ToolButton {
-                text: "打开串口"
+            RowLayout {
+                Layout.fillWidth: true
 
-                onClicked: My.Ctrl.setSerial(true, serialName)
+                ToolButton {
+                    text: "打开/关闭摄像头"
+
+                    onClicked: My.Ctrl.toggleCamera()
+                }
+
+                Item {Layout.fillWidth: true}
+
+                TextField {
+                    id: serialName
+                }
+
+                ToolButton {
+                    text: "打开串口"
+
+                    onClicked: My.Ctrl.setSerial(true, serialName.text)
+                }
+
+                ToolButton {
+                    text: "关闭串口"
+
+                    onClicked: My.Ctrl.setSerial(false, "")
+                }
             }
 
-            ToolButton {
-                text: "关闭串口"
+            RowLayout {
+                Layout.fillWidth: true
 
-                onClicked: My.Ctrl.setSerial(false, "")
+                ToolButton {
+                    text: "启用调试"
+
+                    onClicked: My.Ctrl.setCvDebugEnabled(true)
+                }
+
+                ToolButton {
+                    text: "禁用调试"
+
+                    onClicked: My.Ctrl.setCvDebugEnabled(false)
+                }
+
+                ToolButton {
+                    text: "显示主界面"
+                    onClicked: My.Ctrl.matchWindow.showNormal()
+                }
+
+                ToolButton {
+                    text: "全屏主界面"
+
+                    onClicked: My.Ctrl.matchWindow.showFullScreen()
+                }
+
+                Item { Layout.fillWidth: true }
+
+                ToolButton {
+                    text: "结束进程"
+
+                    onClicked: Qt.quit()
+                }
             }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            ToolButton {
-                text: "启用调试"
-
-                onClicked: My.Ctrl.setCvDebugEnabled(true)
-            }
-
-            ToolButton {
-                text: "禁用调试"
-
-                onClicked: My.Ctrl.setCvDebugEnabled(false)
-            }
-
-            ToolButton {
-                text: "显示主界面"
-                onClicked: My.Ctrl.matchWindow.showNormal()
-            }
-
-            ToolButton {
-                text: "全屏主界面"
-
-                onClicked: My.Ctrl.matchWindow.showFullScreen()
-            }
-
-            Item { Layout.fillWidth: true }
-
-            ToolButton {
-                text: "结束进程"
-
-                onClicked: Qt.quit()
-            }
-        }
         }
     }
 

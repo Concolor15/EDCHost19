@@ -3,10 +3,16 @@
 
 #include <opencv2/highgui.hpp>
 #include <CoordinateConverter.h>
+#include "globalconfig.h"
+#include "camera.h"
+#include "logic.h"
 
 Controller* Controller::inst = 0;
 
-Controller::Controller(QObject *parent) : QObject(parent) { }
+Controller::Controller(QObject *parent) : QObject(parent)
+{
+    logic = new Logic(this);
+}
 
 void Controller::init()
 {
@@ -40,32 +46,7 @@ void Controller::imgproc_handle(LocateResult* _data)
 
     debugInfo += QStringLiteral("\nCarB:\n");
     debugInfo += r->cars[1];
-    /*
-    debugInfo += QString("logic Ball: (%1, %2)\n")
-            .arg(r->logic_ball_center.x(), 0, 'f', 1)
-            .arg(r->logic_ball_center.y(), 0, 'f', 1);
-    debugInfo += QString("logic Car1: (%1, %2)\n")
-            .arg(r->logic_cars_center[0].x(), 0, 'f', 1)
-            .arg(r->logic_cars_center[0].y(), 0, 'f', 1);
-    debugInfo += QString("logic Car2: (%1, %2)\n\n")
-            .arg(r->logic_cars_center[1].x(), 0, 'f', 1)
-            .arg(r->logic_cars_center[1].y(), 0, 'f', 1);
-    debugInfo += QStringLiteral("ball located: %1\n")
-            .arg(r->ball_succeeded);
-    debugInfo += QStringLiteral("car1 located: %1\n")
-            .arg(r->cars_succeeded[0]);
-    debugInfo += QStringLiteral("car2 located: %1\n")
-            .arg(r->cars_succeeded[1]);
-    debugInfo += QString("camera Ball: (%1, %2)\n")
-            .arg(r->ball_center.x(), 0, 'f', 1)
-            .arg(r->ball_center.y(), 0, 'f', 1);
-    debugInfo += QString("camera Car1: (%1, %2)\n")
-            .arg(r->cars_center[0].x(), 0, 'f', 1)
-            .arg(r->cars_center[0].y(), 0, 'f', 1);
-    debugInfo += QString("camera Car2: (%1, %2)\n\n")
-            .arg(r->cars_center[1].x(), 0, 'f', 1)
-            .arg(r->cars_center[1].y(), 0, 'f', 1);
-    */
+
     emit CameraDebugInfoEmitted(debugInfo);
 
     if (lastResult==nullptr)
@@ -104,7 +85,7 @@ static void appendSerialDebugInfo(QString& str, uint8_t (&data)[32])
 
 void Controller::serialport_timer_handle()
 {
-    logic.run(lastResult);
+    logic->run(lastResult);
 
     if (lastResult==nullptr)
     {
@@ -112,7 +93,7 @@ void Controller::serialport_timer_handle()
         lastResult = nullptr;
     }
 
-    logic.packToByteArray(data_buffer);
+    logic->packToByteArray(data_buffer);
     buffer_has_data = true;
 
     if (buffer_has_data)
@@ -219,13 +200,26 @@ QQuickWindow* Controller::getProbeWindow()
 
 void Controller::initComponent()
 {
-    qmlRegisterSingletonType<Controller>("my.uri", 1, 0, "Ctrl", [](QQmlEngine*, QJSEngine*)->QObject*{return inst;});
-    qmlRegisterType<Logic>("my.uri", 1, 0, "Logic");
+    QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
+    QQmlEngine::setObjectOwnership(inst->logic, QQmlEngine::CppOwnership);
+    qmlRegisterSingletonType<Controller>(
+                "my.uri", 1, 0, "Ctrl",
+                [](QQmlEngine*, QJSEngine*)->QObject*{
+        return inst;
+    });
+    qmlRegisterSingletonType<Logic>(
+                "my.uri", 1, 0, "Logic",
+                [](QQmlEngine*, QJSEngine*)->QObject*{
+        return inst->logic;
+    });
+    qmlRegisterSingletonType<Config>(
+                "my.uri", 1, 0, "Config",
+                [](QQmlEngine*, QJSEngine*)->QObject*{
+        return &Config::Get();
+    });
     qmlRegisterType<MyFilter>("my.uri", 1, 0, "Filter");
 
     engine = new QQmlEngine(this);
-    engine->rootContext()->setContextProperty("logic", &logic);
-
     QObject::connect(engine, &QQmlEngine::quit, qGuiApp, &QGuiApplication::quit);
 
     mainWindowComponent = new QQmlComponent(engine, QUrl("qrc:/Main.qml"), this);
@@ -301,8 +295,8 @@ void Controller::setSerial(bool openOrClose, QString serialName)
 {   
     if (openOrClose)
     {
-        if (serialName != "")
-            sp.setPortName(serialName);
+        //if (serialName != "")
+        //    sp.setPortName(serialName);
         if (!sp.open(QIODevice::WriteOnly))
             qCritical() << sp.errorString();
     }
@@ -344,4 +338,21 @@ void Controller::setCvDebugEnabled(bool cvDebugEnabled)
 MyCamera *Controller::getCamera()
 {
     return cam;
+}
+
+void Controller::setCamera(MyCamera* newCamera)
+{
+    if (cam == newCamera) return;
+
+    delete cam;
+
+    cam = newCamera;
+    emit cameraChanged(newCamera);
+}
+
+int64_t GetElapsedTime()
+{
+    auto time = GetController()->elapsedTimer.elapsed();
+    //qWarning() << time;
+    return time;
 }

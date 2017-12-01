@@ -20,18 +20,18 @@ ApplicationWindow {
     readonly property int viewIndex: btnSetPerspective.checked ? 1 : 0
 
     property bool canStart:
-        logic.status === Logic.NotStart ||
-        logic.status === Logic.Finished
+        Logic.status === Logic.NotStart ||
+        Logic.status === Logic.Finished
 
     property bool onProgress:
-        logic.status === Logic.Running ||
-        logic.status === Logic.Paused
+        Logic.status === Logic.Running ||
+        Logic.status === Logic.Paused
 
-    property bool canPause: logic.status === Logic.Running
+    property bool canPause: Logic.status === Logic.Running
 
     Component.onCompleted: function() {
-        My.Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
-        My.Ctrl.toggleCamera()
+        Ctrl.setPerspective(loc.np1, loc.np2, loc.np3, loc.np4)
+        Ctrl.toggleCamera()
     }
 
     footer: ToolBar {
@@ -102,9 +102,9 @@ ApplicationWindow {
 
         Item {
             id: adorner
-            property point ballPos: vid.mapPointToItem(logic.rawBallPos)
-            property point carAPos: vid.mapPointToItem(logic.rawCarAPos)
-            property point carBPos: vid.mapPointToItem(logic.rawCarBPos)
+            property point ballPos: vid.mapPointToItem(Logic.rawBallPos)
+            property point carAPos: vid.mapPointToItem(Logic.rawCarAPos)
+            property point carBPos: vid.mapPointToItem(Logic.rawCarBPos)
 
             readonly property color car1Color: "#FF0000"
             readonly property color car2Color: "#0000FF"
@@ -228,7 +228,7 @@ ApplicationWindow {
                     anchors.top: labelTime.bottom
                     anchors.topMargin: 20
 
-                    text: logic.elapsedTime
+                    text: Logic.elapsedTime
 
                     font.pointSize: 24
                 }
@@ -240,7 +240,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
 
                 title: "红方得分"
-                content: logic.scoreA
+                content: Logic.scoreA
             }
 
             MyLabel {
@@ -249,7 +249,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
 
                 title: "蓝方得分"
-                content: logic.scoreB
+                content: Logic.scoreB
             }
 
             MyLabel {
@@ -257,10 +257,10 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                enabled: logic.evilA !== 0
+                enabled: Logic.evilA !== 0
 
                 title: "红方邪恶"
-                content: logic.evilA
+                content: Logic.evilA
             }
 
             MyLabel {
@@ -268,10 +268,10 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                enabled: logic.evilB !== 0
+                enabled: Logic.evilB !== 0
 
                 title: "蓝方邪恶"
-                content: logic.evilB
+                content: Logic.evilB
             }
 
             MyLabel {
@@ -279,10 +279,10 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                enabled: logic.shouldStopA
+                enabled: Logic.restStopA > 0
 
-                title: "红方剩余强停"
-                content: logic.restStopA
+                title: "红方强停"
+                content: Logic.restStopA
             }
 
             MyLabel {
@@ -290,10 +290,10 @@ ApplicationWindow {
                 Layout.preferredWidth: 150
                 Layout.fillHeight: true
 
-                enabled: logic.shouldStopB
+                enabled: Logic.restStopB > 0
 
-                title: "蓝方剩余强停"
-                content: logic.restStopB
+                title: "蓝方强停"
+                content: Logic.restStopB
             }
         }
 
@@ -329,9 +329,9 @@ ApplicationWindow {
 
                     onClicked: {
                         if (root.canPause)
-                            logic.pause()
+                            Logic.pause()
                         else
-                            logic.resume()
+                            Logic.resume()
                     }
                 }
 
@@ -343,9 +343,9 @@ ApplicationWindow {
 
                     onClicked: {
                         if (root.canStart)
-                            logic.start()
+                            Logic.start()
                         else
-                            logic.stop()
+                            Logic.stop()
                     }
                 }
 
@@ -357,7 +357,7 @@ ApplicationWindow {
 
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    onClicked: logic.setSide(0)
+                    onClicked: Logic.setSide(0)
                 }
 
                 MyButton {
@@ -368,7 +368,7 @@ ApplicationWindow {
 
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    onClicked: logic.setSide(1)
+                    onClicked: Logic.setSide(1)
                 }
 
                 MyButton {
@@ -376,13 +376,7 @@ ApplicationWindow {
                     id: btnPlusA
                     text: "红方得分"
 
-                    onClicked: logic.setScore(0, logic.scoreA+1)
-                }
-
-                MyButton {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    id: btnPenalizeA
-                    text: "A方犯规"
+                    onClicked: Logic.setScore(0, Logic.scoreA+1)
                 }
 
                 MyButton {
@@ -391,17 +385,14 @@ ApplicationWindow {
 
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    onClicked: logic.setScore(1, logic.scoreB+1)
-                }
-
-                MyButton {
-                    id: btnPenalizeB
-                    text: "B方犯规"
-
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    onClicked: Logic.setScore(1, Logic.scoreB+1)
                 }
 
 
+                Label {
+                    text: Logic.shootSide==0 ? "点球方：红方" : "点球方：蓝方"
+                    color: Logic.shootSide==0 ? "red" : "blue"
+                }
 
             }
 

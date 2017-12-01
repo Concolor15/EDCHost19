@@ -6,10 +6,14 @@
 #include <QtQml>
 #include <QtQuick>
 #include <QtSerialPort>
-#include "type.h"
-#include "logic.h"
+#include "util.h"
 #include "camera.h"
 #include "globalconfig.h"
+
+class MyCamera;
+class ImgprocThread;
+struct LocateResult;
+class Logic;
 
 class Controller : public QObject
 {
@@ -34,7 +38,7 @@ public:
 
     ImgprocThread* imgThread;
 
-    Logic& GetLogic() {return logic;}
+    Logic* GetLogic() {return logic;}
 
     Q_INVOKABLE void setPerspective(
                 QPointF p1,
@@ -71,7 +75,7 @@ private:
     QPointer<QQuickWindow> matchWindow;
     QPointer<QQuickWindow> probeWindow;
 
-    Logic logic;
+    Logic* logic;
 
     QTimer timer;
     QElapsedTimer elapsedTimer;
@@ -79,7 +83,6 @@ private:
     LocateResult* lastResult = nullptr;
 
     MyCamera* cam = nullptr;
-    ProcConfig cv_param;
 
     QSerialPort sp;
     uint8_t data_buffer[32];
@@ -109,19 +112,6 @@ inline void Controller::static_Destroy()
     inst = nullptr;
 }
 
-inline void Controller::setCamera(MyCamera* newCamera)
-{
-    if (cam == newCamera) return;
-
-    delete cam;
-
-    cam = newCamera;
-    emit cameraChanged(newCamera);
-}
-
-inline int64_t GetElapsedTime()
-{
-    return GetController()->elapsedTimer.elapsed();
-}
+int64_t GetElapsedTime();
 
 #endif // CONTROLLER_H

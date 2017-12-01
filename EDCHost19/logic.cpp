@@ -1,5 +1,7 @@
+#include "stdafx.h"
 #include "logic.h"
 
+#include <cmath>
 
 Logic::Logic(QObject* parent) : QObject(parent)
 {
@@ -95,8 +97,8 @@ void Logic::updateAll()
     emit scoreBChanged(m_score[1]);
     emit evilAChanged(m_evil[0]);
     emit evilBChanged(m_evil[1]);
-    emit shouldStopAChanged(getShouldStopA());
-    emit shouldStopBChanged(getShouldStopB());
+    //emit shouldStopAChanged(getShouldStopA());
+    //emit shouldStopBChanged(getShouldStopB());
     emit restStopAChanged(getRestStopA());
     emit restStopBChanged(getRestStopB());
     emit rawBallPosChanged(m_ball.raw_center);
@@ -108,11 +110,13 @@ void Logic::reset_start()
 {
     m_status = NotStart;
     m_elapsedTime = 0;
-    m_stopUntil[0] = 0;
-    m_stopUntil[1] = 0;
+    m_shoot_side_protected = 0;
+    m_stopCount[0] = 0;
+    m_stopCount[1] = 0;
+    m_restStop[0] = 0;
+    m_restStop[1] = 0;
     m_evil[0] = 0;
     m_evil[1] = 0;
-    m_shootSide = 0;
     m_ball = {};
     m_car[0] = {};
     m_car[1] = {};
@@ -120,6 +124,23 @@ void Logic::reset_start()
     updateAll();
 }
 
+void Logic::setEvil(int side, double newEvil)
+{
+    Q_ASSERT(side ==0 || side == 1);
+    Q_ASSERT(newEvil >= 0);
+
+    if (newEvil == m_evil[side])
+        return;
+
+    m_evil[side] = newEvil;
+
+    if (side==0)
+        emit evilAChanged(getEvilA());
+    else
+        emit evilBChanged(getEvilB());
+}
+
+/*
 void Logic::addElapsedTime(int delta)
 {
     if (delta == 0)
@@ -142,22 +163,36 @@ void Logic::addElapsedTime(int delta)
     if (m_elapsedTime <= m_stopUntil[1])
         emit restStopBChanged(m_stopUntil[1]-m_elapsedTime);
 }
+*/
 
-void Logic::updateStopInfo(int side, int newStopUntil)
+void Logic::updateStopInfo(int side)
 {
     Q_ASSERT(side==0 || side==1);
-    Q_ASSERT(newStopUntil > std::max(m_elapsedTime, m_stopUntil[side]));
 
-    m_stopUntil[side] = newStopUntil;
+    if (m_evil[side]>100)
+    {
+        setEvil(side, 0);
+        m_stopCount[side] += 1;
+        m_restStop[side] += 10*std::min(2*m_stopCount[side]+3, 10);
+    }
+    else
+    {
+        if (m_restStop[side]>0)
+        {
+            m_restStop[side] -= 1;
+            if (side==1-m_shootSide && m_restStop[side]==0)
+            {
+                m_shoot_side_protected = m_elapsedTime + 20;
+            }
+        }
+    }
 
     if (side==0)
     {
-        emit shouldStopAChanged(true);
         emit restStopAChanged(getRestStopA());
     }
     else
     {
-        emit shouldStopBChanged(true);
         emit restStopBChanged(getRestStopB());
     }
 }
@@ -196,6 +231,12 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data[18] = m_score[0];
     data[19] = m_score[1];
     data[20] = m_status << 6;
+
+    if (m_status != Running)
+    {
+        data[12] |= 0x80;
+        data[14] |= 0x80;
+    }
 
     //uint16_t checksum = qChecksum((const char*)data, 28);
     //data[28] = checksum >> 8;
@@ -236,8 +277,17 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data_buffer[31] = 0x0A;*/
 }
 
+static double hypot2(double x, double y)
+{
+    return sqrt(x*x+y*y);
+}
+
 void Logic::run(const LocateResult *info)
 {
+    constexpr int TOTAL_TIME = 800;
+    constexpr double OVERSPEED_THRESHOLD = 40;
+    constexpr double FORBIDDEN_AREA_RADIUS = 50;
+    constexpr double PUNISHMENT_PER_ROUND = 4;
     constexpr int EVIL_THRESHOLD = 100;
 
     // The frame is downsampled
@@ -247,10 +297,28 @@ void Logic::run(const LocateResult *info)
     if (m_status != Running)
         return;
 
-    addElapsedTime(1);
+    //if (m_elapsedTime == TOTAL_TIME)
+    //    stop(true);
+
+    m_elapsedTime += 1;
+    emit elapsedTimeChanged(m_elapsedTime);
 
     if (info == nullptr)
+    {
+        if (m_restStop[0]>0)
+        {
+            m_restStop[0] -= 1;
+            emit restStopAChanged(m_restStop[0]);
+        }
+
+        if (m_restStop[1]>0)
+        {
+            m_restStop[1] -= 1;
+            emit restStopBChanged(m_restStop[1]);
+        }
+
         return;
+    }
 
     m_ball = info->ball;
     m_car[0] = info->cars[0];
@@ -261,21 +329,31 @@ void Logic::run(const LocateResult *info)
     m_car[1].raw_center = mult2(m_car[1].raw_center);
 
     emit rawBallPosChanged(m_ball.raw_center);
-    emit rawCarAPosChanged(m_ball.raw_center);
-    emit rawCarBPosChanged(m_ball.raw_center);
+    emit rawCarAPosChanged(m_car[0].raw_center);
+    emit rawCarBPosChanged(m_car[1].raw_center);
 
     int defend_side = 1-m_shootSide;
-    int& evil_defend = m_evil[defend_side];
 
-    // TODO: update evil
+    auto& rpt_attack = info->cars[m_shootSide];
+    auto& rpt_defend = info->cars[defend_side];
 
-    if (defend_side==0)
-        emit evilAChanged(m_evil[0]);
+    if (!rpt_defend.located)
+        return;
+
+    double dis_attack = hypot2(rpt_attack.center.y()-105, rpt_attack.center.x());
+    double dis_defend = hypot2(rpt_defend.center.y()-105, rpt_defend.center.x());
+
+    double speed_defend = rpt_defend.vel_stable ? hypot2(rpt_defend.velocity.x(), rpt_defend.velocity.y())
+                                                  : 0;
+
+    double new_evil_defend = m_evil[defend_side];
+    if (m_elapsedTime>m_shoot_side_protected && (speed_defend > OVERSPEED_THRESHOLD
+            || (dis_defend<FORBIDDEN_AREA_RADIUS && dis_attack>FORBIDDEN_AREA_RADIUS)))
+        new_evil_defend += PUNISHMENT_PER_ROUND;
     else
-        emit evilBChanged(m_evil[1]);
+        new_evil_defend -= 0.8;
 
-    if (evil_defend >= EVIL_THRESHOLD)
-    {
-        updateStopInfo(defend_side, 0);
-    }
+    setEvil(defend_side, std::max(new_evil_defend, 0.0));
+
+    updateStopInfo(defend_side);
 }

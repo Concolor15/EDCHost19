@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtMultimedia>
-#include <opencv2/core/types.hpp>
+#include <opencv2/core.hpp>
 #include "locate.h"
 #include "CoordinateConverter.h"
 #include "globalconfig.h"
@@ -20,7 +20,6 @@ public:
     LocateResult* Locate(cv::Mat const& mat, int64_t timestamp_ms);
 
 	// 定位所需参数
-    ProcConfig const* config;
     CoordinateConverter const* cvt;
 
 //private:

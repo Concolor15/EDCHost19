@@ -5,7 +5,7 @@ QT += core gui quickcontrols2 qml quick  multimedia serialport
 TARGET = EDCHost19
 TEMPLATE = app
 
-CONFIG += c++14
+CONFIG += c++17
 CONFIG += precompile_header
 PRECOMPILED_HEADER = stdafx.h
 
@@ -20,9 +20,9 @@ HEADERS = \
     globalconfig.h \
     imgproc.h \
     logic.h \
-    type.h \
     locate.h \
-    camera.h
+    camera.h \
+    util.h
 
 SOURCES = \
     controller.cpp \

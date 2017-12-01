@@ -44,3 +44,13 @@ inline QPointF point_cv2qt(cv::Point2f p)
     return {p.x, p.y};
 }
 
+class MutexTryLocker {
+  QMutex &m_;
+  bool locked_;
+public:
+  MutexTryLocker(QMutex &m) : m_(m), locked_(m.tryLock()) {}
+  ~MutexTryLocker() { if (locked_) m_.unlock(); }
+  bool isLocked() const { return locked_; }
+};
+
+

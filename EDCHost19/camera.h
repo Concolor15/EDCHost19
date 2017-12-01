@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QtMultimedia>
 #include <opencv2/core/types.hpp>
-#include "type.h"
+#include "util.h"
 #include "imgproc.h"
 #include "globalconfig.h"
 
@@ -52,7 +52,6 @@ class ImgprocThread: public QThread
     Q_OBJECT
     friend class MyFilterRunnable;
 public:
-    AtomicData<ProcConfig> _config;
     AtomicData<CoordinateConverter::Param> coord_param;
     void setDebugEnabled(bool newDebugEnabled);
 private:
@@ -62,7 +61,6 @@ private:
 
     cv::Mat frame;
     CoordinateConverter cvt;
-    ProcConfig config;
     ImgProc proc;
 
     int64_t frame_timestamp_ms;

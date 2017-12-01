@@ -40,22 +40,43 @@ struct ProcConfig
     }
 };
 
-class Config
+class Config: public QObject
 {
-    static Config* inst;
+private:
+    Q_OBJECT
+    explicit Config(QObject* parent=Q_NULLPTR);
 public:
-    static Config const& Get();
+    static Config* inst;
+    static Config& Get();
     static Config* GetMutatable();
+    static void static_init();
+    static void static_destroy();
+
     void LoadFromFile(QString filename);
     void SaveToFile(QString filename) const;
+
+    ProcConfig procConfig;
+
+    Q_INVOKABLE void setProcConfigByString(QString str);
+    Q_INVOKABLE QString getProcConfigByString();
 
     QString video_dev_name;
     QString serial_dev_name;
 };
 
-inline Config const& Config::Get()
+inline Config& Config::Get()
 {
     return *inst;
+}
+
+inline ProcConfig const* GetProcConfig()
+{
+    return &Config::inst->procConfig;
+}
+
+inline ProcConfig* GetProcConfigMutate()
+{
+    return &Config::inst->procConfig;
 }
 
 inline Config* Config::GetMutatable()
@@ -63,4 +84,8 @@ inline Config* Config::GetMutatable()
     return inst;
 }
 
+inline void Config::static_init()
+{
+    inst = new Config();
+}
 #endif // GLOBALCONFIG_H
