@@ -17,9 +17,17 @@ public:
         friend QString& operator+=(QString& str, Report const& obj);
     };
 
+    struct PredicateResult
+    {
+        double uncertainty;
+        QPointF raw_center;
+    };
+
     void update(QPointF center, QPointF raw, int64_t timestamp_ms);
     void update_failure(int64_t timestamp_ms);
-    void genReport(Report* report);
+    void genReport(Report* report) const;
+
+    void predicate(int64_t timestamp_ms, PredicateResult& result) const;
 
 private:
     bool m_located = false;

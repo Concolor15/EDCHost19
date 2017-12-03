@@ -42,8 +42,10 @@ struct ProcConfig
 
 class Config: public QObject
 {
-private:
     Q_OBJECT
+
+    Q_PROPERTY(int timeLimit MEMBER m_timeLimit NOTIFY onTimeLimitChanged)
+
     explicit Config(QObject* parent=Q_NULLPTR);
 public:
     static Config* inst;
@@ -52,17 +54,29 @@ public:
     static void static_init();
     static void static_destroy();
 
+    int getTimeLimit() const { return m_timeLimit; }
+
     void LoadFromFile(QString filename);
     void SaveToFile(QString filename) const;
 
     ProcConfig procConfig;
+    QAtomicInt cvDebugEnabled;
 
     Q_INVOKABLE void setProcConfigByString(QString str);
     Q_INVOKABLE QString getProcConfigByString();
+    Q_INVOKABLE void setCvDebugEnabled(bool newDebugEnabled);
 
     QString video_dev_name;
     QString serial_dev_name;
+
+signals:
+    void onTimeLimitChanged(int newTimeLimit);
+
+private:
+    int m_timeLimit = 80000;
 };
+
+
 
 inline Config& Config::Get()
 {

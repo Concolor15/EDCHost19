@@ -67,6 +67,8 @@ LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
 {
     binarize(yuv);
 
+    bool debugEnabled = Config::Get().cvDebugEnabled.load() != 0;
+
     if (debugEnabled)
     {
         cv::merge(vector<Mat>{ ball, car1, car2}, merged);
@@ -92,7 +94,7 @@ LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
             circle(dst, cts, 10, Scalar(0, 0, 255), -1);
         }
 
-        // Black Magic to invoke cv::imshow in main thread
+        // invoke cv::imshow in main thread
 
         QTimer::singleShot(0, qApp, [p_dst=&dst, p_merged=&merged](){
             imshow("show", *p_dst);

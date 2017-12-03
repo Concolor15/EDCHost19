@@ -43,7 +43,7 @@ void ObjectTracker::update_failure(int64_t timestamp_ms)
     m_located = false;
 }
 
-void ObjectTracker::genReport(Report* report)
+void ObjectTracker::genReport(Report* report) const
 {
     report->located = m_located;
     report->raw_center = m_current_raw;
@@ -69,7 +69,7 @@ QString& operator+=(QString &str, const ObjectTracker::Report &obj)
     str += QStringLiteral("vel stable: %1\n").arg(obj.speed_stable);
     str += QStringLiteral("center: %1, %2\n").arg(obj.center.x()).arg(obj.center.y());
     str += QStringLiteral("cam   : %1, %2\n").arg(obj.raw_center.x()).arg(obj.raw_center.y());
-    str += QStringLiteral("speed: %1\n").arg(obj.speed);
+    str += QStringLiteral("speed : %1\n").arg(obj.speed);
 
     return str;
 }

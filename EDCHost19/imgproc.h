@@ -4,16 +4,11 @@
 #include <opencv2/core.hpp>
 #include "locate.h"
 #include "CoordinateConverter.h"
-#include "globalconfig.h"
-
-
 
 class ImgProc
 {
 public:
     ImgProc() { }
-
-    bool debugEnabled = false;
 
 	//保证不会修改 mat
     //返回值由调用者负责释放

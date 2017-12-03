@@ -6,7 +6,6 @@
 #include <opencv2/core/types.hpp>
 #include "util.h"
 #include "imgproc.h"
-#include "globalconfig.h"
 
 class MyCamera: public QCamera
 {
@@ -23,8 +22,6 @@ public:
         QCamera(position, parent) { }
 
     QCamera* getMediaObject() {return this; }
-private:
-    //QPointer<QAbstractVideoSurface> m_surface;
 };
 
 
@@ -64,8 +61,6 @@ private:
     ImgProc proc;
 
     int64_t frame_timestamp_ms;
-
-    bool debugEnabled = false;
 
     void run() override;
 

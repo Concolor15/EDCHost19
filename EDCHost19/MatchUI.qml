@@ -13,7 +13,7 @@ ApplicationWindow {
 
     width : 1200
     height : 900
-    title: "进行比赛\uE32A"
+    title: "进行比赛"
 
     readonly property color backColor: "#66bb6a"
     readonly property bool isSetPerspective: btnSetPerspective.checked
@@ -39,7 +39,7 @@ ApplicationWindow {
             anchors.fill: parent
 
             ToolButton {
-                text: "调试信息\uE32A"
+                text: "调试信息"
                 onClicked: My.Ctrl.probeWindow.show()
             }
 
@@ -82,7 +82,7 @@ ApplicationWindow {
         id: vidcanvas
 
         anchors.left: parent.left
-        anchors.right: view2rect.left
+        anchors.right: parent.right
         anchors.top: view1rect.bottom
         anchors.bottom: parent.bottom
 
@@ -92,7 +92,12 @@ ApplicationWindow {
             id: vid
             source: My.Ctrl.camera
             filters: [filter]
+
             anchors.fill: parent
+
+            /*transform: Scale {
+                xScale: vidcanvas.width / vid.width
+            }*/
 
             onSourceChanged: {
                 if (source != null)
@@ -202,13 +207,17 @@ ApplicationWindow {
 
     Rectangle {
         id: view1rect
-        x: 0
-        y: 0
-        width: parent.width
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        //y: 0
+        //width: parent.width
         height: 150
         color: root.backColor
 
-        RowLayout {
+        readonly property int offset1: 140
+
+        /*RowLayout {
             id: textPanel
             anchors.fill: parent
             anchors.topMargin: 20
@@ -295,6 +304,76 @@ ApplicationWindow {
                 title: "蓝方强停"
                 content: Logic.restStopB
             }
+        }*/
+
+        Stopwatch {
+            id: stopwatch
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 15
+            state: Logic.status
+            //scale: 1.5
+        }
+
+        Label {
+            id: labelTime_
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: stopwatch.bottom
+            anchors.topMargin: 15
+
+            font.pointSize: 24
+
+            //enabled: root.canPause
+
+            text: (Logic.elapsedTime / 10).toFixed(1)
+        }
+
+        Label {
+            id: labelScore1
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: -view1rect.offset1
+            anchors.top: parent.top
+            anchors.topMargin: 20
+
+            font.pointSize: 24
+
+            text: "红方得分"
+        }
+
+        Label {
+            anchors.horizontalCenter: labelScore1.horizontalCenter
+            anchors.bottom: labelTime_.bottom
+
+            font.bold: true
+            font.pointSize: 32
+
+            color: "red"
+
+            text: Logic.scoreA
+        }
+
+        Label {
+            id: labelScore2
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: view1rect.offset1
+            anchors.top: parent.top
+            anchors.topMargin: 20
+
+            font.pointSize: 24
+
+            text: "蓝方得分"
+        }
+
+        Label {
+            anchors.horizontalCenter: labelScore2.horizontalCenter
+            anchors.bottom: labelTime_.bottom
+
+            font.bold: true
+            font.pointSize: 32
+
+            color: "blue"
+
+            text: Logic.scoreB
         }
 
     }
@@ -401,5 +480,7 @@ ApplicationWindow {
             }
         }
     }
+
+
 
 }

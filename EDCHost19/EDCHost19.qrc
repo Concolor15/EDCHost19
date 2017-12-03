@@ -9,5 +9,6 @@
         <file>Resources/BallIndicator.qml</file>
         <file>Resources/CarIndicator.qml</file>
         <file>Resources/MyLabel.qml</file>
+        <file>Resources/Stopwatch.qml</file>
     </qresource>
 </RCC>

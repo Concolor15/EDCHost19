@@ -8,7 +8,6 @@
 #include <QtSerialPort>
 #include "util.h"
 #include "camera.h"
-#include "globalconfig.h"
 
 class MyCamera;
 class ImgprocThread;
@@ -49,8 +48,6 @@ public:
     Q_INVOKABLE void setSerial(bool openOrClose, QString serialName);
     Q_INVOKABLE void toggleCamera();
 
-    Q_INVOKABLE void setCvDebugEnabled(bool cvDebugEnabled);
-
     MyCamera* getCamera();
     QQuickWindow* getMainWindow();
     QQuickWindow* getMatchWindow();
@@ -61,10 +58,10 @@ signals:
     void CameraDebugInfoEmitted(QString info);
     void SerialDebugInfoEmitted(QString info);
 
-public slots:
+private slots:
     void imgproc_handle(LocateResult* data);
     void serialport_timer_handle();
-
+    //void cameraErrorHandler();
 
 private:
     QQmlEngine* engine;

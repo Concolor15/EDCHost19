@@ -83,13 +83,13 @@ ApplicationWindow {
                 ToolButton {
                     text: "启用调试"
 
-                    onClicked: My.Ctrl.setCvDebugEnabled(true)
+                    onClicked: My.Config.setCvDebugEnabled(true)
                 }
 
                 ToolButton {
                     text: "禁用调试"
 
-                    onClicked: My.Ctrl.setCvDebugEnabled(false)
+                    onClicked: My.Config.setCvDebugEnabled(false)
                 }
 
                 ToolButton {

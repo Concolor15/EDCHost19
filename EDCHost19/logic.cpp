@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "logic.h"
 
+#include "globalconfig.h"
 #include <cmath>
 
 using namespace std;
@@ -255,7 +256,6 @@ void Logic::packToByteArray(uint8_t (&data)[32])
 
 void Logic::run(const LocateResult *info)
 {
-    constexpr int TOTAL_TIME = 800;
     constexpr double OVERSPEED_THRESHOLD = 40;
     constexpr double FORBIDDEN_AREA_RADIUS = 50;
     constexpr double PUNISHMENT_PER_ROUND = 4;
@@ -268,7 +268,7 @@ void Logic::run(const LocateResult *info)
     if (m_status != Running)
         return;
 
-    if (!m_inDebug && m_elapsedTime == TOTAL_TIME)
+    if (m_elapsedTime >= Config::Get().getTimeLimit())
     {
         stop(true);
         return;

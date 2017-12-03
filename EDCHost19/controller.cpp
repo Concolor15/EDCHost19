@@ -106,42 +106,42 @@ void Controller::serialport_timer_handle()
         buffer_has_data = false;
 
         {
-        if (!sp.isOpen())
-        {
-            debugInfo += QStringLiteral("device not open!\n");
-            goto send;
+            if (!sp.isOpen())
+            {
+                debugInfo += QStringLiteral("device not open!\n");
+                goto send;
+            }
+
+            if (!sp.isWritable())
+            {
+                debugInfo += QStringLiteral("device not writable!\n");
+                goto send;
+            }
+
+            auto count = sp.write((const char*)data_buffer, sizeof(data_buffer));
+
+            if (count == -1)
+            {
+                debugInfo += QStringLiteral("device write failed!\n");
+                goto send;
+            }
+
+            if (count != sizeof(data_buffer))
+            {
+                debugInfo += QStringLiteral("write partly failed: sent %1\n").arg(count);
+                goto send;
+            }
+
+            if (!sp.flush())
+            {
+                debugInfo += QStringLiteral("flush failed!\n");
+                goto send;
+            }
+
+            debugInfo += QStringLiteral("succeed\n");
         }
 
-        if (!sp.isWritable())
-        {
-            debugInfo += QStringLiteral("device not writable!\n");
-            goto send;
-        }
-
-        auto count = sp.write((const char*)data_buffer, sizeof(data_buffer));
-
-        if (count == -1)
-        {
-            debugInfo += QStringLiteral("device write failed!\n");
-            goto send;
-        }
-
-        if (count != sizeof(data_buffer))
-        {
-            debugInfo += QStringLiteral("write partly failed: sent %1\n").arg(count);
-            goto send;
-        }
-
-        if (!sp.flush())
-        {
-            debugInfo += QStringLiteral("flush failed!\n");
-            goto send;
-        }
-
-        debugInfo += QStringLiteral("succeed\n");
-        }
-
-    send:
+send:
         appendSerialDebugInfo(debugInfo, data_buffer);
         emit SerialDebugInfoEmitted(debugInfo);
     }
@@ -243,7 +243,7 @@ void Controller::initComponent()
 //{
 
 
-    /*
+/*
     auto const& pos = data.posObjs;
     data_buffer[0] = 0xFC | (data.binShootout << 1) | (data.shootSide^1);
     data_buffer[1] = (data.quaGameStatus << 6) | (data.nTimeByRounds >> 8);
@@ -295,8 +295,8 @@ void Controller::setSerial(bool openOrClose, QString serialName)
 {   
     if (openOrClose)
     {
-        //if (serialName != "")
-        //    sp.setPortName(serialName);
+        if (serialName != "")
+            sp.setPortName(serialName);
         if (!sp.open(QIODevice::WriteOnly))
             qCritical() << sp.errorString();
     }
@@ -317,22 +317,18 @@ void Controller::toggleCamera()
         return;
     }
 
-        auto devices = QCameraInfo::availableCameras();
+    auto devices = QCameraInfo::availableCameras();
 
-        if (devices.empty())
-        {
-            qCritical() << "no camera available!";
-            return;
-        }
+    if (devices.empty())
+    {
+        qCritical() << "no camera available!";
+        return;
+    }
 
-        cam = new MyCamera(devices.last(), this);
+    cam = new MyCamera(devices.last(), this);
+    //cam->load();
 
     emit cameraChanged(cam);
-}
-
-void Controller::setCvDebugEnabled(bool cvDebugEnabled)
-{
-    imgThread->setDebugEnabled(cvDebugEnabled);
 }
 
 MyCamera *Controller::getCamera()
