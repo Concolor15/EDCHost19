@@ -13,7 +13,7 @@ ApplicationWindow {
 
     width : 1200
     height : 900
-    title: "进行比赛"
+    title: "进行比赛\uE32A"
 
     readonly property color backColor: "#66bb6a"
     readonly property bool isSetPerspective: btnSetPerspective.checked
@@ -39,7 +39,7 @@ ApplicationWindow {
             anchors.fill: parent
 
             ToolButton {
-                text: "调试信息"
+                text: "调试信息\uE32A"
                 onClicked: My.Ctrl.probeWindow.show()
             }
 

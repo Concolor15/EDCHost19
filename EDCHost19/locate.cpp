@@ -48,32 +48,28 @@ void ObjectTracker::genReport(Report* report)
     report->located = m_located;
     report->raw_center = m_current_raw;
     report->center = m_current_center;
-    report->velocity = {};
+    report->speed = 0;
 
     if ( !m_located || !queue_full)
     {
-        report->vel_stable = false;
+        report->speed_stable = false;
         return;
     }
     auto& prev = queue[head];
     auto& cur  = queue[head==0 ? CAPICITY-1 : head-1];
     double time_span_s = (cur.timestamp_ms - prev.timestamp_ms)/1000.0;
-    report->vel_stable = true;
-    report->velocity = {(cur.center.x()-prev.center.x())/time_span_s,
-                        (cur.center.y()-prev.center.y())/time_span_s};
+    report->speed_stable = true;
+    report->speed = hypot(cur.center.x()-prev.center.x(),
+                        cur.center.y()-prev.center.y())/time_span_s;
 }
-static double hypot(QPointF p)
-{
-    return sqrt(p.x()*p.x()+p.y()*p.y());
-}
+
 QString& operator+=(QString &str, const ObjectTracker::Report &obj)
 {
-
     str += QStringLiteral("located: %1\n").arg(obj.located);
-    str += QStringLiteral("vel stable: %1\n").arg(obj.vel_stable);
+    str += QStringLiteral("vel stable: %1\n").arg(obj.speed_stable);
     str += QStringLiteral("center: %1, %2\n").arg(obj.center.x()).arg(obj.center.y());
     str += QStringLiteral("cam   : %1, %2\n").arg(obj.raw_center.x()).arg(obj.raw_center.y());
-    str += QStringLiteral("velocity: %1\n").arg(hypot(obj.velocity));
+    str += QStringLiteral("speed: %1\n").arg(obj.speed);
 
     return str;
 }

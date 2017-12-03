@@ -3,6 +3,7 @@
 
 #include <cmath>
 
+using namespace std;
 Logic::Logic(QObject* parent) : QObject(parent)
 {
 
@@ -140,62 +141,37 @@ void Logic::setEvil(int side, double newEvil)
         emit evilBChanged(getEvilB());
 }
 
-/*
-void Logic::addElapsedTime(int delta)
+void Logic::setRestStop(int side, int newRestStop)
 {
-    if (delta == 0)
+    Q_ASSERT(side ==0 || side == 1);
+    Q_ASSERT(newRestStop >= 0);
+
+    if (newRestStop == m_restStop[side])
         return;
 
-    int old = m_elapsedTime;
-    m_elapsedTime += delta;
-
-    emit elapsedTimeChanged(m_elapsedTime);
-
-    if (old < m_stopUntil[0] && m_stopUntil[0] <= old+delta)
-        emit shouldStopAChanged(false);
-
-    if (old < m_stopUntil[1] && m_stopUntil[1] <= old+delta)
-        emit shouldStopBChanged(false);
-
-    if (m_elapsedTime <= m_stopUntil[0])
-        emit restStopAChanged(m_stopUntil[0]-m_elapsedTime);
-
-    if (m_elapsedTime <= m_stopUntil[1])
-        emit restStopBChanged(m_stopUntil[1]-m_elapsedTime);
-}
-*/
-
-void Logic::updateStopInfo(int side)
-{
-    Q_ASSERT(side==0 || side==1);
-
-    if (m_evil[side]>100)
-    {
-        setEvil(side, 0);
-        m_stopCount[side] += 1;
-        m_restStop[side] += 10*std::min(2*m_stopCount[side]+3, 10);
-    }
-    else
-    {
-        if (m_restStop[side]>0)
-        {
-            m_restStop[side] -= 1;
-            if (side==1-m_shootSide && m_restStop[side]==0)
-            {
-                m_shoot_side_protected = m_elapsedTime + 20;
-            }
-        }
-    }
+    m_restStop[side] = newRestStop;
 
     if (side==0)
-    {
-        emit restStopAChanged(getRestStopA());
-    }
+        emit restStopAChanged(newRestStop);
     else
+        emit restStopBChanged(newRestStop);
+}
+
+void Logic::reduceRestStop(int side)
+{
+    Q_ASSERT(side ==0 || side == 1);
+
+    if (m_restStop[side]>0)
     {
-        emit restStopBChanged(getRestStopB());
+        m_restStop[side] -= 1;
+
+        if (side==0)
+            emit restStopAChanged(m_restStop[0]);
+        else
+            emit restStopBChanged(m_restStop[1]);
     }
 }
+
 
 static void writePoint(uint8_t* addr, ObjectTracker::Report const& data)
 {
@@ -277,11 +253,6 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data_buffer[31] = 0x0A;*/
 }
 
-static double hypot2(double x, double y)
-{
-    return sqrt(x*x+y*y);
-}
-
 void Logic::run(const LocateResult *info)
 {
     constexpr int TOTAL_TIME = 800;
@@ -297,26 +268,19 @@ void Logic::run(const LocateResult *info)
     if (m_status != Running)
         return;
 
-    //if (m_elapsedTime == TOTAL_TIME)
-    //    stop(true);
+    if (!m_inDebug && m_elapsedTime == TOTAL_TIME)
+    {
+        stop(true);
+        return;
+    }
 
     m_elapsedTime += 1;
     emit elapsedTimeChanged(m_elapsedTime);
 
     if (info == nullptr)
     {
-        if (m_restStop[0]>0)
-        {
-            m_restStop[0] -= 1;
-            emit restStopAChanged(m_restStop[0]);
-        }
-
-        if (m_restStop[1]>0)
-        {
-            m_restStop[1] -= 1;
-            emit restStopBChanged(m_restStop[1]);
-        }
-
+        reduceRestStop(0);
+        reduceRestStop(1);
         return;
     }
 
@@ -337,23 +301,44 @@ void Logic::run(const LocateResult *info)
     auto& rpt_attack = info->cars[m_shootSide];
     auto& rpt_defend = info->cars[defend_side];
 
-    if (!rpt_defend.located)
+    if (!rpt_defend.located || !rpt_defend.located)
+    {
+        reduceRestStop(0);
+        reduceRestStop(1);
         return;
+    }
 
-    double dis_attack = hypot2(rpt_attack.center.y()-105, rpt_attack.center.x());
-    double dis_defend = hypot2(rpt_defend.center.y()-105, rpt_defend.center.x());
+    double dis_attack = hypot(rpt_attack.center.y()-105, rpt_attack.center.x());
+    double dis_defend = hypot(rpt_defend.center.y()-105, rpt_defend.center.x());
 
-    double speed_defend = rpt_defend.vel_stable ? hypot2(rpt_defend.velocity.x(), rpt_defend.velocity.y())
-                                                  : 0;
+
+    bool punish_overspeed =
+            rpt_defend.speed_stable &&
+            rpt_defend.speed > OVERSPEED_THRESHOLD;
+
+    bool punish_forbidden_area =
+            m_elapsedTime > m_shoot_side_protected &&
+            dis_defend < FORBIDDEN_AREA_RADIUS &&
+            dis_attack > FORBIDDEN_AREA_RADIUS;
 
     double new_evil_defend = m_evil[defend_side];
-    if (m_elapsedTime>m_shoot_side_protected && (speed_defend > OVERSPEED_THRESHOLD
-            || (dis_defend<FORBIDDEN_AREA_RADIUS && dis_attack>FORBIDDEN_AREA_RADIUS)))
-        new_evil_defend += PUNISHMENT_PER_ROUND;
-    else
-        new_evil_defend -= 0.8;
+    new_evil_defend += punish_overspeed || punish_forbidden_area ?
+                PUNISHMENT_PER_ROUND :
+                -0.8;
 
     setEvil(defend_side, std::max(new_evil_defend, 0.0));
 
-    updateStopInfo(defend_side);
+    if (m_evil[defend_side]>EVIL_THRESHOLD)
+    {
+        setEvil(defend_side, 0);
+        m_stopCount[defend_side] += 1;
+
+        m_shoot_side_protected = m_elapsedTime + 30;
+        int new_restStop = m_restStop[defend_side];
+        new_restStop += 10*min(2*m_stopCount[defend_side]*3, 10);
+        setRestStop(defend_side, new_restStop);
+        return;
+    }
+
+    reduceRestStop(defend_side);
 }

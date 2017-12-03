@@ -8,12 +8,11 @@ class Logic: public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool inDebug MEMBER m_inDebug NOTIFY inDebugChanged)
+
     Q_PROPERTY(State status    READ getStatus      NOTIFY statusChanged)
     Q_PROPERTY(int elapsedTime READ getElapsedTime NOTIFY elapsedTimeChanged)  
     Q_PROPERTY(int shootSide   READ getShootSide   NOTIFY shootSideChanged)
-
-    //Q_PROPERTY(bool shouldStopA READ getShouldStopA NOTIFY shouldStopAChanged)
-    //Q_PROPERTY(bool shouldStopB READ getShouldStopB NOTIFY shouldStopBChanged)
 
     Q_PROPERTY(int restStopA READ getRestStopA NOTIFY restStopAChanged)
     Q_PROPERTY(int restStopB READ getRestStopB NOTIFY restStopBChanged)
@@ -65,6 +64,8 @@ public:
     bool getCarBLocated() const { return m_car[1].located; }
 
 signals:
+    void inDebugChanged(bool newInDebug);
+
     void elapsedTimeChanged(int newElapsedTime);
     void statusChanged(State newStatus);
     void shootSideChanged(int newShootSide);
@@ -97,7 +98,11 @@ private:
 
     void addElapsedTime(int delta=1);
     void setEvil(int side, double newEvil);
+    void setRestStop(int side, int newRestStop);
+    void reduceRestStop(int side);
     void updateStopInfo(int side);
+
+    bool m_inDebug = false;
 
     int m_elapsedTime = 0;
     State m_status = NotStart;

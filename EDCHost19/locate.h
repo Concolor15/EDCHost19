@@ -10,9 +10,9 @@ public:
     {
         QPointF raw_center;
         QPointF center;
-        QPointF velocity;
+        double speed;
         bool located;
-        bool vel_stable;
+        bool speed_stable;
 
         friend QString& operator+=(QString& str, Report const& obj);
     };
