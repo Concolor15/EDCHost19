@@ -174,10 +174,12 @@ void Logic::reduceRestStop(int side)
 }
 
 
-static void writePoint(uint8_t* addr, ObjectTracker::Report const& data)
+static void writePoint(uint8_t* addr, ObjectTracker::Report const& data, bool flipped)
 {
-    int x = (int)data.center.x();
-    int y = (int)data.center.y();
+    double x0 = data.center.x();
+    double y0 = data.center.y();
+    int x = (int)(flipped ? 297.0-x0 : x0);
+    int y = (int)(flipped ? 210.0-y0 : y0);
     bool located = data.located;
     addr[0] = (uint8_t)y;
     addr[1] = (x >> 8) | (located ? 0 : 0x80);
@@ -192,9 +194,9 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data[1] = ((m_elapsedTime >> 8) & 0x3F) | 0x40;
     data[2] = m_elapsedTime & 0xFF;
 
-    writePoint(&data[3], m_car[0]);
-    writePoint(&data[6], m_car[1]);
-    writePoint(&data[9], m_ball);
+    writePoint(&data[3], m_car[0], m_flipped);
+    writePoint(&data[6], m_car[1], m_flipped);
+    writePoint(&data[9], m_ball, m_flipped);
 
     int stopRestA = getRestStopA();
     int stopRestB = getRestStopB();
@@ -207,7 +209,7 @@ void Logic::packToByteArray(uint8_t (&data)[32])
     data[17] = m_evil[1];
     data[18] = m_score[0];
     data[19] = m_score[1];
-    data[20] = m_status << 6;
+    data[20] = (m_status << 6) | (uint8_t)m_flipped << 5;
 
     if (m_status != Running)
     {
@@ -308,8 +310,12 @@ void Logic::run(const LocateResult *info)
         return;
     }
 
-    double dis_attack = hypot(rpt_attack.center.y()-105, rpt_attack.center.x());
-    double dis_defend = hypot(rpt_defend.center.y()-105, rpt_defend.center.x());
+    auto disFromGateCenter = [_flipped = m_flipped](QPointF p) {
+        return hypot(p.y() - 105.0, _flipped ? 297.0 - p.x() : p.x());
+    };
+
+    double dis_attack = disFromGateCenter(rpt_attack.center);
+    double dis_defend = disFromGateCenter(rpt_defend.center);
 
 
     bool punish_overspeed =

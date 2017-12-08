@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import QtMultimedia 5.9
@@ -34,7 +34,17 @@ ApplicationWindow {
         Ctrl.toggleCamera()
     }
 
-    footer: ToolBar {
+    Action {
+        shortcut: StandardKey.Save
+        onTriggered: {
+            if (Logic.status === Logic.Running)
+                Logic.pause();
+            else if (Logic.status === Logic.Paused)
+                Logic.resume();
+        }
+    }
+
+    /*footer: ToolBar {
         RowLayout {
             anchors.fill: parent
 
@@ -72,7 +82,7 @@ ApplicationWindow {
                 }
             }
         }
-    }
+    }*/
 
     My.Filter {
         id: filter
@@ -81,8 +91,8 @@ ApplicationWindow {
     Item {
         id: vidcanvas
 
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: rectRedSide.right
+        anchors.right: rectBlueSide.left
         anchors.top: view1rect.bottom
         anchors.bottom: parent.bottom
 
@@ -94,10 +104,6 @@ ApplicationWindow {
             filters: [filter]
 
             anchors.fill: parent
-
-            /*transform: Scale {
-                xScale: vidcanvas.width / vid.width
-            }*/
 
             onSourceChanged: {
                 if (source != null)
@@ -152,6 +158,7 @@ ApplicationWindow {
 
         Item {
             id: loc
+            anchors.fill: parent
             visible: root.isSetPerspective
 
             property point np1 : Qt.point(0,0)
@@ -167,9 +174,11 @@ ApplicationWindow {
                 var p3 = vid.mapNormalizedPointToItem(np3)
                 var p4 = vid.mapNormalizedPointToItem(np4)
                 c1.x = p1.x; c1.y = p1.y;
-                c2.x = p2.x; c2.y = p2.y;
+                //c2.x = p2.x; c2.y = p2.y;
                 c3.x = p3.x; c3.y = p3.y;
                 c4.x = p4.x; c4.y = p4.y;
+
+                c2.x = np2.x*vid.width; c2.y=np2.y*vid.height;
             }
 
             function set() {
@@ -210,14 +219,15 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        //y: 0
-        //width: parent.width
         height: 150
         color: root.backColor
 
         readonly property int offset1: 140
+        readonly property int offset2: 300
+        readonly property int offset3: 450
 
-        /*RowLayout {
+        /*
+        RowLayout {
             id: textPanel
             anchors.fill: parent
             anchors.topMargin: 20
@@ -304,7 +314,8 @@ ApplicationWindow {
                 title: "蓝方强停"
                 content: Logic.restStopB
             }
-        }*/
+        }
+        */
 
         Stopwatch {
             id: stopwatch
@@ -321,7 +332,8 @@ ApplicationWindow {
             anchors.top: stopwatch.bottom
             anchors.topMargin: 15
 
-            font.pointSize: 24
+            font.bold: true
+            font.pointSize: 28
 
             //enabled: root.canPause
 
@@ -376,10 +388,81 @@ ApplicationWindow {
             text: Logic.scoreB
         }
 
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: -view1rect.offset2
+            anchors.verticalCenter: stopwatch.verticalCenter
+
+            font.weight: Font.DemiBold
+            font.pointSize: 32
+
+            color: Logic.shootSide == 0 ? "red" : "transparent"
+
+            text: "进攻"
+        }
+
+        Label {
+            id: lblShootSideBlue
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: view1rect.offset2
+            anchors.verticalCenter: stopwatch.verticalCenter
+
+            font.weight: Font.DemiBold
+            font.pointSize: 32
+
+            color: Logic.shootSide === 1 ? "blue" : "transparent"
+
+            text: "进攻"
+        }
     }
 
     Rectangle {
-        id: view2rect
+        id: rectRedSide
+        anchors.top: view1rect.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: 150
+
+        color: root.backColor
+
+        Column {
+            anchors.fill: parent
+
+            topPadding: 20
+            spacing: 20
+
+            Label {
+                font.pointSize: 24
+
+                text: "红方邪恶"
+                enabled: Logic.evilA > 0
+            }
+
+            Label {
+                font.pointSize: 24
+
+                text: Logic.evilA
+                enabled: Logic.evilA > 0
+            }
+
+            Label {
+                font.pointSize: 24
+
+                text: "红方强停"
+                enabled: Logic.restStopA > 0
+            }
+
+            Label {
+                font.pointSize: 24
+
+                text: (Logic.restStopA / 10).toFixed(1)
+                enabled: Logic.restStopA > 0
+            }
+        }
+    }
+
+    Rectangle {
+        id: rectBlueSide
         anchors.top: view1rect.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -387,100 +470,167 @@ ApplicationWindow {
 
         color: root.backColor
 
-        StackLayout {
+        Column {
+            id: btnPanel
             anchors.fill: parent
-            currentIndex: root.viewIndex
 
-            Column {
-                id: btnPanel
-                anchors.fill: parent
+            topPadding: 20
+            spacing: 20
 
-                topPadding: 20
-                spacing: 20
+            Label {
+                font.pointSize: 24
 
-                MyButton {
-                    id: btnPauseResume
-                    text: root.canPause ? "暂停" : "继续"
-
-                    enabled: !root.canStart
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    onClicked: {
-                        if (root.canPause)
-                            Logic.pause()
-                        else
-                            Logic.resume()
-                    }
-                }
-
-                MyButton {
-                    id: btnBeginEnd
-                    text: root.canStart ? "开始" : "结束"
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    onClicked: {
-                        if (root.canStart)
-                            Logic.start()
-                        else
-                            Logic.stop()
-                    }
-                }
-
-                MyButton {
-                    id: btnSOA
-                    text: "红方点球"
-
-                    enabled: !root.onProgress
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    onClicked: Logic.setSide(0)
-                }
-
-                MyButton {
-                    id: btnSOB
-                    text: "蓝方点球"
-
-                    enabled: !root.onProgress
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    onClicked: Logic.setSide(1)
-                }
-
-                MyButton {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    id: btnPlusA
-                    text: "红方得分"
-
-                    onClicked: Logic.setScore(0, Logic.scoreA+1)
-                }
-
-                MyButton {
-                    id: btnPlusB
-                    text: "蓝方加分"
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    onClicked: Logic.setScore(1, Logic.scoreB+1)
-                }
-
-
-                Label {
-                    text: Logic.shootSide==0 ? "点球方：红方" : "点球方：蓝方"
-                    color: Logic.shootSide==0 ? "red" : "blue"
-                }
-
+                text: "蓝方邪恶"
+                enabled: Logic.evilB > 0
             }
 
-            Item {
+            Label {
+                font.pointSize: 24
 
+                text: Logic.evilB
+                enabled: Logic.evilB > 0
             }
+
+            Label {
+                font.pointSize: 24
+
+                text: "蓝方强停"
+                enabled: Logic.restStopB > 0
+            }
+
+            Label {
+                font.pointSize: 24
+
+                text: (Logic.restStopB / 10).toFixed(1)
+                enabled: Logic.restStopB > 0
+            }
+
+
+            MyButton {
+                id: btnPauseResume
+                text: root.canPause ? "暂停" : "继续"
+
+                enabled: !root.canStart
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: {
+                    if (root.canPause)
+                        Logic.pause()
+                    else
+                        Logic.resume()
+                }
+            }
+
+            MyButton {
+                id: btnBeginEnd
+                text: root.canStart ? "开始" : "结束"
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: {
+                    if (root.canStart)
+                        Logic.start()
+                    else
+                        Logic.stop()
+                }
+            }
+
+            MyButton {
+                id: btnSOA
+                text: "红方点球"
+
+                enabled: !root.onProgress
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: Logic.setSide(0)
+            }
+
+            MyButton {
+                id: btnSOB
+                text: "蓝方点球"
+
+                enabled: !root.onProgress
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: Logic.setSide(1)
+            }
+
+            MyButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                id: btnPlusA
+                text: "红方得分"
+
+                onClicked: Logic.setScore(0, Logic.scoreA+1)
+            }
+
+            MyButton {
+                id: btnPlusB
+                text: "蓝方加分"
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: Logic.setScore(1, Logic.scoreB+1)
+            }
+
         }
     }
 
+    Button {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: 50; height: 50
 
+        background: null
+
+        text: "\uf067"
+
+        font: {
+            family: "FontAwesome"
+        }
+
+        onClicked: menu.open()
+
+        Menu {
+            id: menu
+            MenuItem { text: "Cut" }
+
+            MenuItem {
+                text: "调试信息"
+                onClicked: My.Ctrl.probeWindow.show()
+            }
+
+
+            MenuItem {
+                id: btnSetPerspective
+                checkable: true
+                text: "设置区域"
+
+                onToggled: {
+                    if (checked)
+                        loc.reset()
+                }
+            }
+
+            MenuItem {
+                enabled: btnSetPerspective.checked
+                text: "确认区域"
+
+                onClicked: {
+                    loc.set()
+                    btnSetPerspective.checked = false
+                }
+            }
+
+        }
+    }
+
+    /*MouseArea {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: 50; height: 50
+    }*/
 
 }

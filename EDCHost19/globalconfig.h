@@ -62,6 +62,7 @@ public:
     ProcConfig procConfig;
     QAtomicInt cvDebugEnabled;
 
+
     Q_INVOKABLE void setProcConfigByString(QString str);
     Q_INVOKABLE QString getProcConfigByString();
     Q_INVOKABLE void setCvDebugEnabled(bool newDebugEnabled);
@@ -74,6 +75,7 @@ signals:
 
 private:
     int m_timeLimit = 80000;
+    int m_flipped = false;
 };
 
 

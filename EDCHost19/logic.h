@@ -8,6 +8,8 @@ class Logic: public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool flipped MEMBER m_flipped NOTIFY onFlippedChanged)
+
     Q_PROPERTY(State status    READ getStatus      NOTIFY statusChanged)
     Q_PROPERTY(int elapsedTime READ getElapsedTime NOTIFY elapsedTimeChanged)  
     Q_PROPERTY(int shootSide   READ getShootSide   NOTIFY shootSideChanged)
@@ -63,6 +65,8 @@ public:
 
 signals:
 
+    void onFlippedChanged(bool newFlipped);
+
     void elapsedTimeChanged(int newElapsedTime);
     void statusChanged(State newStatus);
     void shootSideChanged(int newShootSide);
@@ -98,6 +102,8 @@ private:
     void setRestStop(int side, int newRestStop);
     void reduceRestStop(int side);
     void updateStopInfo(int side);
+
+    bool m_flipped = false;
 
     int m_elapsedTime = 0;
     State m_status = NotStart;

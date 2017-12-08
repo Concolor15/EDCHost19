@@ -12,9 +12,10 @@
 
 int main(int argc, char *argv[])
 {
+    //qputenv("GST_DEBUG", "4");
     //qputenv( "QSG_RENDER_LOOP", "threaded");
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QQuickStyle::setStyle("Universal");
+    //QQuickStyle::setStyle("Universal");
 
     QGuiApplication app(argc, argv);
 

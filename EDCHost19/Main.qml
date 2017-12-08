@@ -11,6 +11,8 @@ Window {
     height: 600
     title: "EDC19 上位机"
 
+
+
     Image {
         anchors.fill: parent
         source: "Resources/MainBGN.png"

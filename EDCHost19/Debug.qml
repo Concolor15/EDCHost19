@@ -1,8 +1,9 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import my.uri 1.0 as My
+import my.uri 1.0
 
 ApplicationWindow {
     width: 750
@@ -21,6 +22,16 @@ ApplicationWindow {
     Component.onCompleted: {
         My.Ctrl.onCameraDebugInfoEmitted.connect(setCameraText)
         My.Ctrl.onSerialDebugInfoEmitted.connect(setSerialText)
+    }
+
+    Action {
+        shortcut: StandardKey.Save
+        onTriggered: {
+            if (Logic.status === Logic.Running)
+                Logic.pause();
+            else if (Logic.status === Logic.Paused)
+                Logic.resume();
+        }
     }
 
     footer: ToolBar {
@@ -124,8 +135,7 @@ ApplicationWindow {
         text: "相机"
     }
 
-    TextArea {
-        id: textCamera
+    ScrollView {
         x: 25
         width: 325
 
@@ -133,9 +143,11 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 15
 
-        font.family: "monospace"
-
-        readOnly: true
+        TextArea {
+            id: textCamera
+            font.family: "monospace"
+            readOnly: true
+        }
     }
 
     Label {
@@ -147,8 +159,7 @@ ApplicationWindow {
         text: "串口"
     }
 
-    TextArea {
-        id: textSerial
+    ScrollView {
         x: 400
         width: 325
 
@@ -156,8 +167,12 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 15
 
-        font.family: "monospace"
-
-        readOnly: true
+        TextArea {
+            id: textSerial
+            font.family: "monospace"
+            readOnly: true
+        }
     }
+
+
 }
