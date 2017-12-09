@@ -339,10 +339,12 @@ void Logic::run(const LocateResult *info)
         setEvil(defend_side, 0);
         m_stopCount[defend_side] += 1;
 
-        m_shoot_side_protected = m_elapsedTime + 30;
+        //m_shoot_side_protected = m_elapsedTime + 30;
         int new_restStop = m_restStop[defend_side];
         new_restStop += 10*min(2*m_stopCount[defend_side]*3, 10);
         setRestStop(defend_side, new_restStop);
+
+        m_shoot_side_protected = m_elapsedTime + new_restStop + 30;
         return;
     }
 

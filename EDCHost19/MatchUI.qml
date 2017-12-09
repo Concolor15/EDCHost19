@@ -585,10 +585,10 @@ ApplicationWindow {
 
         background: null
 
-        text: "\uf067"
+        text: "\uf067" // plus symbol
 
         font: {
-            family: "FontAwesome"
+            family: "Font Awesome 5 Free"
         }
 
         onClicked: menu.open()

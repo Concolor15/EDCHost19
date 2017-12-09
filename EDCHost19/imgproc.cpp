@@ -49,6 +49,9 @@ void ImgProc::binarize(const Mat &yuv)
 {
     auto const& config = *GetProcConfig();
 
+    //Mat yuv_;
+    cv::GaussianBlur(yuv, yuv, cv::Size(7,7), 4, 4);
+
     cv::inRange(yuv,
                 Scalar(config.ball_Y_lb, config.ball_U_lb, config.ball_V_lb),
                 Scalar(config.ball_Y_ub, config.ball_U_ub, config.ball_V_ub),
@@ -65,9 +68,16 @@ void ImgProc::binarize(const Mat &yuv)
 
 LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
 {
+    bool debugEnabled = Config::Get().cvDebugEnabled.load() != 0;
+
     binarize(yuv);
 
-    bool debugEnabled = Config::Get().cvDebugEnabled.load() != 0;
+    if (debugEnabled)
+    {
+        yuv.copyTo(dst);
+    }
+
+    //binarize(yuv);
 
     if (debugEnabled)
     {
@@ -80,7 +90,6 @@ LocateResult* ImgProc::Locate(Mat const& yuv, int64_t timestamp)
 
     if (debugEnabled)
     {
-        yuv.copyTo(dst);
         for (auto & cts : ball_centers)
         {
             circle(dst, cts, 10, Scalar(255, 0, 0),-1);
